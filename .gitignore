@@ -1,0 +1,9 @@
+bin/
+obj/
+packages/
+reports/
+.vs/
+*.user
+paket-files/
+.cake/
+tools/Cake*/
