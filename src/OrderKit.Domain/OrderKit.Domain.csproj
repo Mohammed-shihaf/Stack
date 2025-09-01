@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <AssemblyName>OrderKit.Domain</AssemblyName>
+    <RootNamespace>OrderKit.Domain</RootNamespace>
+    <!-- LangVersion is deliberately NOT set. It defaults from the TargetFramework,
+         which is what makes the family axis one number instead of two. -->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
+    <PackageReference Include="System.Net.Http" Version="4.3.0" />
+    <PackageReference Include="Microsoft.AspNet.Mvc" Version="5.2.3" />
+    <PackageReference Include="System.Text.RegularExpressions" Version="4.3.0" />
+    <PackageReference Include="BouncyCastle" Version="1.8.1" />
+  </ItemGroup>
+
+</Project>
