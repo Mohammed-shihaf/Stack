@@ -1,0 +1,8 @@
+<Project>
+  <!-- The sheet says "Roslyn", which is a compiler platform, not a package.
+       Resolved to SonarAnalyzer.CSharp: rule S3776 IS cognitive complexity. -->
+  <ItemGroup>
+    <PackageReference Include="SonarAnalyzer.CSharp" Version="9.32.0.97167"
+                      PrivateAssets="all" />
+  </ItemGroup>
+</Project>

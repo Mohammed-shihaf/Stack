@@ -1,0 +1,22 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrderKit", "src\OrderKit\OrderKit.csproj", "{B587000B-25D5-1148-9A11-5F2D90DB33CE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrderKit.Tests", "tests\OrderKit.Tests\OrderKit.Tests.csproj", "{D7993E2A-0038-2F0F-26BD-E136606FE576}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B587000B-25D5-1148-9A11-5F2D90DB33CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B587000B-25D5-1148-9A11-5F2D90DB33CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B587000B-25D5-1148-9A11-5F2D90DB33CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B587000B-25D5-1148-9A11-5F2D90DB33CE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D7993E2A-0038-2F0F-26BD-E136606FE576}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D7993E2A-0038-2F0F-26BD-E136606FE576}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D7993E2A-0038-2F0F-26BD-E136606FE576}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D7993E2A-0038-2F0F-26BD-E136606FE576}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
