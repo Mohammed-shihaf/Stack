@@ -1,0 +1,15 @@
+# Machine-readable trigger for the evaluation harness.
+tool: git log --numstat
+slug: git-churn
+kind: standalone
+status: active
+target_framework: net8.0
+language_version: "12.0"
+runner: tools/git-churn/run.sh
+expects:
+  exit_code: 0
+  reason: >-
+    stdlib git. Class C. Counts Co-authored-by trailers, not just the author field -- the TypeScript corpus's ownership metric was wrong, not missing, for exactly this reason.
+metrics:
+  primary_for: 0
+  alternative_for: 0

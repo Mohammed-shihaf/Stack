@@ -1,0 +1,15 @@
+# Machine-readable trigger for the evaluation harness.
+tool: diff-cover
+slug: diff-cover
+kind: standalone
+status: skipped
+target_framework: net8.0
+language_version: "12.0"
+runner: tools/diff-cover/run.sh
+expects:
+  exit_code: 3
+  reason: >-
+    Class C: reads Cobertura/OpenCover XML. No coverage report can be produced on this family, so it has nothing to read.
+metrics:
+  primary_for: 0
+  alternative_for: 6
