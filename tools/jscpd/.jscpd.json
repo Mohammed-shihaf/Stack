@@ -1,0 +1,9 @@
+{
+  "threshold": 100,
+  "minTokens": 50,
+  "reporters": ["json", "console"],
+  "absolute": true,
+  "gitignore": true,
+  "format": ["csharp"],
+  "ignore": ["**/obj/**", "**/bin/**", "**/packages/**"]
+}
