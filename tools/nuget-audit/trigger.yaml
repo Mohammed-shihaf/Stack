@@ -1,0 +1,15 @@
+# Machine-readable trigger for the evaluation harness.
+tool: dotnet list package --vulnerable
+slug: nuget-audit
+kind: sdk
+status: skipped
+target_framework: net8.0
+language_version: "12.0"
+runner: tools/nuget-audit/run.sh
+expects:
+  exit_code: 3
+  reason: >-
+    Requires PackageReference and an SDK-style project. Structurally impossible on the packages.config cells, and requires a restore this host cannot perform.
+metrics:
+  primary_for: 8
+  alternative_for: 0

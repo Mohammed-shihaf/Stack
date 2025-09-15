@@ -1,0 +1,15 @@
+# Machine-readable trigger for the evaluation harness.
+tool: Lizard
+slug: lizard
+kind: standalone
+status: active
+target_framework: net8.0
+language_version: "12.0"
+runner: tools/lizard/run.sh
+expects:
+  exit_code: 0
+  reason: >-
+    Python tokeniser. Class B: own parser, never loads a compiler, so the TFM is irrelevant to it.
+metrics:
+  primary_for: 6
+  alternative_for: 0
