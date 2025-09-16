@@ -1,0 +1,15 @@
+# Machine-readable trigger for the evaluation harness.
+tool: PyDriller
+slug: pydriller
+kind: standalone
+status: active
+target_framework: net8.0
+language_version: "12.0"
+runner: tools/pydriller/run.sh
+expects:
+  exit_code: 0
+  reason: >-
+    Python, reads git only. Class C: never touches the source language.
+metrics:
+  primary_for: 5
+  alternative_for: 0
