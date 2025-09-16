@@ -1,0 +1,15 @@
+# Machine-readable trigger for the evaluation harness.
+tool: Opengrep
+slug: opengrep
+kind: standalone
+status: not-installed
+target_framework: net8.0
+language_version: "12.0"
+runner: tools/opengrep/run.sh
+expects:
+  exit_code: 4
+  reason: >-
+    Standalone binary, absent from this host. Class B when present. NOTE: the sheet declares 'C# 12+', which inverts the hazard -- a tree-sitter grammar has no language floor, only a construct set, so the risk runs toward NEWER syntax.
+metrics:
+  primary_for: 0
+  alternative_for: 18
