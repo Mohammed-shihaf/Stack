@@ -1,0 +1,15 @@
+# Machine-readable trigger for the evaluation harness.
+tool: Roslyn analyzers (cognitive complexity)
+slug: roslyn-metrics
+kind: analyzer
+status: not-installed
+target_framework: net8.0
+language_version: "12.0"
+runner: tools/roslyn-metrics/run.sh
+expects:
+  exit_code: 4
+  reason: >-
+    The sheet says 'Roslyn', which is a compiler platform, not a package. Resolved here to SonarAnalyzer.CSharp (rule S3776 is cognitive complexity). Analyzer packages come from NuGet, which is refused at this host's egress proxy.
+metrics:
+  primary_for: 7
+  alternative_for: 0

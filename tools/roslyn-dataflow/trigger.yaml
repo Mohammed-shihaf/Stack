@@ -1,0 +1,15 @@
+# Machine-readable trigger for the evaluation harness.
+tool: Roslyn SemanticModel.AnalyzeDataFlow
+slug: roslyn-dataflow
+kind: analyzer
+status: not-installed
+target_framework: net8.0
+language_version: "12.0"
+runner: tools/roslyn-dataflow/run.sh
+expects:
+  exit_code: 4
+  reason: >-
+    PROPOSED REPAIR, not in the source sheet. The sheet assigns Data Flow to Stryker.NET, a mutation tester that computes no def-use chains. AnalyzeDataFlow is a real Roslyn API that ships in the SDK and yields genuine def/use sets.
+metrics:
+  primary_for: 0
+  alternative_for: 0
