@@ -1,0 +1,15 @@
+# Machine-readable trigger for the evaluation harness.
+tool: Roslyn SAST analyzers
+slug: roslyn-sast
+kind: analyzer
+status: not-installed
+target_framework: net8.0
+language_version: "12.0"
+runner: tools/roslyn-sast/run.sh
+expects:
+  exit_code: 4
+  reason: >-
+    The sheet says 'roslyn sast', also not a package. Resolved here to SecurityCodeScan + Microsoft.CodeAnalysis.NetAnalyzers. NuGet unreachable.
+metrics:
+  primary_for: 12
+  alternative_for: 0
