@@ -1,0 +1,29 @@
+rules:
+  - id: orderkit-tainted-query
+    languages: [csharp]
+    severity: WARNING
+    message: >-
+      Untrusted public parameter reaches a query string without sanitisation.
+      Planted flow 2 in InputSanitizer.BuildQuery.
+    patterns:
+      - pattern: string.Format("SELECT $...ANY", $...ARGS)
+
+  - id: orderkit-tainted-command
+    languages: [csharp]
+    severity: WARNING
+    message: >-
+      Untrusted collection element reaches command assembly. Planted flow 4 in
+      InputSanitizer.BuildCommand.
+    patterns:
+      - pattern-inside: |
+          public static string BuildCommand(...) { ... }
+      - pattern: $SB.Append($ARG)
+
+  - id: orderkit-tainted-path
+    languages: [csharp]
+    severity: WARNING
+    message: >-
+      Untrusted public parameter reaches path assembly. Planted flow 3 in
+      InputSanitizer.BuildReportPath.
+    patterns:
+      - pattern: $ROOT.TrimEnd('/') + "/" + $NAME
