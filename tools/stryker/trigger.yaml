@@ -1,0 +1,15 @@
+# Machine-readable trigger for the evaluation harness.
+tool: Stryker.NET
+slug: stryker
+kind: sdk
+status: skipped
+target_framework: net8.0
+language_version: "12.0"
+runner: tools/stryker/run.sh
+expects:
+  exit_code: 3
+  reason: >-
+    Requires an SDK-style project and a modern SDK to run. Also: the sheet makes it primary for 16 Data Flow metrics, which it cannot compute -- see roslyn-dataflow.
+metrics:
+  primary_for: 23
+  alternative_for: 7
