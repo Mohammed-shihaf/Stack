@@ -1,0 +1,15 @@
+# Machine-readable trigger for the evaluation harness.
+tool: unilyze
+slug: unilyze
+kind: absent
+status: absent
+target_framework: net8.0
+language_version: "12.0"
+runner: tools/unilyze/run.sh
+expects:
+  exit_code: 3
+  reason: >-
+    NOT A TOOL. The only package of this name anywhere is PyPI `unilyze` 0.2.1, 'Get detailed unicode information about characters and text', last released 2020-07-23. Not on npm. It has no .NET surface of any kind. The source sheet assigns it as the alternative for 34 of the 103 metrics and declares '.NET 8-10, C# 8-14' for it, which is a fabricated capability claim. This runner exits 3 and says so, so the hole is visible rather than invisible.
+metrics:
+  primary_for: 0
+  alternative_for: 34
