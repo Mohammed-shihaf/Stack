@@ -1,0 +1,259 @@
+{
+  "branch": "CS-242",
+  "family": "net8",
+  "targetFramework": "net8.0",
+  "netLabel": ".NET 8",
+  "languageVersion": "12.0",
+  "languageVersionBelow": "11.0",
+  "sdkPin": "8.0.130",
+  "cell": {
+    "bundler": "sdk-msbuild",
+    "packageManager": "packagereference",
+    "architecture": "microservices"
+  },
+  "branchFunctional": true,
+  "branchNonFunctionalReason": "",
+  "degenerateAxes": {},
+  "prose": {
+    "additionalVersionsAllowed": {
+      "README.md": [
+        "netstandard2.0"
+      ],
+      "tools/roslyn-dataflow/README.md": [],
+      "tools/unilyze/README.md": []
+    },
+    "note": "README.md must be able to state OpenTelemetry's and Coverlet's own floors, which are netstandard2.0 -- a true sentence naming a foreign framework. The allowance is scoped to ONE file and ONE version so the blast radius is a single document. Widening the rule instead would silently un-catch the bug it was written for."
+  },
+  "domainLanguageFloor": "12.0",
+  "languageFixture": {
+    "path": "src",
+    "byteIdenticalAcrossBranches": true,
+    "note": "The domain layer is byte-identical across all 24 branches of this family, so any tool-output difference is attributable to the cell variables and nothing else."
+  },
+  "expectations": {
+    "toolsActive": 5,
+    "toolsTotal": 19,
+    "metricsWithLivePrimary": 25,
+    "metricsDark": 78,
+    "note": "A dark tool is a data point, not a failure. But a family in which NOTHING fires cannot distinguish 'correctly detected nothing' from 'the scan never ran', which is why the source-level tools below are the built-in negative control.",
+    "negativeControl": [
+      "lizard",
+      "jscpd",
+      "semgrep",
+      "pydriller",
+      "git-churn"
+    ],
+    "controlAssertions": {
+      "lizard.max_ccn": ">= 15",
+      "jscpd.duplicates": ">= 1",
+      "git-churn.contributors": 4
+    }
+  },
+  "tools": [
+    {
+      "tool": "Lizard",
+      "slug": "lizard",
+      "kind": "standalone",
+      "status": "active",
+      "expectedExitCode": 0,
+      "reason": "Python tokeniser. Class B: own parser, never loads a compiler, so the TFM is irrelevant to it."
+    },
+    {
+      "tool": "jscpd",
+      "slug": "jscpd",
+      "kind": "standalone",
+      "status": "active",
+      "expectedExitCode": 0,
+      "reason": "Node, own tokeniser. Class B."
+    },
+    {
+      "tool": "Dolos",
+      "slug": "dolos",
+      "kind": "standalone",
+      "status": "not-installed",
+      "expectedExitCode": 4,
+      "reason": "Node, tree-sitter C# grammar. Class B, and the sheet's declaration ('C# language-version independent - source similarity, not tied to compiler') is correct. MEASURED, not assumed: @dodona/dolos 2.9.3 fails to install on this host because @dodona/dolos-parsers 1.4.1 needs node-gyp native compilation, which fails under node 22.22.2. That is exit 4 (absent from this host), not exit 3 (cannot run on this family) -- collapsing the two would let a missing binary masquerade as a .NET Framework result."
+    },
+    {
+      "tool": "Semgrep",
+      "slug": "semgrep",
+      "kind": "standalone",
+      "status": "active",
+      "expectedExitCode": 0,
+      "reason": "Python, tree-sitter C# grammar. Class B."
+    },
+    {
+      "tool": "Opengrep",
+      "slug": "opengrep",
+      "kind": "standalone",
+      "status": "not-installed",
+      "expectedExitCode": 4,
+      "reason": "Standalone binary, absent from this host. Class B when present. NOTE: the sheet declares 'C# 12+', which inverts the hazard -- a tree-sitter grammar has no language floor, only a construct set, so the risk runs toward NEWER syntax."
+    },
+    {
+      "tool": "Trivy",
+      "slug": "trivy",
+      "kind": "standalone",
+      "status": "not-installed",
+      "expectedExitCode": 4,
+      "reason": "Standalone Go binary, absent from this host. Class C: reads manifests/lockfiles."
+    },
+    {
+      "tool": "PyDriller",
+      "slug": "pydriller",
+      "kind": "standalone",
+      "status": "active",
+      "expectedExitCode": 0,
+      "reason": "Python, reads git only. Class C: never touches the source language."
+    },
+    {
+      "tool": "git log --numstat",
+      "slug": "git-churn",
+      "kind": "standalone",
+      "status": "active",
+      "expectedExitCode": 0,
+      "reason": "stdlib git. Class C. Counts Co-authored-by trailers, not just the author field -- the TypeScript corpus's ownership metric was wrong, not missing, for exactly this reason."
+    },
+    {
+      "tool": "diff-cover",
+      "slug": "diff-cover",
+      "kind": "standalone",
+      "status": "skipped",
+      "expectedExitCode": 3,
+      "reason": "Class C: reads Cobertura/OpenCover XML. No coverage report can be produced on this family, so it has nothing to read."
+    },
+    {
+      "tool": "Roslyn analyzers (cognitive complexity)",
+      "slug": "roslyn-metrics",
+      "kind": "analyzer",
+      "status": "not-installed",
+      "expectedExitCode": 4,
+      "reason": "The sheet says 'Roslyn', which is a compiler platform, not a package. Resolved here to SonarAnalyzer.CSharp (rule S3776 is cognitive complexity). Analyzer packages come from NuGet, which is refused at this host's egress proxy."
+    },
+    {
+      "tool": "Roslyn SAST analyzers",
+      "slug": "roslyn-sast",
+      "kind": "analyzer",
+      "status": "not-installed",
+      "expectedExitCode": 4,
+      "reason": "The sheet says 'roslyn sast', also not a package. Resolved here to SecurityCodeScan + Microsoft.CodeAnalysis.NetAnalyzers. NuGet unreachable."
+    },
+    {
+      "tool": "Roslyn SemanticModel.AnalyzeDataFlow",
+      "slug": "roslyn-dataflow",
+      "kind": "analyzer",
+      "status": "not-installed",
+      "expectedExitCode": 4,
+      "reason": "PROPOSED REPAIR, not in the source sheet. The sheet assigns Data Flow to Stryker.NET, a mutation tester that computes no def-use chains. AnalyzeDataFlow is a real Roslyn API that ships in the SDK and yields genuine def/use sets."
+    },
+    {
+      "tool": "dotnet list package --vulnerable",
+      "slug": "nuget-audit",
+      "kind": "sdk",
+      "status": "skipped",
+      "expectedExitCode": 3,
+      "reason": "Requires PackageReference and an SDK-style project. Structurally impossible on the packages.config cells, and requires a restore this host cannot perform."
+    },
+    {
+      "tool": "Coverlet",
+      "slug": "coverlet",
+      "kind": "sdk",
+      "status": "not-installed",
+      "expectedExitCode": 4,
+      "reason": "STATUS CHANGED AT THIS FAMILY. net45 and net46 sat below netstandard2.0, whose .NET Framework floor is net461, so Coverlet was excluded by the TARGET FRAMEWORK and exited 3. This family is above that floor: nothing about net462 excludes Coverlet. It is now held out only by NuGet being refused at this host's egress proxy, which is a setup gap -- exit 4. The 18 metrics it is primary for (statement 5, branch 7, delta 6) are dark for a completely different reason than they were one family ago, and collapsing 3 and 4 would hide that."
+    },
+    {
+      "tool": "AltCover",
+      "slug": "altcover",
+      "kind": "sdk",
+      "status": "not-installed",
+      "expectedExitCode": 4,
+      "reason": "Declares .NET Framework 2.0+ via a net20 recorder, so it is the one coverage tool in the roster that could reach this family. Blocked only by NuGet."
+    },
+    {
+      "tool": "MiniCover",
+      "slug": "minicover",
+      "kind": "sdk",
+      "status": "skipped",
+      "expectedExitCode": 3,
+      "reason": "MiniCover 3.10.0 declares .NET SDK 8.0/9.0/10.0 only -- verified against its own MiniCover.csproj (<TargetFrameworks>net10.0;net9.0;net8.0</TargetFrameworks>). It is the alternative for 22 metrics and cannot reach any .NET Framework target."
+    },
+    {
+      "tool": "Stryker.NET",
+      "slug": "stryker",
+      "kind": "sdk",
+      "status": "skipped",
+      "expectedExitCode": 3,
+      "reason": "Requires an SDK-style project and a modern SDK to run. Also: the sheet makes it primary for 16 Data Flow metrics, which it cannot compute -- see roslyn-dataflow."
+    },
+    {
+      "tool": "OpenTelemetry (.NET) + OTLP exporter",
+      "slug": "opentelemetry",
+      "kind": "sdk",
+      "status": "not-installed",
+      "expectedExitCode": 4,
+      "reason": "STATUS CHANGED AT THIS FAMILY, for the same reason as Coverlet: netstandard2.0 clears at net461, so the target framework no longer excludes it and only NuGet does. Note separately that tracing is not path coverage. The TypeScript corpus shipped an OTel bootstrap that registered a no-op processor, exported nothing and exited 0 -- a structurally zero result."
+    },
+    {
+      "tool": "unilyze",
+      "slug": "unilyze",
+      "kind": "absent",
+      "status": "absent",
+      "expectedExitCode": 3,
+      "reason": "NOT A TOOL. The only package of this name anywhere is PyPI `unilyze` 0.2.1, 'Get detailed unicode information about characters and text', last released 2020-07-23. Not on npm. It has no .NET surface of any kind. The source sheet assigns it as the alternative for 34 of the 103 metrics and declares '.NET 8-10, C# 8-14' for it, which is a fabricated capability claim. This runner exits 3 and says so, so the hole is visible rather than invisible."
+    }
+  ],
+  "plantedFixtures": {
+    "cyclomaticPeak": "OrderKit.PricingService.PriceCents",
+    "cognitivePeak": "OrderKit.RiskScorer.Score",
+    "duplicatePair": [
+      "DuplicateProcessorA.cs",
+      "DuplicateProcessorB.cs"
+    ],
+    "taintFixture": "OrderKit.InputSanitizer",
+    "taintSources": "every public parameter -- a library does not control its callers, so an engine that only recognises argv, environment or a request object misses all four flows",
+    "plantedPackages": [
+      {
+        "id": "Newtonsoft.Json",
+        "version": "9.0.1",
+        "note": "deserialisation gadget advisories"
+      },
+      {
+        "id": "System.Net.Http",
+        "version": "4.3.0",
+        "note": "multiple advisories on the 4.3.x line"
+      },
+      {
+        "id": "Microsoft.AspNet.Mvc",
+        "version": "5.2.3",
+        "note": "XSS advisory"
+      },
+      {
+        "id": "System.Text.RegularExpressions",
+        "version": "4.3.0",
+        "note": "ReDoS advisory"
+      },
+      {
+        "id": "BouncyCastle",
+        "version": "1.8.1",
+        "note": "multiple crypto advisories"
+      }
+    ]
+  },
+  "blockedHosts": [
+    "api.nuget.org",
+    "www.nuget.org",
+    "globalcdn.nuget.org",
+    "builds.dotnet.microsoft.com",
+    "dot.net"
+  ],
+  "buildStatus": {
+    "sourcesParse": true,
+    "parseGate": "csc -langversion:12.0 clean; -langversion:11.0 FAILS (CS8025)",
+    "restored": false,
+    "compiledAgainstTargetPack": false,
+    "testsExecuted": false,
+    "reason": "NuGet is refused at this host's egress proxy, so no PackageReference resolves and no test framework is available. Sources are verified by the Roslyn parse gate instead -- the replacement for the build gate, not a substitute for it.",
+    "declaredTestCount": 19
+  }
+}
