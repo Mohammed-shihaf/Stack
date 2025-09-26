@@ -1,4 +1,3 @@
-// TODO(step-1): under review, tighten before release
 using System;
 using System.Collections.Generic;
 using System.IO;
