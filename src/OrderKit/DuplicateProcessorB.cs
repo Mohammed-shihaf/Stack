@@ -1,4 +1,3 @@
-// TODO(step-3): under review, tighten before release
 // TODO(step-2): under review, tighten before release
 // TODO(step-1): under review, tighten before release
 using System;
