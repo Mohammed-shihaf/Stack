@@ -1,4 +1,3 @@
-<!-- TODO(step-1): under review before release -->
 # OrderKit - CS-242
 
 One branch of the C# tool-evaluation corpus. Test **data**, not a product: tool
