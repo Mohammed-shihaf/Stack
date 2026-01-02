@@ -1,0 +1,26 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+env/
+.tox/
+.nox/
+.pytest_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.mutmut-cache
+.testmondata
+# pymcdc writes <source>.mdc NEXT TO the file it analyses. The domain layer must
+# stay byte-identical across all five families, so a tool that drops artifacts
+# into the source tree has to be contained -- the runner sweeps them into
+# reports/ and this rule keeps any stragglers out of git.
+*.mdc
+reports/
+*.log
+.DS_Store
