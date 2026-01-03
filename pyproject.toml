@@ -1,0 +1,77 @@
+# orderlab -- branch PY-122
+# Build backend : setuptools 84.0.0
+# Package manager: pip 26.2.1
+# Interpreter    : CPython 3.11.13
+#
+# setuptools 84.0.0 -- the current latest release, admitted here without a rollback. Reads PEP 621 [project] natively; setup.cfg carries only the mutmut and pytest sections.
+# pip 26.2.1 -- the current latest release, running here without a rollback.
+
+[build-system]
+requires = ["setuptools==84.0.0", "wheel==0.48.0"]
+build-backend = "setuptools.build_meta"
+
+# setuptools 84.0.0 is post-setuptools-61, so PEP 621 [project] is read
+# natively and the metadata lives here rather than in setup.cfg.
+# On the 3.6 family the newest usable setuptools was 59.6.0, which
+# ignores [project] in silence, so no branch there could carry this
+# table. Here it is also what makes a setuptools branch drivable by
+# uv. setup.cfg still holds the mutmut section: mutmut 3.x does not
+# read pyproject.
+[project]
+name = "orderlab"
+version = "1.0.0"
+description = "Order pricing domain used as a white-box tool-evaluation fixture"
+readme = "README.md"
+requires-python = "==3.11.13"
+license = { text = "MIT" }
+authors = [{ name = "Prajith Kumaravel", email = "prajith.k19022003@gmail.com" }]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Topic :: Software Development :: Quality Assurance",
+]
+dependencies = [
+    "requests==2.31.0",
+    "Jinja2==3.1.3",
+    "urllib3==2.2.2",
+    "cryptography==42.0.0",
+    "paramiko==2.10.1",
+    "six==1.17.0"
+]
+
+[project.scripts]
+orderlab = "orderlab.__main__:main"
+
+[project.optional-dependencies]
+dev = [
+    "pytest==9.1.1",
+    "crosshair-tool==0.0.110 ; python_version >= '3.8'",
+    "coverage==7.16.0 ; python_version >= '3.10'",
+    "pymcdc==0.2.6 ; python_version >= '3.10'",
+    "radon==6.0.1",
+    "lizard==1.24.0",
+    "pytest-testmon==2.2.0 ; python_version >= '3.10'",
+    "pylint==4.0.8 ; python_version >= '3.10'",
+    "semgrep==1.176.0 ; python_version >= '3.10'",
+    "bandit==1.9.4 ; python_version >= '3.10'",
+    "pip-audit==2.10.1 ; python_version >= '3.10'",
+    "cosmic-ray==8.7.0 ; python_version >= '3.9'",
+    "beniget==0.5.0 ; python_version >= '3.6'",
+    "gast==0.7.0 ; python_version >= '3.6'",
+    "pydriller==2.10 ; python_version >= '3.5'",
+    "ruff==0.16.5 ; python_version >= '3.7'",
+    "complexipy==7.0.1 ; python_version >= '3.8'",
+    "slipcover==1.1.0 ; python_version >= '3.9'",
+    "mutmut==3.7.0 ; python_version >= '3.10'",
+    "diff-cover==10.5.1 ; python_version >= '3.10'",
+    "astroid==4.0.4 ; python_version >= '3.10'",
+    "pyan3==2.8.1 ; python_version >= '3.10'",
+    "vulture==2.16 ; python_version >= '3.9'",
+    "dulwich==1.2.14 ; python_version >= '3.10'",
+]
+
+[tool.setuptools]
+package-dir = {"" = "packages/domain/src"}
+
+[tool.setuptools.packages.find]
+where = ["packages/domain/src"]
