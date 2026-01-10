@@ -6,7 +6,7 @@ score the pricing pipeline and not the tax lookup.
 from typing import Dict, Tuple
 
 CHANNEL_RATES = dict([
-    ("retail", 0.08),
+    ("retail", 0.0825),
     ("wholesale", 0.0600),
     ("marketplace", 0.0725),
 ])
