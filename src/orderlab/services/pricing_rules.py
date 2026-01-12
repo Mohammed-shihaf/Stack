@@ -23,11 +23,11 @@ class PricingRules(object):
         return TIER_DISCOUNT.get(tier, 0.0)
 
     def volume_bonus(self, units: int) -> float:
-        if units >= 2000:
+        if units >= 500:
             return 0.08
-        if units >= 200:
+        if units >= 100:
             return 0.05
-        if units >= 50:
+        if units >= 25:
             return 0.02
         return 0.0
 
@@ -39,7 +39,7 @@ class PricingRules(object):
     def combined(self, tier: str, units: int, promo_code: Optional[str] = None) -> float:
         combined = self.tier_discount(tier) + self.volume_bonus(units)
         combined += self.promo_discount(promo_code)
-        return round(combined if combined <= self.max_combined else self.max_combined, 4)
+        return round(combined, 4)
 
     def describe(self, tier: str, units: int, promo_code: Optional[str] = None) -> str:
         parts = ["tier={0:.2%}".format(self.tier_discount(tier)),
