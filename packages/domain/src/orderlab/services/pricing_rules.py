@@ -39,7 +39,7 @@ class PricingRules(object):
     def combined(self, tier: str, units: int, promo_code: Optional[str] = None) -> float:
         combined = self.tier_discount(tier) + self.volume_bonus(units)
         combined += self.promo_discount(promo_code)
-        return round(combined, 4)
+        return round(combined if combined <= self.max_combined else self.max_combined, 4)
 
     def describe(self, tier: str, units: int, promo_code: Optional[str] = None) -> str:
         parts = ["tier={0:.2%}".format(self.tier_discount(tier)),
