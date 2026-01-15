@@ -38,6 +38,17 @@ class OrderService(object):
         self._processed += 1
         return total
 
+    def price_all(self, orders: Iterable[OrderRecord]) -> Tuple[List[float], List[PricingFailure]]:
+        """Price a batch. Failures are collected, never raised."""
+        priced = []  # type: List[float]
+        failures = []  # type: List[PricingFailure]
+        for order in orders:
+            try:
+                priced.append(self.price(order))
+            except PricingFailure as failure:
+                failures.append(failure)
+        return priced, failures
+
     @property
     def processed_count(self) -> int:
         return self._processed
