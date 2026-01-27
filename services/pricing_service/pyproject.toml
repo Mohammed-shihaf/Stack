@@ -1,0 +1,17 @@
+# Workspace member `pricing_service` of branch PY-122.
+[build-system]
+requires = ["setuptools==84.0.0", "wheel==0.48.0"]
+build-backend = "setuptools.build_meta"
+
+# Workspace members use setuptools regardless of the branch's own
+# backend: poetry-core 1.0.8 has no workspace concept at all, and
+# uv_build cannot execute on Python 3.6. Holding the members constant
+# keeps the backend axis a property of the ROOT manifest only, which is
+# what the branch variable is meant to isolate.
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.member]
+name = "pricing_service"
+package = "pricing_service"
+description = "Owns the tier and volume rule tables"
