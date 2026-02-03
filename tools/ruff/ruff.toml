@@ -1,0 +1,16 @@
+# Ruff, the alternative tool for the twelve Lint / Rule Violation metrics.
+# target-version must agree with .python-version, requires-python and every
+# trigger.yaml on this branch; full_check.py asserts that.
+target-version = "py311"
+line-length = 100
+src = ["src"]
+
+[lint]
+select = ["E", "F", "W", "C90", "N", "B", "S", "A", "C4", "SIM", "ARG", "PL"]
+ignore = ["D", "ANN"]
+
+[lint.mccabe]
+max-complexity = 10
+
+[lint.per-file-ignores]
+"tests/*" = ["S101", "PLR2004"]
