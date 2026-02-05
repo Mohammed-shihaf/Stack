@@ -1,0 +1,48 @@
+# Four sources, four sinks. An engine that only recognises argv, environ or a
+# request object finds three of these four and looks like it succeeded --
+# which is exactly what this rule set is here to detect.
+rules:
+  - id: orderlab-taint-env-to-shell
+    mode: taint
+    pattern-sources:
+      - pattern: os.environ.get(...)
+      - pattern: os.environ[...]
+    pattern-sinks:
+      - pattern: subprocess.$FN(..., shell=True, ...)
+    message: process environment reaches a shell command
+    languages: [python]
+    severity: ERROR
+
+  - id: orderlab-taint-argv-to-path
+    mode: taint
+    pattern-sources:
+      - pattern: sys.argv[...]
+    pattern-sinks:
+      - pattern: open($PATH, ...)
+    message: argv reaches a filesystem path
+    languages: [python]
+    severity: ERROR
+
+  - id: orderlab-taint-file-to-pickle
+    mode: taint
+    pattern-sources:
+      - pattern: $H.read()
+    pattern-sinks:
+      - pattern: pickle.loads(...)
+    message: file contents reach a deserialiser
+    languages: [python]
+    severity: ERROR
+
+  - id: orderlab-taint-param-to-sql
+    mode: taint
+    pattern-sources:
+      - pattern: |
+          def lookup_order($CURSOR, $ORDER_ID):
+            ...
+    pattern-sinks:
+      - pattern: $CURSOR.execute($QUERY)
+    message: >-
+      a public function parameter reaches SQL string concatenation. A library
+      does not control its callers, so every public parameter is a source.
+    languages: [python]
+    severity: ERROR
