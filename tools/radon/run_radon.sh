@@ -16,7 +16,6 @@ require_smoke "radon" "radon==6.0.1" "$PYBIN" -m radon --version
 
 
 mkdir -p "$ROOT/reports"
-# standardised runner preamble
 cd "$ROOT"
 
 "$PYBIN" -m radon cc -s -j "$SRC/$PKG" > reports/radon-cc.json && "$PYBIN" -m radon mi -j "$SRC/$PKG" > reports/radon-mi.json && "$PYBIN" -m radon cc -s "$SRC/$PKG/analysis/complexity_sample.py"
