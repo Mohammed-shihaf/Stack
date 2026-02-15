@@ -16,6 +16,7 @@ require_smoke "vulture" "vulture==2.16" "$PYBIN" -m vulture --version
 
 
 mkdir -p "$ROOT/reports"
+# standardised runner preamble
 cd "$ROOT"
 
 FINDINGS_EXIT=1   # non-zero from this tool means 'found something', not 'broke'

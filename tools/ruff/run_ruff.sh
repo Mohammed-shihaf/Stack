@@ -16,6 +16,7 @@ require_smoke "ruff" "ruff==0.16.5" "$PYBIN" -m ruff --version
 
 
 mkdir -p "$ROOT/reports"
+# standardised runner preamble
 cd "$ROOT"
 
 FINDINGS_EXIT=1   # non-zero from this tool means 'found something', not 'broke'
