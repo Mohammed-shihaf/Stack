@@ -16,7 +16,6 @@ require_smoke "pylint" "pylint==4.0.8" "$PYBIN" -m pylint --version
 
 
 mkdir -p "$ROOT/reports"
-# standardised runner preamble
 cd "$ROOT"
 
 FINDINGS_EXIT=1   # non-zero from this tool means 'found something', not 'broke'
