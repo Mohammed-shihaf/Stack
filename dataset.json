@@ -1,0 +1,281 @@
+{
+  "branchId": "PY-121",
+  "repository": "python-p311-121-125",
+  "language": "Python",
+  "pythonVersion": "3.11",
+  "pythonVersionVerified": "3.11.13",
+  "buildBackend": "setuptools",
+  "buildBackendVersion": "84.0.0",
+  "buildBackendModule": "setuptools.build_meta",
+  "buildBackendMetadata": "pyproject [project]",
+  "packageManager": "pip",
+  "packageManagerVersion": "26.2.1",
+  "architecture": "Monolith",
+  "scenario": "1 - Monolithic",
+  "module": "flat",
+  "sourceRoot": "src",
+  "package": "orderlab",
+  "deployableUnits": [
+    "orderlab-py-121"
+  ],
+  "workspaces": [],
+  "toolsWired": 29,
+  "toolsActive": 29,
+  "toolsDark": 0,
+  "branchFunctional": true,
+  "backendNote": "setuptools 84.0.0 -- the current latest release, admitted here without a rollback. Reads PEP 621 [project] natively; setup.cfg carries only the mutmut and pytest sections.",
+  "packageManagerNote": "pip 26.2.1 -- the current latest release, running here without a rollback.",
+  "testRunner": "pytest==9.1.1",
+  "plantedFixtures": {
+    "duplication": [
+      "src/orderlab/services/retail_order_processor.py",
+      "src/orderlab/services/wholesale_order_processor.py"
+    ],
+    "complexity": "src/orderlab/analysis/complexity_sample.py",
+    "sast": "src/orderlab/analysis/sast_fixture.py",
+    "taint": "src/orderlab/analysis/taint_fixture.py",
+    "deadCode": "src/orderlab/analysis/dead_code.py",
+    "callGraph": "src/orderlab/analysis/call_graph_sample.py",
+    "lint": "src/orderlab/analysis/lint_violations.py",
+    "vulnerablePins": [
+      "requests==2.31.0",
+      "Jinja2==3.1.3",
+      "urllib3==2.2.2",
+      "cryptography==42.0.0",
+      "paramiko==2.10.1"
+    ],
+    "runtimeSupportPins": [
+      "six==1.17.0"
+    ],
+    "vulnerablePinAdvisories": {
+      "requests==2.31.0": 6,
+      "Jinja2==3.1.3": 8,
+      "urllib3==2.2.2": 12,
+      "cryptography==42.0.0": 15,
+      "paramiko==2.10.1": 4
+    }
+  },
+  "toolsActiveDetail": [
+    {
+      "tool": "CrossHair",
+      "dir": "crosshair",
+      "role": "primary",
+      "pin": "crosshair-tool==0.0.110",
+      "declaredFloor": ">=3.8",
+      "note": "crosshair-tool 0.0.110 declares >=3.8 but its real floor is 3.9. On the 3.8 family it installed, `import crosshair` succeeded, and the tool then died on invocation with TypeError: 'ABCMeta' object is not subscriptable -- crosshair/libimpl/builtinslib.py subscripts collections.abc.Mapping, which is PEP 585. PEP 585 is 3.9, so here that module imports and the tool runs. The declared floor was wrong by exactly one minor version, and only invoking it ever showed that."
+    },
+    {
+      "tool": "Coverage.py",
+      "dir": "coverage",
+      "role": "primary",
+      "pin": "coverage==7.16.0",
+      "declaredFloor": ">=3.10",
+      "note": "Coverage.py 7.16.0 declares >=3.10. It is the PRIMARY tool for 40 of the 103 metrics -- the single largest block in the framework -- and it was dark on all four earlier families. The entire Control Flow and Data Flow section reports for the first time here."
+    },
+    {
+      "tool": "Pymcdc",
+      "dir": "pymcdc",
+      "role": "primary",
+      "pin": "pymcdc==0.2.6",
+      "declaredFloor": ">=3.10",
+      "note": "pymcdc 0.2.6 declares >=3.10. Primary for Condition Coverage / Logical Sub-expression Validation, which had no primary at all on any earlier family."
+    },
+    {
+      "tool": "Radon",
+      "dir": "radon",
+      "role": "primary",
+      "pin": "radon==6.0.1",
+      "note": "radon 6.0.1 declares no Requires-Python and imports cleanly on 3.8."
+    },
+    {
+      "tool": "Lizard",
+      "dir": "lizard",
+      "role": "primary",
+      "pin": "lizard==1.24.0",
+      "note": "lizard 1.24.0 -- a silent import crash on the 3.6 family, working from 3.7 onward. Agrees with radon exactly: CCN 21 = CC 21."
+    },
+    {
+      "tool": "testmon",
+      "dir": "testmon",
+      "role": "primary",
+      "pin": "pytest-testmon==2.2.0",
+      "declaredFloor": ">=3.10",
+      "note": "pytest-testmon 2.2.0 declares >=3.10. Primary for Test Prioritization / QA Resource Allocation."
+    },
+    {
+      "tool": "cognitive-ast",
+      "dir": "cognitive-ast",
+      "role": "primary",
+      "note": "Not a PyPI package -- no distribution of that name exists. Implemented here as a stdlib `ast` cognitive-complexity scorer, written 3.6-compatible, so it runs everywhere in this corpus including here."
+    },
+    {
+      "tool": "jscpd",
+      "dir": "jscpd",
+      "role": "primary",
+      "pin": "jscpd@5.1.1",
+      "note": "jscpd 5.1.1 is an npm package that runs on Node, not on the project interpreter, so the Python version is irrelevant to it. Verified in-session: found the planted clone pair in Python sources."
+    },
+    {
+      "tool": "pylint",
+      "dir": "pylint",
+      "role": "primary",
+      "pin": "pylint==4.0.8",
+      "declaredFloor": ">=3.10",
+      "note": "pylint 4.0.8 declares >=3.10. Primary for the 12 Lint metrics, whose alternative (Ruff) has been running alone since 3.7. First two-sided lint cross-check in the corpus."
+    },
+    {
+      "tool": "Semgrep OSS",
+      "dir": "semgrep",
+      "role": "primary",
+      "pin": "semgrep==1.176.0",
+      "declaredFloor": ">=3.10",
+      "note": "semgrep 1.176.0 declares >=3.10, and bandit 1.9.4 with it. The 7 SAST metrics get their primary. NOTE: `python -m semgrep` is deprecated as of semgrep 1.38.0 -- the console script is the only supported entry point, and this runner uses it."
+    },
+    {
+      "tool": "Bandit",
+      "dir": "bandit",
+      "role": "primary",
+      "pin": "bandit==1.9.4",
+      "declaredFloor": ">=3.10",
+      "note": "bandit 1.9.4 declares >=3.10. Runs alongside semgrep as the SAST primary pair."
+    },
+    {
+      "tool": "pip-audit",
+      "dir": "pip-audit",
+      "role": "primary",
+      "pin": "pip-audit==2.10.1",
+      "declaredFloor": ">=3.10",
+      "note": "pip-audit 2.10.1 declares >=3.10. Primary for the 8 Dependency Risk metrics; Trivy has been the only SCA evidence until now. It can finally audit the five planted pins directly rather than through a manifest scanner."
+    },
+    {
+      "tool": "cosmic-ray",
+      "dir": "cosmic-ray",
+      "role": "primary",
+      "pin": "cosmic-ray==8.7.0",
+      "declaredFloor": ">=3.9",
+      "note": "cosmic-ray 8.7.0 declares >=3.9. Mutation Score gets a primary for the first time in the corpus; mutmut, its alternative, needs 3.10."
+    },
+    {
+      "tool": "Beniget",
+      "dir": "beniget",
+      "role": "primary",
+      "pin": "beniget==0.5.0",
+      "declaredFloor": ">=3.6",
+      "note": "beniget 0.5.0 declares >=3.6 and means it. Needs gast 0.7.0."
+    },
+    {
+      "tool": "PyDriller",
+      "dir": "pydriller",
+      "role": "primary",
+      "pin": "pydriller==2.10",
+      "declaredFloor": ">=3.5",
+      "note": "pydriller 2.10 works. It declared >=3.5 and lied on both previous families, crashing on a walrus operator at pydriller/utils/mailmap.py:72 -- the walrus is 3.8. Verified here by execution, not by import."
+    },
+    {
+      "tool": "Ruff",
+      "dir": "ruff",
+      "role": "alternative",
+      "pin": "ruff==0.16.5",
+      "declaredFloor": ">=3.7",
+      "note": "ruff 0.16.5 -- alternative for 19 of the 103 metrics. Dark on 3.6, live from 3.7 onward."
+    },
+    {
+      "tool": "complexipy",
+      "dir": "complexipy",
+      "role": "alternative",
+      "pin": "complexipy==7.0.1",
+      "declaredFloor": ">=3.8",
+      "note": "complexipy 7.0.1 declares >=3.8. It is the alternative for all seven Cognitive Complexity metrics, which until this family had cognitive-ast as primary and no cross-check whatsoever."
+    },
+    {
+      "tool": "symilar (pylint)",
+      "dir": "symilar",
+      "role": "alternative",
+      "pin": "pylint==4.0.8",
+      "declaredFloor": ">=3.10",
+      "note": "symilar ships inside pylint 4.0.8, so it arrives with it. The 7 Code Duplication metrics finally have both halves: jscpd has been running since 3.6 with no alternative."
+    },
+    {
+      "tool": "Opengrep",
+      "dir": "opengrep",
+      "role": "alternative",
+      "note": "Standalone binary with its own parser. Python-version independent. Install note, not a pin."
+    },
+    {
+      "tool": "Opengrep (taint mode)",
+      "dir": "opengrep-taint",
+      "role": "alternative",
+      "note": "Same binary, taint mode. Install note, not a pin."
+    },
+    {
+      "tool": "Trivy",
+      "dir": "trivy",
+      "role": "alternative",
+      "note": "Standalone binary; scans manifests and lockfiles, never the interpreter. Install note, not a pin."
+    },
+    {
+      "tool": "SlipCover",
+      "dir": "slipcover",
+      "role": "alternative",
+      "pin": "slipcover==1.1.0",
+      "declaredFloor": ">=3.9",
+      "note": "slipcover 1.1.0 declares >=3.9,<3.15. It is the alternative for 22 of the 103 metrics and the first coverage-shaped tool in this corpus other than the hand-written settrace driver -- though its primary, Coverage.py, is still dark until 3.10, so the cross-check remains one-sided."
+    },
+    {
+      "tool": "mutmut",
+      "dir": "mutmut",
+      "role": "alternative",
+      "pin": "mutmut==3.7.0",
+      "declaredFloor": ">=3.10",
+      "note": "mutmut 3.7.0 declares >=3.10. Mutation Score gets its alternative; cosmic-ray arrived at 3.9. Reads paths_to_mutate from setup.cfg, which resolves correctly on both the monolith and the microservices layouts."
+    },
+    {
+      "tool": "diff-cover",
+      "dir": "diff-cover",
+      "role": "alternative",
+      "pin": "diff-cover==10.5.1",
+      "declaredFloor": ">=3.10",
+      "note": "diff-cover 10.5.1 declares >=3.10. It consumes Coverage.py's XML, so it could not have run before 3.10 even if it had installed -- its input did not exist."
+    },
+    {
+      "tool": "astroid",
+      "dir": "astroid",
+      "role": "alternative",
+      "pin": "astroid==4.0.4",
+      "declaredFloor": ">=3.10",
+      "note": "astroid 4.0.4, NOT the latest 4.3.1 -- and this is the one place in the corpus where the latest-everywhere policy had to yield. pylint 4.0.8 requires astroid<=4.1.dev0,>=4.0.2, so pinning both at latest is ResolutionImpossible:\n    ERROR: Cannot install -r requirements-dev.txt (line 23) and astroid==4.3.1 because these package versions have conflicting dependencies.\nTwo roster tools -- pylint (primary for 12 Lint metrics) and astroid (alternative for 5 Data Flow metrics) -- have mutually exclusive latest releases. This is the exact shape of the TypeScript corpus's headline finding, where madge 8.0.0's peer range held six Node families at TypeScript 5.9.3: a CEILING SET BY A TOOL, NEVER BY THE RUNTIME. It was invisible on every earlier Python family because both tools were dark, so they were never resolved together."
+    },
+    {
+      "tool": "pyan3 + astroid",
+      "dir": "pyan3",
+      "role": "alternative",
+      "pin": "pyan3==2.8.1",
+      "declaredFloor": ">=3.10",
+      "note": "pyan3 2.8.1 declares >=3.10,<3.16. Call-graph alternative; Beniget has been the only def-use evidence since 3.6."
+    },
+    {
+      "tool": "pylint + vulture",
+      "dir": "vulture",
+      "role": "alternative",
+      "pin": "vulture==2.16",
+      "declaredFloor": ">=3.9",
+      "note": "vulture 2.16 declares >=3.9. Dead Data Identification gets its alternative, but pylint (its partner in the roster entry 'pylint + vulture') is dark until 3.10."
+    },
+    {
+      "tool": "dulwich",
+      "dir": "dulwich",
+      "role": "alternative",
+      "pin": "dulwich==1.2.14",
+      "declaredFloor": ">=3.10",
+      "note": "dulwich 1.2.14 declares >=3.10. The cross-check on PyDriller for the 5 Code Churn metrics -- both halves of that block now run."
+    },
+    {
+      "tool": "sys.settrace driver (stdlib)",
+      "dir": "settrace",
+      "role": "alternative",
+      "note": "stdlib sys.settrace driver, written 3.6-compatible."
+    }
+  ],
+  "toolsInactive": [],
+  "toolsInactiveSilent": []
+}
