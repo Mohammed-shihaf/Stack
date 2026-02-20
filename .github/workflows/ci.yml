@@ -1,0 +1,63 @@
+# CI for PY-122.
+#
+# Python 3.11.13 is end-of-life, but from 3.8 onward getting it is no longer
+# an ordeal: python-build-standalone covers the version, so `uv python install`
+# yields a working interpreter in seconds.
+#
+# The 3.6 and 3.7 families of this corpus cannot do that -- their CI pulls a
+# tarball from the actions/python-versions manifest and then drops Ubuntu
+# 20.04's libssl1.1 and libffi7 in beside libpython, because 22.04+ ship
+# neither and those CPythons link both. Fifteen lines there, four here. That
+# difference is itself a property of the family.
+#
+# A skipped tool exits 3, and that is expected: 13 of the 29 still cannot
+# install on this interpreter, which is the measurement. `make tools`
+# distinguishes an expected skip from a new one.
+name: PY-122
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0        # PyDriller and dulwich need real history
+
+      - name: Install uv
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+
+      - name: Provide CPython 3.11.13
+        run: |
+          set -euo pipefail
+          uv python install 3.11.13
+          uv python find 3.11 | tee /tmp/pybin
+          "$(cat /tmp/pybin)" -V
+
+      - name: Install
+        run: |
+          python3.7 -m venv .venv
+          .venv/bin/python -m pip install --upgrade "pip==26.2.1"
+          .venv/bin/python -m pip install -r requirements-runtime.txt -r requirements-dev.txt && .venv/bin/python -m pip install -e .
+
+      - name: Test
+        run: .venv/bin/python -m pytest -q
+
+      - name: Cross-file consistency audit
+        run: .venv/bin/python tools/full_check.py
+
+      - name: Verify tool wiring
+        run: .venv/bin/python tools/tool_integration.py --verify
+
+      - name: Run every wired tool
+        run: PYTHON=.venv/bin/python .venv/bin/python tools/tool_integration.py --run
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: reports-PY-122
+          path: reports/
