@@ -40,7 +40,7 @@ jobs:
 
       - name: Install
         run: |
-          python3.7 -m venv .venv
+          "$(cat /tmp/pybin)" -m venv .venv
           .venv/bin/python -m pip install --upgrade "pip==26.2.1"
           .venv/bin/python -m pip install -r requirements-runtime.txt -r requirements-dev.txt && .venv/bin/python -m pip install -e .
 
