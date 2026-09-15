@@ -44,6 +44,13 @@ jobs:
           .venv/bin/python -m pip install --upgrade "pip==26.2.1"
           .venv/bin/python -m pip install -r requirements-runtime.txt -r requirements-dev.txt && .venv/bin/python -m pip install -e .
 
+      - name: Install opengrep and Trivy
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/opengrep/opengrep/main/install.sh | bash
+          echo "$HOME/.opengrep/cli/latest" >> "$GITHUB_PATH"
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh \
+            | sh -s -- -b /usr/local/bin
+
       - name: Test
         run: .venv/bin/python -m pytest -q
 
