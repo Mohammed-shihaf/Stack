@@ -1,15 +1,17 @@
 {
-  "name": "typescript-n12-ts-025",
+  "name": "typescript-n12-ts-030",
   "version": "1.0.0",
   "private": true,
-  "description": "Node 14 / esbuild / npm / Monolith tool-evaluation repository (branch TS-025).",
+  "description": "Node 14 / esbuild / pnpm / Microservices tool-evaluation repository (branch TS-030).",
   "license": "MIT",
   "engines": {
     "node": ">=14.17 <15"
   },
-  "packageManager": "npm@9.9.4",
-  "main": "dist/src/index.js",
-  "types": "dist/src/index.d.ts",
+  "packageManager": "pnpm@7.33.7",
+  "workspaces": [
+    "packages/*",
+    "services/*"
+  ],
   "scripts": {
     "build": "bash tools/typescript/run_tsc.sh",
     "bundle": "bash tools/esbuild/run_esbuild.sh",
