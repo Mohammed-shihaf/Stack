@@ -1,15 +1,17 @@
 {
-  "name": "typescript-n12-ts-051",
+  "name": "typescript-n12-ts-072",
   "version": "1.0.0",
   "private": true,
-  "description": "Node 16 / esbuild / yarn (Berry) / Monolith tool-evaluation repository (branch TS-051).",
+  "description": "Node 16 / rollup / bun / Microservices tool-evaluation repository (branch TS-072).",
   "license": "MIT",
   "engines": {
     "node": ">=16.17 <17"
   },
-  "packageManager": "yarn@3.8.7",
-  "main": "dist/src/index.js",
-  "types": "dist/src/index.d.ts",
+  "packageManager": "bun@1.3.13",
+  "workspaces": [
+    "packages/*",
+    "services/*"
+  ],
   "scripts": {
     "build": "bash tools/typescript/run_tsc.sh",
     "bundle": "bash tools/esbuild/run_esbuild.sh",
@@ -35,6 +37,9 @@
   "devDependencies": {
     "@biomejs/biome": "2.5.11",
     "@cyclonedx/cdxgen": "9.11.6",
+    "@rollup/plugin-commonjs": "29.0.3",
+    "@rollup/plugin-node-resolve": "16.0.3",
+    "@rollup/plugin-typescript": "12.3.0",
     "@stryker-mutator/core": "7.3.0",
     "@stryker-mutator/mocha-runner": "7.3.0",
     "@types/chai": "4.3.5",
@@ -50,7 +55,6 @@
     "c8": "9.1.0",
     "chai": "4.3.10",
     "dependency-cruiser": "13.1.5",
-    "esbuild": "0.21.5",
     "eslint": "8.57.1",
     "eslint-plugin-security": "2.1.1",
     "eslint-plugin-sonarjs": "1.0.4",
@@ -63,10 +67,12 @@
     "mocha": "10.8.2",
     "npm-check-updates": "16.14.20",
     "nyc": "15.1.0",
+    "rollup": "3.30.0",
     "source-map-support": "0.5.21",
     "ts-morph": "23.0.0",
     "ts-node": "10.2.1",
     "ts-prune": "0.10.3",
+    "tslib": "2.8.1",
     "typescript": "5.5.4",
     "vitest": "0.34.6"
   }
