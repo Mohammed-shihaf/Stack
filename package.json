@@ -1,15 +1,17 @@
 {
-  "name": "typescript-n12-ts-013",
+  "name": "typescript-n12-ts-012",
   "version": "1.0.0",
   "private": true,
-  "description": "Node 12 / vite / pnpm / Monolith tool-evaluation repository (branch TS-013).",
+  "description": "Node 12 / vite / yarn (Berry) / Microservices tool-evaluation repository (branch TS-012).",
   "license": "MIT",
   "engines": {
     "node": ">=12.20 <13"
   },
-  "packageManager": "pnpm@6.35.1",
-  "main": "dist/src/index.js",
-  "types": "dist/src/index.d.ts",
+  "packageManager": "yarn@3.8.7",
+  "workspaces": [
+    "packages/*",
+    "services/*"
+  ],
   "scripts": {
     "build": "bash tools/typescript/run_tsc.sh",
     "bundle": "bash tools/esbuild/run_esbuild.sh",
