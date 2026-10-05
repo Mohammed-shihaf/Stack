@@ -1,0 +1,6 @@
+{
+  "name": "vendor-mpl-tool",
+  "version": "1.0.0",
+  "license": "MPL-2.0",
+  "main": "index.js"
+}

@@ -1,0 +1,199 @@
+"""Tests for class instantiation across multiple frontends."""
+
+from __future__ import annotations
+
+from interpreter.class_name import ClassName
+from interpreter.field_name import FieldName
+from interpreter.func_name import FuncName
+from interpreter.project.entry_point import EntryPoint
+from interpreter.run import run
+from interpreter.types.typed_value import unwrap, unwrap_locals
+from interpreter.var_name import VarName
+from interpreter.vm.vm_types import Pointer
+
+
+def _run_program(source: str, language: str = "python", max_steps: int = 300) -> dict:
+    """Run a program and return the main frame's local_vars."""
+    vm = run(
+        source,
+        language=language,
+        max_steps=max_steps,
+        entry_point=EntryPoint.top_level(),
+    )
+    return unwrap_locals(vm.call_stack[0].local_vars)
+
+
+class TestPythonClassInstantiation:
+    def test_constructor_sets_fields(self):
+        """Python class constructor should set instance fields."""
+        source = """\
+class Dog:
+    def __init__(self, name):
+        self.name = name
+
+d = Dog("Rex")
+answer = 42
+"""
+        vm = run(
+            source, language="python", max_steps=300, entry_point=EntryPoint.top_level()
+        )
+        vars_ = unwrap_locals(vm.call_stack[0].local_vars)
+        assert vars_[VarName("answer")] == 42
+        assert VarName("d") in vars_
+        obj_ptr = vars_[VarName("d")]
+        assert isinstance(obj_ptr, Pointer)
+        assert vm.heap_contains(obj_ptr.base)
+        assert vm.heap_get(obj_ptr.base).fields.get(FieldName("name")).value == "Rex"
+
+    def test_method_call_on_instance(self):
+        """Method calls on instances should work."""
+        source = """\
+class Counter:
+    def __init__(self):
+        self.val = 0
+    def inc(self):
+        self.val = self.val + 1
+    def get(self):
+        return self.val
+
+c = Counter()
+c.inc()
+c.inc()
+c.inc()
+answer = c.get()
+"""
+        vars_ = _run_program(source)
+        assert vars_[VarName("answer")] == 3
+
+
+class TestJavaClassInstantiation:
+    def test_class_methods_registered(self):
+        """Java class methods should be registered in the correct class scope."""
+        from interpreter.cfg import build_cfg
+        from interpreter.frontends import get_deterministic_frontend
+        from interpreter.registry import build_registry
+
+        fe = get_deterministic_frontend("java")
+        ir = fe.lower(b"""\
+class Dog {
+    String name;
+    Dog(String n) {
+        this.name = n;
+    }
+}
+""")
+        cfg = build_cfg(ir)
+        reg = build_registry(ir, cfg, fe.func_symbol_table, fe.class_symbol_table)
+        assert ClassName("Dog") in reg.class_methods
+        assert FuncName("__init__") in reg.class_methods[ClassName("Dog")]
+
+    def test_constructor_dispatched(self):
+        """Java new expression should dispatch the constructor."""
+        source = """\
+class Dog {
+    String name;
+    Dog(String n) {
+        this.name = n;
+    }
+}
+Dog d = new Dog("Rex");
+int answer = 42;
+"""
+        vm = run(
+            source, language="java", max_steps=300, entry_point=EntryPoint.top_level()
+        )
+        vars_ = unwrap_locals(vm.call_stack[0].local_vars)
+        assert vars_[VarName("answer")] == 42
+        # d should be a Pointer to a heap address, not symbolic
+        assert isinstance(vars_[VarName("d")], Pointer)
+        assert vars_[VarName("d")].base.startswith("obj_")
+        # Constructor should have dispatched to Dog — verify heap object type
+        assert vm.heap_get(vars_[VarName("d")].base).type_hint == "Dog"
+
+    def test_constructor_sets_fields(self):
+        """Java constructor should set fields on the allocated object."""
+        source = """\
+class Dog {
+    String name;
+    Dog(String n) {
+        this.name = n;
+    }
+}
+Dog d = new Dog("Rex");
+int answer = 42;
+"""
+        vm = run(
+            source, language="java", max_steps=300, entry_point=EntryPoint.top_level()
+        )
+        obj_ptr = unwrap(vm.call_stack[0].local_vars[VarName("d")])
+        assert isinstance(obj_ptr, Pointer)
+        assert vm.heap_contains(obj_ptr.base)
+        assert vm.heap_get(obj_ptr.base).fields.get(FieldName("name")).value == "Rex"
+
+
+class TestCSharpClassInstantiation:
+    def test_class_methods_registered(self):
+        """C# class methods should be registered in the correct class scope."""
+        from interpreter.cfg import build_cfg
+        from interpreter.frontends import get_deterministic_frontend
+        from interpreter.registry import build_registry
+
+        fe = get_deterministic_frontend("csharp")
+        ir = fe.lower(b"""\
+class Dog {
+    string name;
+    Dog(string n) {
+        this.name = n;
+    }
+}
+""")
+        cfg = build_cfg(ir)
+        reg = build_registry(ir, cfg, fe.func_symbol_table, fe.class_symbol_table)
+        assert ClassName("Dog") in reg.class_methods
+        assert FuncName("__init__") in reg.class_methods[ClassName("Dog")]
+
+
+class TestScalaClassInstantiation:
+    def test_class_methods_registered(self):
+        """Scala class methods should be registered in the correct class scope."""
+        from interpreter.cfg import build_cfg
+        from interpreter.frontends import get_deterministic_frontend
+        from interpreter.registry import build_registry
+
+        fe = get_deterministic_frontend("scala")
+        ir = fe.lower(b"""\
+class Dog(name: String) {
+    def getName(): String = name
+}
+""")
+        cfg = build_cfg(ir)
+        reg = build_registry(ir, cfg, fe.func_symbol_table, fe.class_symbol_table)
+        assert ClassName("Dog") in reg.class_methods
+        assert FuncName("getName") in reg.class_methods[ClassName("Dog")]
+
+
+class TestJavaScriptClassInstantiation:
+    def test_constructor_allocates_and_calls(self):
+        """JavaScript new expression should allocate object and call constructor."""
+        source = """\
+class Dog {
+    constructor(name) {
+        this.name = name;
+    }
+}
+let d = new Dog("Rex");
+let answer = 42;
+"""
+        vm = run(
+            source,
+            language="javascript",
+            max_steps=300,
+            entry_point=EntryPoint.top_level(),
+        )
+        vars_ = unwrap_locals(vm.call_stack[0].local_vars)
+        assert vars_[VarName("answer")] == 42
+        assert isinstance(vars_[VarName("d")], Pointer)
+        assert vars_[VarName("d")].base.startswith("obj_")
+        # Constructor body must have run: this.name = "Rex"
+        heap_obj = vm.heap_get(vars_[VarName("d")].base)
+        assert heap_obj.fields[FieldName("name")].value == "Rex"

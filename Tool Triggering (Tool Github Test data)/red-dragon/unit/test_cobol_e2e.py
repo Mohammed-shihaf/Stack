@@ -1,0 +1,1685 @@
+"""End-to-end tests for COBOL frontend: fixture JSON → IR → CFG → execute.
+
+These tests exercise the full pipeline: JSON ASG → CobolFrontend.lower()
+→ IR instructions → build_cfg → build_registry → execute_cfg.
+"""
+
+import json
+from pathlib import Path
+from typing import Any
+
+from cobol_asg.cobol_parser import make_cobol_parser
+from interpreter.cfg import build_cfg
+from interpreter.cobol.cobol_frontend import CobolFrontend
+from interpreter.cobol.features import CobolFeature
+from interpreter.func_name import FuncName
+from interpreter.instructions import AllocRegion, Const, InstructionBase
+from interpreter.ir import Opcode
+from interpreter.registry import build_registry
+from interpreter.run import VMConfig, execute_cfg, initial_vm_state
+from interpreter.vm.executor import (
+    LocalExecutor,
+    _default_handler_context,
+)
+from interpreter.vm.vm import VMState, apply_update
+from interpreter.vm.vm_types import StackFrame
+from tests.covers import covers
+
+FIXTURE_DIR = Path(__file__).parent / "fixtures" / "cobol"
+
+
+def _load_fixture(name: str) -> dict:
+    fixture_path = FIXTURE_DIR / name
+    return json.loads(fixture_path.read_text())
+
+
+def _execute_straight_line(
+    instructions: list[InstructionBase],
+    *,
+    stop_before_procedure: bool = False,
+) -> VMState:
+    """Execute IR straight-line (no branches).
+
+    When *stop_before_procedure* is True, execution halts at the first
+    paragraph label (``para_`` prefix), running only the Data Division.
+    """
+    vm = VMState()
+    vm.call_stack.append(StackFrame(function_name=FuncName("<main>")))
+    cfg = build_cfg(instructions)
+    registry = build_registry(instructions, cfg)
+    from dataclasses import replace
+
+    ctx = replace(_default_handler_context(), cfg=cfg, registry=registry)
+
+    for inst in instructions:
+        if inst.opcode == Opcode.LABEL:
+            if stop_before_procedure and str(inst.label).startswith("para_"):
+                break
+            continue
+        if inst.opcode == Opcode.RETURN:
+            break
+        if inst.opcode in (Opcode.BRANCH, Opcode.BRANCH_IF):
+            continue  # Skip branches for straight-line
+        result = LocalExecutor.execute(inst=inst, vm=vm, ctx=ctx)
+        if result.handled:
+            apply_update(vm, result.update)
+
+    return vm
+
+
+def _execute_cobol_program(
+    cfg: Any,
+    registry: Any,
+    max_steps: int = 500,
+    program_id: str = "MAIN",
+) -> tuple[Any, Any]:
+    """Execute a COBOL program in two phases:
+    1. Run from 'entry' to execute the singleton init block (allocates WS).
+    2. Run from 'func_<pid>_0' to execute the procedure division.
+
+    Returns the (VMState, ExecutionStats) from the procedure phase.
+    """
+    # Phase 1: init block — allocates WS and stores singleton
+    init_vm, _ = execute_cfg(
+        cfg,
+        "entry",
+        registry,
+        VMConfig(max_steps=100),
+        vm=initial_vm_state(),
+    )
+    # Phase 2: procedure — loads WS from singleton and runs procedure body
+    proc_label = f"func_{program_id.lower()}_0"
+    return execute_cfg(
+        cfg, proc_label, registry, VMConfig(max_steps=max_steps), vm=init_vm
+    )
+
+
+class TestHelloWorldFixture:
+    @covers(
+        CobolFeature.PIC_CLAUSE,
+        CobolFeature.VALUE_CLAUSE,
+        CobolFeature.SECTION_WORKING_STORAGE,
+        CobolFeature.FRONTEND_IDEMPOTENCY,
+        CobolFeature.DATA_LAYOUT_ENGINE,
+    )
+    def test_produces_ir(self):
+        data = _load_fixture("hello_world.json")
+        frontend = CobolFrontend(make_cobol_parser())
+        instructions = frontend.lower_from_ast_dict(data)
+
+        assert len(instructions) > 0
+        labels = [i for i in instructions if i.opcode == Opcode.LABEL]
+        assert any(l.label == "entry" for l in labels)
+
+    @covers(
+        CobolFeature.PIC_CLAUSE,
+        CobolFeature.VALUE_CLAUSE,
+        CobolFeature.DATA_LAYOUT_ENGINE,
+    )
+    def test_data_division_allocs_11_bytes(self):
+        data = _load_fixture("hello_world.json")
+        frontend = CobolFrontend(make_cobol_parser())
+        instructions = frontend.lower_from_ast_dict(data)
+
+        # Two allocs: the WS region (11 bytes) and the always-present
+        # special-registers region (RETURN-CODE, 2 bytes). red-dragon-o8uq.
+        allocs = [i for i in instructions if isinstance(i, AllocRegion)]
+        assert len(allocs) == 2
+        # Each alloc's size is stored in a preceding CONST instruction.
+        alloc_sizes = {
+            const.value
+            for alloc in allocs
+            for const in instructions
+            if isinstance(const, Const) and const.result_reg == alloc.size_reg
+        }
+        assert 11 in alloc_sizes  # WS region: X(11)
+
+    @covers(
+        CobolFeature.PIC_CLAUSE,
+        CobolFeature.VALUE_CLAUSE,
+        CobolFeature.DATA_LAYOUT_ENGINE,
+        CobolFeature.NUMERIC_EXECUTION,
+    )
+    def test_initial_value_written_to_region(self):
+        """Verify that the initial VALUE "HELLO WORLD" is written into the region."""
+        data = _load_fixture("hello_world.json")
+        frontend = CobolFrontend(make_cobol_parser())
+        instructions = frontend.lower_from_ast_dict(data)
+
+        vm = _execute_straight_line(instructions)
+
+        # Should have at least one region
+        assert vm.region_count() >= 1
+        region_addr = list(vm.region_keys())[0]
+        region = vm.region_get(region_addr)
+        assert region is not None
+
+        # Region should have 11 bytes written (EBCDIC-encoded "HELLO WORLD")
+        assert len(region) == 11
+        # Verify actual EBCDIC content matches "HELLO WORLD"
+        expected_ebcdic = list("HELLO WORLD".encode("cp500"))
+        assert (
+            list(region) == expected_ebcdic
+        ), f"expected EBCDIC 'HELLO WORLD', got {list(region)}"
+
+
+class TestMoveFieldsFixture:
+    @covers(CobolFeature.MOVE, CobolFeature.PIC_CLAUSE, CobolFeature.DATA_LAYOUT_ENGINE)
+    def test_produces_load_and_write_region(self):
+        data = _load_fixture("move_fields.json")
+        frontend = CobolFrontend(make_cobol_parser())
+        instructions = frontend.lower_from_ast_dict(data)
+
+        loads = [i for i in instructions if i.opcode == Opcode.LOAD_REGION]
+        writes = [i for i in instructions if i.opcode == Opcode.WRITE_REGION]
+        assert len(loads) >= 1
+        assert len(writes) >= 1
+
+    @covers(CobolFeature.MOVE, CobolFeature.PIC_CLAUSE, CobolFeature.DATA_LAYOUT_ENGINE)
+    def test_data_division_allocs_6_bytes(self):
+        data = _load_fixture("move_fields.json")
+        frontend = CobolFrontend(make_cobol_parser())
+        instructions = frontend.lower_from_ast_dict(data)
+
+        allocs = [i for i in instructions if isinstance(i, AllocRegion)]
+        size_const = [
+            i
+            for i in instructions
+            if isinstance(i, Const) and i.result_reg == allocs[0].size_reg
+        ]
+        assert size_const[0].value == 6  # 9(3) + 9(3) = 3 + 3
+
+
+class TestArithmeticFixture:
+    @covers(
+        CobolFeature.ADD,
+        CobolFeature.SUBTRACT,
+        CobolFeature.ARITHMETIC_EXPRESSION,
+        CobolFeature.NUMERIC_EXECUTION,
+    )
+    def test_produces_binops(self):
+        data = _load_fixture("arithmetic.json")
+        frontend = CobolFrontend(make_cobol_parser())
+        instructions = frontend.lower_from_ast_dict(data)
+
+        binops = [i for i in instructions if i.opcode == Opcode.BINOP]
+        ops = [b.operands[0] for b in binops]
+        assert "+" in ops  # ADD 50
+        assert "-" in ops  # SUBTRACT 25
+
+    @covers(
+        CobolFeature.ADD,
+        CobolFeature.SUBTRACT,
+        CobolFeature.PIC_CLAUSE,
+        CobolFeature.VALUE_CLAUSE,
+        CobolFeature.NUMERIC_EXECUTION,
+        CobolFeature.DATA_LAYOUT_ENGINE,
+    )
+    def test_initial_value_100_in_region(self):
+        """Verify initial VALUE "100" is correctly encoded as zoned decimal."""
+        data = _load_fixture("arithmetic.json")
+        frontend = CobolFrontend(make_cobol_parser())
+        instructions = frontend.lower_from_ast_dict(data)
+
+        vm = _execute_straight_line(instructions, stop_before_procedure=True)
+
+        region_addr = list(vm.region_keys())[0]
+        region = vm.region_get(region_addr)
+        assert region is not None
+        assert len(region) == 5  # 9(5)
+        assert (
+            _decode_zoned_unsigned(region, 0, 5) == 100
+        ), f"expected initial zoned decimal 100, got {_decode_zoned_unsigned(region, 0, 5)}"
+
+    @covers(
+        CobolFeature.ADD,
+        CobolFeature.SUBTRACT,
+        CobolFeature.ARITHMETIC_EXPRESSION,
+        CobolFeature.NUMERIC_EXECUTION,
+        CobolFeature.DATA_LAYOUT_ENGINE,
+    )
+    def test_arithmetic_produces_correct_result(self):
+        """Full execution: 100 + 50 - 25 = 125 in zoned decimal region."""
+        data = _load_fixture("arithmetic.json")
+        frontend = CobolFrontend(make_cobol_parser())
+        instructions = frontend.lower_from_ast_dict(data)
+
+        vm = _execute_straight_line(instructions)
+
+        region_addr = list(vm.region_keys())[0]
+        region = vm.region_get(region_addr)
+        assert region is not None
+        assert len(region) == 5  # 9(5)
+        assert (
+            _decode_zoned_unsigned(region, 0, 5) == 125
+        ), f"expected zoned decimal 125 (100+50-25), got {_decode_zoned_unsigned(region, 0, 5)}"
+
+
+class TestPerformReturnFixture:
+    @covers(
+        CobolFeature.PERFORM,
+        CobolFeature.MOVE,
+        CobolFeature.STOP_RUN,
+        CobolFeature.NUMERIC_EXECUTION,
+        CobolFeature.DATA_LAYOUT_ENGINE,
+    )
+    def test_perform_returns_to_caller(self):
+        """MAIN PERFORMs WORK, WORK does MOVE, execution returns to MAIN and hits STOP RUN."""
+        data = _load_fixture("perform_return.json")
+        frontend = CobolFrontend(make_cobol_parser())
+        instructions = frontend.lower_from_ast_dict(data)
+        cfg = build_cfg(instructions)
+        registry = build_registry(instructions, cfg)
+
+        vm, _ = _execute_cobol_program(cfg, registry, max_steps=500)
+
+        # Execution should have completed (hit STOP RUN)
+        assert vm.region_count() >= 1
+        region_addr = list(vm.region_keys())[0]
+        region = vm.region_get(region_addr)
+        # WS-RESULT at offset 0, PIC 9(3): MOVE 42 should yield 42
+        assert (
+            _decode_zoned_unsigned(region, 0, 3) == 42
+        ), "PERFORM should return to caller — WS-RESULT must be 42"
+
+    @covers(
+        CobolFeature.PERFORM,
+        CobolFeature.MOVE,
+        CobolFeature.STOP_RUN,
+        CobolFeature.NUMERIC_EXECUTION,
+        CobolFeature.DATA_LAYOUT_ENGINE,
+    )
+    def test_nested_perform(self):
+        """MAIN PERFORMs PARA-A, PARA-A PERFORMs PARA-B, both return correctly."""
+        data = {
+            "data_fields": [
+                {
+                    "name": "WS-VAL",
+                    "level": 77,
+                    "pic": "9(3)",
+                    "usage": "DISPLAY",
+                    "offset": 0,
+                    "value": "0",
+                },
+            ],
+            "paragraphs": [
+                {
+                    "name": "MAIN-PARA",
+                    "statements": [
+                        {"type": "PERFORM", "operands": ["PARA-A"]},
+                        {"type": "STOP_RUN"},
+                    ],
+                },
+                {
+                    "name": "PARA-A",
+                    "statements": [
+                        {"type": "MOVE", "operands": ["10", "WS-VAL"]},
+                        {"type": "PERFORM", "operands": ["PARA-B"]},
+                        {"type": "MOVE", "operands": ["42", "WS-VAL"]},
+                    ],
+                },
+                {
+                    "name": "PARA-B",
+                    "statements": [
+                        {"type": "MOVE", "operands": ["99", "WS-VAL"]},
+                    ],
+                },
+            ],
+        }
+        frontend = CobolFrontend(make_cobol_parser())
+        instructions = frontend.lower_from_ast_dict(data)
+        cfg = build_cfg(instructions)
+        registry = build_registry(instructions, cfg)
+
+        vm, stats = _execute_cobol_program(cfg, registry, max_steps=300)
+
+        assert stats.steps < 300
+        assert vm.region_count() >= 1
+        region = vm.region_get(list(vm.region_keys())[0])
+        # PARA-A: MOVE 10 → PERFORM PARA-B (MOVE 99) → MOVE 42
+        # Final WS-VAL == 42 proves PARA-B returned to PARA-A and PARA-A continued
+        assert _decode_zoned_unsigned(region, 0, 3) == 42
+
+    @covers(
+        CobolFeature.MOVE,
+        CobolFeature.STOP_RUN,
+        CobolFeature.NUMERIC_EXECUTION,
+        CobolFeature.DATA_LAYOUT_ENGINE,
+    )
+    def test_fall_through_without_perform(self):
+        """Two paragraphs, no PERFORM — verify sequential execution."""
+        data = {
+            "data_fields": [
+                {
+                    "name": "WS-A",
+                    "level": 77,
+                    "pic": "9(3)",
+                    "usage": "DISPLAY",
+                    "offset": 0,
+                    "value": "0",
+                },
+            ],
+            "paragraphs": [
+                {
+                    "name": "FIRST-PARA",
+                    "statements": [
+                        {"type": "MOVE", "operands": ["1", "WS-A"]},
+                    ],
+                },
+                {
+                    "name": "SECOND-PARA",
+                    "statements": [
+                        {"type": "MOVE", "operands": ["2", "WS-A"]},
+                        {"type": "STOP_RUN"},
+                    ],
+                },
+            ],
+        }
+        frontend = CobolFrontend(make_cobol_parser())
+        instructions = frontend.lower_from_ast_dict(data)
+        cfg = build_cfg(instructions)
+        registry = build_registry(instructions, cfg)
+
+        vm, stats = _execute_cobol_program(cfg, registry, max_steps=500)
+
+        # Should complete within steps (hit STOP RUN in SECOND-PARA)
+        assert stats.steps < 200
+        assert vm.region_count() >= 1
+        # WS-A should be 2: FIRST-PARA MOVEs 1, then fall-through to SECOND-PARA MOVEs 2
+        region = vm.region_get(list(vm.region_keys())[0])
+        assert _decode_zoned_unsigned(region, 0, 3) == 2
+
+
+class TestCobolFrontendIdempotency:
+    @covers(
+        CobolFeature.FRONTEND_IDEMPOTENCY,
+        CobolFeature.PIC_CLAUSE,
+        CobolFeature.VALUE_CLAUSE,
+    )
+    def test_lower_twice_produces_same_ir(self):
+        """Calling lower_from_ast_dict() twice should reset state and produce identical IR."""
+        data = _load_fixture("hello_world.json")
+        frontend = CobolFrontend(make_cobol_parser())
+
+        ir1 = frontend.lower_from_ast_dict(data)
+        ir2 = frontend.lower_from_ast_dict(data)
+
+        assert len(ir1) == len(ir2)
+        for i, (a, b) in enumerate(zip(ir1, ir2)):
+            assert a.opcode == b.opcode, f"Mismatch at {i}: {a.opcode} != {b.opcode}"
+            assert a.label == b.label
+            assert a.result_reg == b.result_reg
+
+
+class TestMultipleStatementTypes:
+    @covers(
+        CobolFeature.MOVE,
+        CobolFeature.DISPLAY,
+        CobolFeature.STOP_RUN,
+        CobolFeature.PIC_CLAUSE,
+        CobolFeature.VALUE_CLAUSE,
+        CobolFeature.DATA_LAYOUT_ENGINE,
+    )
+    def test_mixed_statements(self):
+        """Test a program with MOVE, DISPLAY, and STOP RUN."""
+        data = {
+            "data_fields": [
+                {
+                    "name": "WS-A",
+                    "level": 77,
+                    "pic": "9(3)",
+                    "offset": 0,
+                    "value": "0",
+                },
+                {
+                    "name": "WS-B",
+                    "level": 77,
+                    "pic": "X(5)",
+                    "offset": 0,
+                    "value": "HELLO",
+                },
+            ],
+            "paragraphs": [
+                {
+                    "name": "MAIN",
+                    "statements": [
+                        {"type": "MOVE", "operands": ["42", "WS-A"]},
+                        {"type": "DISPLAY", "operands": ["WS-B"]},
+                        {"type": "STOP_RUN"},
+                    ],
+                },
+            ],
+        }
+        frontend = CobolFrontend(make_cobol_parser())
+        instructions = frontend.lower_from_ast_dict(data)
+
+        opcodes = {i.opcode for i in instructions}
+        assert Opcode.ALLOC_REGION in opcodes
+        assert Opcode.WRITE_REGION in opcodes
+        assert Opcode.CALL_FUNCTION in opcodes  # print
+        assert Opcode.HALT in opcodes  # STOP RUN
+
+
+class TestIfElseExecution:
+    """IF ... ELSE execution tests."""
+
+    @covers(
+        CobolFeature.IF_ELSE,
+        CobolFeature.COMPARISON_OPERATORS,
+        CobolFeature.MOVE,
+        CobolFeature.STOP_RUN,
+        CobolFeature.NUMERIC_EXECUTION,
+        CobolFeature.DATA_LAYOUT_ENGINE,
+    )
+    def test_if_true_branch_taken(self):
+        """IF WS-A > 0 should take the THEN branch when WS-A = 5."""
+        data = {
+            "data_fields": [
+                {
+                    "name": "WS-A",
+                    "level": 77,
+                    "pic": "9(3)",
+                    "usage": "DISPLAY",
+                    "offset": 0,
+                    "value": "5",
+                },
+                {
+                    "name": "WS-RESULT",
+                    "level": 77,
+                    "pic": "9(3)",
+                    "usage": "DISPLAY",
+                    "offset": 3,
+                    "value": "0",
+                },
+            ],
+            "paragraphs": [
+                {
+                    "name": "MAIN-PARA",
+                    "statements": [
+                        {
+                            "type": "IF",
+                            "condition": {
+                                "not": False,
+                                "relation": {
+                                    "left": {"kind": "ref", "name": "WS-A"},
+                                    "op": ">",
+                                    "right": {"kind": "lit", "value": "0"},
+                                },
+                            },
+                            "children": [
+                                {"type": "MOVE", "operands": ["1", "WS-RESULT"]},
+                            ],
+                            "else_children": [
+                                {"type": "MOVE", "operands": ["2", "WS-RESULT"]},
+                            ],
+                        },
+                        {"type": "STOP_RUN"},
+                    ],
+                },
+            ],
+        }
+        frontend = CobolFrontend(make_cobol_parser())
+        instructions = frontend.lower_from_ast_dict(data)
+        cfg = build_cfg(instructions)
+        registry = build_registry(instructions, cfg)
+
+        vm, stats = _execute_cobol_program(cfg, registry, max_steps=500)
+        assert stats.steps < 200
+        assert vm.region_count() >= 1
+        # WS-RESULT should be 1 (THEN branch: MOVE 1 TO WS-RESULT)
+        region = vm.region_get(list(vm.region_keys())[0])
+        assert _decode_zoned_unsigned(region, 3, 3) == 1
+
+    @covers(
+        CobolFeature.IF_ELSE,
+        CobolFeature.COMPARISON_OPERATORS,
+        CobolFeature.MOVE,
+        CobolFeature.STOP_RUN,
+        CobolFeature.NUMERIC_EXECUTION,
+        CobolFeature.DATA_LAYOUT_ENGINE,
+    )
+    def test_if_false_branch_taken(self):
+        """IF WS-A > 10 should take the ELSE branch when WS-A = 5."""
+        data = {
+            "data_fields": [
+                {
+                    "name": "WS-A",
+                    "level": 77,
+                    "pic": "9(3)",
+                    "usage": "DISPLAY",
+                    "offset": 0,
+                    "value": "5",
+                },
+                {
+                    "name": "WS-RESULT",
+                    "level": 77,
+                    "pic": "9(3)",
+                    "usage": "DISPLAY",
+                    "offset": 3,
+                    "value": "0",
+                },
+            ],
+            "paragraphs": [
+                {
+                    "name": "MAIN-PARA",
+                    "statements": [
+                        {
+                            "type": "IF",
+                            "condition": {
+                                "not": False,
+                                "relation": {
+                                    "left": {"kind": "ref", "name": "WS-A"},
+                                    "op": ">",
+                                    "right": {"kind": "lit", "value": "10"},
+                                },
+                            },
+                            "children": [
+                                {"type": "MOVE", "operands": ["1", "WS-RESULT"]},
+                            ],
+                            "else_children": [
+                                {"type": "MOVE", "operands": ["2", "WS-RESULT"]},
+                            ],
+                        },
+                        {"type": "STOP_RUN"},
+                    ],
+                },
+            ],
+        }
+        frontend = CobolFrontend(make_cobol_parser())
+        instructions = frontend.lower_from_ast_dict(data)
+        cfg = build_cfg(instructions)
+        registry = build_registry(instructions, cfg)
+
+        vm, stats = _execute_cobol_program(cfg, registry, max_steps=500)
+        assert stats.steps < 200
+        assert vm.region_count() >= 1
+        # WS-RESULT should be 2 (ELSE branch: MOVE 2 TO WS-RESULT)
+        region = vm.region_get(list(vm.region_keys())[0])
+        assert _decode_zoned_unsigned(region, 3, 3) == 2
+
+
+class TestPerformTimesExecution:
+    """PERFORM ... TIMES loop execution tests."""
+
+    @covers(
+        CobolFeature.PERFORM_TIMES,
+        CobolFeature.PERFORM_INLINE,
+        CobolFeature.ADD,
+        CobolFeature.NUMERIC_EXECUTION,
+        CobolFeature.DATA_LAYOUT_ENGINE,
+    )
+    def test_perform_times_inline_executes_body_n_times(self):
+        """Inline PERFORM 3 TIMES with ADD 1 TO WS-CTR should result in WS-CTR = 3."""
+        data = {
+            "data_fields": [
+                {
+                    "name": "WS-CTR",
+                    "level": 77,
+                    "pic": "9(3)",
+                    "usage": "DISPLAY",
+                    "offset": 0,
+                    "value": "0",
+                },
+            ],
+            "paragraphs": [
+                {
+                    "name": "MAIN-PARA",
+                    "statements": [
+                        {
+                            "type": "PERFORM",
+                            "perform_type": "TIMES",
+                            "times": "3",
+                            "children": [
+                                {"type": "ADD", "operands": ["1", "WS-CTR"]},
+                            ],
+                        },
+                        {"type": "STOP_RUN"},
+                    ],
+                },
+            ],
+        }
+        frontend = CobolFrontend(make_cobol_parser())
+        instructions = frontend.lower_from_ast_dict(data)
+        cfg = build_cfg(instructions)
+        registry = build_registry(instructions, cfg)
+
+        vm, stats = _execute_cobol_program(cfg, registry, max_steps=500)
+
+        # Should complete within step limit
+        assert stats.steps < 500
+        assert vm.region_count() >= 1
+        # WS-CTR should be 3 after ADD 1 executed 3 times
+        region = vm.region_get(list(vm.region_keys())[0])
+        assert _decode_zoned_unsigned(region, 0, 3) == 3
+
+
+class TestPerformUntilExecution:
+    """PERFORM ... UNTIL loop execution tests."""
+
+    @covers(
+        CobolFeature.PERFORM_UNTIL,
+        CobolFeature.PERFORM_TEST_BEFORE,
+        CobolFeature.ADD,
+        CobolFeature.COMPARISON_OPERATORS,
+        CobolFeature.NUMERIC_EXECUTION,
+        CobolFeature.DATA_LAYOUT_ENGINE,
+    )
+    def test_perform_until_test_before(self):
+        """PERFORM UNTIL WS-A > 2 with ADD 1 should loop until WS-A reaches 3."""
+        data = {
+            "data_fields": [
+                {
+                    "name": "WS-A",
+                    "level": 77,
+                    "pic": "9(3)",
+                    "usage": "DISPLAY",
+                    "offset": 0,
+                    "value": "0",
+                },
+            ],
+            "paragraphs": [
+                {
+                    "name": "MAIN-PARA",
+                    "statements": [
+                        {
+                            "type": "PERFORM",
+                            "perform_type": "UNTIL",
+                            "until": {
+                                "not": False,
+                                "relation": {
+                                    "left": {"kind": "ref", "name": "WS-A"},
+                                    "op": ">",
+                                    "right": {"kind": "lit", "value": "2"},
+                                },
+                            },
+                            "test_before": True,
+                            "children": [
+                                {"type": "ADD", "operands": ["1", "WS-A"]},
+                            ],
+                        },
+                        {"type": "STOP_RUN"},
+                    ],
+                },
+            ],
+        }
+        frontend = CobolFrontend(make_cobol_parser())
+        instructions = frontend.lower_from_ast_dict(data)
+        cfg = build_cfg(instructions)
+        registry = build_registry(instructions, cfg)
+
+        vm, stats = _execute_cobol_program(cfg, registry, max_steps=500)
+
+        assert stats.steps < 500
+        assert vm.region_count() >= 1
+        # WS-A should be 3: test-before loops ADD 1 three times (0→1→2→3), then exits
+        region = vm.region_get(list(vm.region_keys())[0])
+        assert _decode_zoned_unsigned(region, 0, 3) == 3
+
+
+class TestPerformVaryingExecution:
+    """PERFORM ... VARYING loop execution tests."""
+
+    @covers(
+        CobolFeature.PERFORM_VARYING,
+        CobolFeature.PERFORM_INLINE,
+        CobolFeature.ADD,
+        CobolFeature.COMPARISON_OPERATORS,
+        CobolFeature.NUMERIC_EXECUTION,
+        CobolFeature.DATA_LAYOUT_ENGINE,
+    )
+    def test_perform_varying_inline(self):
+        """PERFORM VARYING WS-IDX FROM 1 BY 1 UNTIL WS-IDX > 3."""
+        data = {
+            "data_fields": [
+                {
+                    "name": "WS-IDX",
+                    "level": 77,
+                    "pic": "9(3)",
+                    "usage": "DISPLAY",
+                    "offset": 0,
+                    "value": "0",
+                },
+                {
+                    "name": "WS-SUM",
+                    "level": 77,
+                    "pic": "9(5)",
+                    "usage": "DISPLAY",
+                    "offset": 3,
+                    "value": "0",
+                },
+            ],
+            "paragraphs": [
+                {
+                    "name": "MAIN-PARA",
+                    "statements": [
+                        {
+                            "type": "PERFORM",
+                            "perform_type": "VARYING",
+                            "varying_var": "WS-IDX",
+                            "varying_from": "1",
+                            "varying_by": "1",
+                            "until": {
+                                "not": False,
+                                "relation": {
+                                    "left": {"kind": "ref", "name": "WS-IDX"},
+                                    "op": ">",
+                                    "right": {"kind": "lit", "value": "3"},
+                                },
+                            },
+                            "test_before": True,
+                            "children": [
+                                {
+                                    "type": "ADD",
+                                    "operands": ["WS-IDX", "WS-SUM"],
+                                },
+                            ],
+                        },
+                        {"type": "STOP_RUN"},
+                    ],
+                },
+            ],
+        }
+        frontend = CobolFrontend(make_cobol_parser())
+        instructions = frontend.lower_from_ast_dict(data)
+        cfg = build_cfg(instructions)
+        registry = build_registry(instructions, cfg)
+
+        vm, stats = _execute_cobol_program(cfg, registry, max_steps=1000)
+
+        assert stats.steps < 1000
+        assert vm.region_count() >= 1
+        # WS-SUM should be 6: VARYING WS-IDX from 1 by 1 until > 3
+        # adds 1+2+3 = 6
+        region = vm.region_get(list(vm.region_keys())[0])
+        assert _decode_zoned_unsigned(region, 3, 5) == 6
+
+
+def _decode_zoned_unsigned(region: bytearray, offset: int, length: int) -> int:
+    """Decode unsigned zoned decimal from a memory region.
+
+    Each byte is EBCDIC zoned: 0xF0=0, 0xF1=1, ..., 0xF9=9.
+    The digit is in the low nibble (b & 0x0F).
+    """
+    digits = [region[offset + i] & 0x0F for i in range(length)]
+    return sum(d * (10 ** (length - 1 - i)) for i, d in enumerate(digits))
+
+
+class TestNumericValueVerification:
+    """Verify that e2e execution produces correct numeric values in memory regions."""
+
+    @covers(
+        CobolFeature.MOVE,
+        CobolFeature.STOP_RUN,
+        CobolFeature.NUMERIC_EXECUTION,
+        CobolFeature.DATA_LAYOUT_ENGINE,
+    )
+    def test_move_literal_value(self):
+        """MOVE 42 TO WS-A → WS-A should decode to 42."""
+        data = {
+            "data_fields": [
+                {
+                    "name": "WS-A",
+                    "level": 77,
+                    "pic": "9(3)",
+                    "usage": "DISPLAY",
+                    "offset": 0,
+                    "value": "0",
+                },
+            ],
+            "paragraphs": [
+                {
+                    "name": "MAIN-PARA",
+                    "statements": [
+                        {"type": "MOVE", "operands": ["42", "WS-A"]},
+                        {"type": "STOP_RUN"},
+                    ],
+                },
+            ],
+        }
+        frontend = CobolFrontend(make_cobol_parser())
+        instructions = frontend.lower_from_ast_dict(data)
+        cfg = build_cfg(instructions)
+        registry = build_registry(instructions, cfg)
+
+        vm, _ = _execute_cobol_program(cfg, registry, max_steps=500)
+
+        region = vm.region_get(list(vm.region_keys())[0])
+        assert _decode_zoned_unsigned(region, 0, 3) == 42
+
+    @covers(
+        CobolFeature.ADD,
+        CobolFeature.STOP_RUN,
+        CobolFeature.NUMERIC_EXECUTION,
+        CobolFeature.DATA_LAYOUT_ENGINE,
+    )
+    def test_add_two_values(self):
+        """WS-A=10, WS-B=5, ADD WS-A WS-B → WS-B should be 15."""
+        data = {
+            "data_fields": [
+                {
+                    "name": "WS-A",
+                    "level": 77,
+                    "pic": "9(4)",
+                    "usage": "DISPLAY",
+                    "offset": 0,
+                    "value": "10",
+                },
+                {
+                    "name": "WS-B",
+                    "level": 77,
+                    "pic": "9(4)",
+                    "usage": "DISPLAY",
+                    "offset": 4,
+                    "value": "5",
+                },
+            ],
+            "paragraphs": [
+                {
+                    "name": "MAIN-PARA",
+                    "statements": [
+                        {"type": "ADD", "operands": ["WS-A", "WS-B"]},
+                        {"type": "STOP_RUN"},
+                    ],
+                },
+            ],
+        }
+        frontend = CobolFrontend(make_cobol_parser())
+        instructions = frontend.lower_from_ast_dict(data)
+        cfg = build_cfg(instructions)
+        registry = build_registry(instructions, cfg)
+
+        vm, _ = _execute_cobol_program(cfg, registry, max_steps=500)
+
+        region = vm.region_get(list(vm.region_keys())[0])
+        assert _decode_zoned_unsigned(region, 0, 4) == 10  # WS-A unchanged
+        assert _decode_zoned_unsigned(region, 4, 4) == 15  # WS-B = 10 + 5
+
+    @covers(
+        CobolFeature.SUBTRACT,
+        CobolFeature.STOP_RUN,
+        CobolFeature.NUMERIC_EXECUTION,
+        CobolFeature.DATA_LAYOUT_ENGINE,
+    )
+    def test_subtract_values(self):
+        """WS-A=10, WS-B=3, SUBTRACT WS-B FROM WS-A → WS-A should be 7."""
+        data = {
+            "data_fields": [
+                {
+                    "name": "WS-A",
+                    "level": 77,
+                    "pic": "9(4)",
+                    "usage": "DISPLAY",
+                    "offset": 0,
+                    "value": "10",
+                },
+                {
+                    "name": "WS-B",
+                    "level": 77,
+                    "pic": "9(4)",
+                    "usage": "DISPLAY",
+                    "offset": 4,
+                    "value": "3",
+                },
+            ],
+            "paragraphs": [
+                {
+                    "name": "MAIN-PARA",
+                    "statements": [
+                        {"type": "SUBTRACT", "operands": ["WS-B", "WS-A"]},
+                        {"type": "STOP_RUN"},
+                    ],
+                },
+            ],
+        }
+        frontend = CobolFrontend(make_cobol_parser())
+        instructions = frontend.lower_from_ast_dict(data)
+        cfg = build_cfg(instructions)
+        registry = build_registry(instructions, cfg)
+
+        vm, _ = _execute_cobol_program(cfg, registry, max_steps=500)
+
+        region = vm.region_get(list(vm.region_keys())[0])
+        assert _decode_zoned_unsigned(region, 0, 4) == 7  # WS-A = 10 - 3
+
+    @covers(
+        CobolFeature.ADD,
+        CobolFeature.STOP_RUN,
+        CobolFeature.NUMERIC_EXECUTION,
+        CobolFeature.DATA_LAYOUT_ENGINE,
+    )
+    def test_add_literal_to_field(self):
+        """WS-A=0, ADD 25 TO WS-A → WS-A should be 25."""
+        data = {
+            "data_fields": [
+                {
+                    "name": "WS-A",
+                    "level": 77,
+                    "pic": "9(4)",
+                    "usage": "DISPLAY",
+                    "offset": 0,
+                    "value": "0",
+                },
+            ],
+            "paragraphs": [
+                {
+                    "name": "MAIN-PARA",
+                    "statements": [
+                        {"type": "ADD", "operands": ["25", "WS-A"]},
+                        {"type": "STOP_RUN"},
+                    ],
+                },
+            ],
+        }
+        frontend = CobolFrontend(make_cobol_parser())
+        instructions = frontend.lower_from_ast_dict(data)
+        cfg = build_cfg(instructions)
+        registry = build_registry(instructions, cfg)
+
+        vm, _ = _execute_cobol_program(cfg, registry, max_steps=500)
+
+        region = vm.region_get(list(vm.region_keys())[0])
+        assert _decode_zoned_unsigned(region, 0, 4) == 25
+
+    @covers(
+        CobolFeature.PERFORM_TIMES,
+        CobolFeature.PERFORM_INLINE,
+        CobolFeature.ADD,
+        CobolFeature.STOP_RUN,
+        CobolFeature.NUMERIC_EXECUTION,
+        CobolFeature.DATA_LAYOUT_ENGINE,
+    )
+    def test_perform_times_accumulation(self):
+        """PERFORM 3 TIMES with ADD 1 TO WS-CTR → WS-CTR should be 3."""
+        data = {
+            "data_fields": [
+                {
+                    "name": "WS-CTR",
+                    "level": 77,
+                    "pic": "9(4)",
+                    "usage": "DISPLAY",
+                    "offset": 0,
+                    "value": "0",
+                },
+            ],
+            "paragraphs": [
+                {
+                    "name": "MAIN-PARA",
+                    "statements": [
+                        {
+                            "type": "PERFORM",
+                            "perform_type": "TIMES",
+                            "times": "3",
+                            "children": [
+                                {"type": "ADD", "operands": ["1", "WS-CTR"]},
+                            ],
+                        },
+                        {"type": "STOP_RUN"},
+                    ],
+                },
+            ],
+        }
+        frontend = CobolFrontend(make_cobol_parser())
+        instructions = frontend.lower_from_ast_dict(data)
+        cfg = build_cfg(instructions)
+        registry = build_registry(instructions, cfg)
+
+        vm, _ = _execute_cobol_program(cfg, registry, max_steps=500)
+
+        region = vm.region_get(list(vm.region_keys())[0])
+        assert _decode_zoned_unsigned(region, 0, 4) == 3
+
+    @covers(
+        CobolFeature.PIC_CLAUSE,
+        CobolFeature.VALUE_CLAUSE,
+        CobolFeature.STOP_RUN,
+        CobolFeature.NUMERIC_EXECUTION,
+        CobolFeature.DATA_LAYOUT_ENGINE,
+    )
+    def test_initial_value_encoding(self):
+        """Initial VALUE 123 should encode correctly in the region."""
+        data = {
+            "data_fields": [
+                {
+                    "name": "WS-A",
+                    "level": 77,
+                    "pic": "9(4)",
+                    "usage": "DISPLAY",
+                    "offset": 0,
+                    "value": "123",
+                },
+            ],
+            "paragraphs": [
+                {
+                    "name": "MAIN-PARA",
+                    "statements": [
+                        {"type": "STOP_RUN"},
+                    ],
+                },
+            ],
+        }
+        frontend = CobolFrontend(make_cobol_parser())
+        instructions = frontend.lower_from_ast_dict(data)
+        cfg = build_cfg(instructions)
+        registry = build_registry(instructions, cfg)
+
+        vm, _ = _execute_cobol_program(cfg, registry, max_steps=500)
+
+        region = vm.region_get(list(vm.region_keys())[0])
+        assert _decode_zoned_unsigned(region, 0, 4) == 123
+
+    @covers(
+        CobolFeature.ADD,
+        CobolFeature.STOP_RUN,
+        CobolFeature.NUMERIC_EXECUTION,
+        CobolFeature.DATA_LAYOUT_ENGINE,
+    )
+    def test_multiple_adds_accumulate(self):
+        """WS-R=0, ADD 10 TO WS-R, ADD 5 TO WS-R → WS-R should be 15."""
+        data = {
+            "data_fields": [
+                {
+                    "name": "WS-R",
+                    "level": 77,
+                    "pic": "9(4)",
+                    "usage": "DISPLAY",
+                    "offset": 0,
+                    "value": "0",
+                },
+            ],
+            "paragraphs": [
+                {
+                    "name": "MAIN-PARA",
+                    "statements": [
+                        {"type": "ADD", "operands": ["10", "WS-R"]},
+                        {"type": "ADD", "operands": ["5", "WS-R"]},
+                        {"type": "STOP_RUN"},
+                    ],
+                },
+            ],
+        }
+        frontend = CobolFrontend(make_cobol_parser())
+        instructions = frontend.lower_from_ast_dict(data)
+        cfg = build_cfg(instructions)
+        registry = build_registry(instructions, cfg)
+
+        vm, _ = _execute_cobol_program(cfg, registry, max_steps=500)
+
+        region = vm.region_get(list(vm.region_keys())[0])
+        assert _decode_zoned_unsigned(region, 0, 4) == 15
+
+    @covers(
+        CobolFeature.PERFORM_TIMES,
+        CobolFeature.PERFORM,
+        CobolFeature.ADD,
+        CobolFeature.STOP_RUN,
+        CobolFeature.NUMERIC_EXECUTION,
+        CobolFeature.DATA_LAYOUT_ENGINE,
+    )
+    def test_paragraph_perform_times_accumulation(self):
+        """PERFORM ADD-PARA 3 TIMES with ADD 10 TO WS-SUM → WS-SUM should be 30.
+
+        Tests paragraph-level PERFORM TIMES (not inline) to verify the loop
+        counter works correctly when the body is a separate paragraph.
+        """
+        data = {
+            "data_fields": [
+                {
+                    "name": "WS-SUM",
+                    "level": 77,
+                    "pic": "9(4)",
+                    "usage": "DISPLAY",
+                    "offset": 0,
+                    "value": "0",
+                },
+            ],
+            "paragraphs": [
+                {
+                    "name": "MAIN-PARA",
+                    "statements": [
+                        {
+                            "type": "PERFORM",
+                            "perform_type": "TIMES",
+                            "times": "3",
+                            "operands": ["ADD-PARA"],
+                        },
+                        {"type": "STOP_RUN"},
+                    ],
+                },
+                {
+                    "name": "ADD-PARA",
+                    "statements": [
+                        {"type": "ADD", "operands": ["10", "WS-SUM"]},
+                    ],
+                },
+            ],
+        }
+        frontend = CobolFrontend(make_cobol_parser())
+        instructions = frontend.lower_from_ast_dict(data)
+        cfg = build_cfg(instructions)
+        registry = build_registry(instructions, cfg)
+
+        vm, _ = _execute_cobol_program(cfg, registry, max_steps=1000)
+
+        region = vm.region_get(list(vm.region_keys())[0])
+        assert _decode_zoned_unsigned(region, 0, 4) == 30
+
+    @covers(
+        CobolFeature.MOVE,
+        CobolFeature.PERFORM_TIMES,
+        CobolFeature.PERFORM,
+        CobolFeature.ADD,
+        CobolFeature.STOP_RUN,
+        CobolFeature.NUMERIC_EXECUTION,
+        CobolFeature.DATA_LAYOUT_ENGINE,
+    )
+    def test_move_then_perform_times_accumulation(self):
+        """MOVE 100 TO WS-SUM, then PERFORM ADD-PARA 3 TIMES adding 10 → WS-SUM should be 130.
+
+        Tests that MOVE literal followed by paragraph PERFORM TIMES produces
+        correct cumulative result, requiring sufficient step budget.
+        """
+        data = {
+            "data_fields": [
+                {
+                    "name": "WS-SUM",
+                    "level": 77,
+                    "pic": "9(4)",
+                    "usage": "DISPLAY",
+                    "offset": 0,
+                    "value": "0",
+                },
+            ],
+            "paragraphs": [
+                {
+                    "name": "MAIN-PARA",
+                    "statements": [
+                        {"type": "MOVE", "operands": ["100", "WS-SUM"]},
+                        {
+                            "type": "PERFORM",
+                            "perform_type": "TIMES",
+                            "times": "3",
+                            "operands": ["ADD-PARA"],
+                        },
+                        {"type": "STOP_RUN"},
+                    ],
+                },
+                {
+                    "name": "ADD-PARA",
+                    "statements": [
+                        {"type": "ADD", "operands": ["10", "WS-SUM"]},
+                    ],
+                },
+            ],
+        }
+        frontend = CobolFrontend(make_cobol_parser())
+        instructions = frontend.lower_from_ast_dict(data)
+        cfg = build_cfg(instructions)
+        registry = build_registry(instructions, cfg)
+
+        vm, _ = _execute_cobol_program(cfg, registry, max_steps=1000)
+
+        region = vm.region_get(list(vm.region_keys())[0])
+        assert _decode_zoned_unsigned(region, 0, 4) == 130
+
+
+class TestSectionFallThrough:
+    """Test that paragraphs within a section execute sequentially."""
+
+    @covers(
+        CobolFeature.SECTION_WORKING_STORAGE,
+        CobolFeature.MOVE,
+        CobolFeature.STOP_RUN,
+        CobolFeature.NUMERIC_EXECUTION,
+        CobolFeature.DATA_LAYOUT_ENGINE,
+    )
+    def test_section_paragraphs_fall_through(self):
+        """Two paragraphs in a section, no PERFORM — verify sequential execution."""
+        data = {
+            "data_fields": [
+                {
+                    "name": "WS-A",
+                    "level": 77,
+                    "pic": "9(3)",
+                    "usage": "DISPLAY",
+                    "offset": 0,
+                    "value": "0",
+                },
+            ],
+            "sections": [
+                {
+                    "name": "MAIN-SECTION",
+                    "paragraphs": [
+                        {
+                            "name": "FIRST-PARA",
+                            "statements": [
+                                {"type": "MOVE", "operands": ["1", "WS-A"]},
+                            ],
+                        },
+                        {
+                            "name": "SECOND-PARA",
+                            "statements": [
+                                {"type": "MOVE", "operands": ["2", "WS-A"]},
+                                {"type": "STOP_RUN"},
+                            ],
+                        },
+                    ],
+                },
+            ],
+        }
+        frontend = CobolFrontend(make_cobol_parser())
+        instructions = frontend.lower_from_ast_dict(data)
+        cfg = build_cfg(instructions)
+        registry = build_registry(instructions, cfg)
+
+        vm, stats = _execute_cobol_program(cfg, registry, max_steps=500)
+
+        assert stats.steps < 200
+        assert vm.region_count() >= 1
+        # Fall-through: FIRST-PARA sets WS-A=1, SECOND-PARA overwrites to 2
+        region = vm.region_get(list(vm.region_keys())[0])
+        assert _decode_zoned_unsigned(region, 0, 3) == 2
+
+
+class TestNestedPerformNumericValues:
+    """Nested PERFORM with numeric value verification."""
+
+    @covers(
+        CobolFeature.PERFORM,
+        CobolFeature.ADD,
+        CobolFeature.STOP_RUN,
+        CobolFeature.NUMERIC_EXECUTION,
+        CobolFeature.DATA_LAYOUT_ENGINE,
+    )
+    def test_nested_perform_accumulation(self):
+        """MAIN performs OUTER, OUTER performs INNER, both add to WS-SUM.
+
+        OUTER: ADD 100, PERFORM INNER, ADD 1
+        INNER: ADD 10
+        Expected: 0 + 100 + 10 + 1 = 111
+        """
+        data = {
+            "data_fields": [
+                {
+                    "name": "WS-SUM",
+                    "level": 77,
+                    "pic": "9(4)",
+                    "usage": "DISPLAY",
+                    "offset": 0,
+                    "value": "0",
+                },
+            ],
+            "paragraphs": [
+                {
+                    "name": "MAIN-PARA",
+                    "statements": [
+                        {"type": "PERFORM", "operands": ["OUTER-PARA"]},
+                        {"type": "STOP_RUN"},
+                    ],
+                },
+                {
+                    "name": "OUTER-PARA",
+                    "statements": [
+                        {"type": "ADD", "operands": ["100", "WS-SUM"]},
+                        {"type": "PERFORM", "operands": ["INNER-PARA"]},
+                        {"type": "ADD", "operands": ["1", "WS-SUM"]},
+                    ],
+                },
+                {
+                    "name": "INNER-PARA",
+                    "statements": [
+                        {"type": "ADD", "operands": ["10", "WS-SUM"]},
+                    ],
+                },
+            ],
+        }
+        frontend = CobolFrontend(make_cobol_parser())
+        instructions = frontend.lower_from_ast_dict(data)
+        cfg = build_cfg(instructions)
+        registry = build_registry(instructions, cfg)
+
+        vm, _ = _execute_cobol_program(cfg, registry, max_steps=500)
+
+        region = vm.region_get(list(vm.region_keys())[0])
+        assert _decode_zoned_unsigned(region, 0, 4) == 111
+
+    @covers(
+        CobolFeature.PERFORM_TIMES,
+        CobolFeature.PERFORM,
+        CobolFeature.ADD,
+        CobolFeature.STOP_RUN,
+        CobolFeature.NUMERIC_EXECUTION,
+        CobolFeature.DATA_LAYOUT_ENGINE,
+    )
+    def test_nested_perform_times(self):
+        """PERFORM OUTER 2 TIMES, OUTER performs INNER 3 TIMES.
+
+        OUTER body: PERFORM INNER 3 TIMES
+        INNER body: ADD 1 TO WS-CTR
+        Expected: 2 * 3 = 6
+        """
+        data = {
+            "data_fields": [
+                {
+                    "name": "WS-CTR",
+                    "level": 77,
+                    "pic": "9(4)",
+                    "usage": "DISPLAY",
+                    "offset": 0,
+                    "value": "0",
+                },
+            ],
+            "paragraphs": [
+                {
+                    "name": "MAIN-PARA",
+                    "statements": [
+                        {
+                            "type": "PERFORM",
+                            "perform_type": "TIMES",
+                            "times": "2",
+                            "operands": ["OUTER-PARA"],
+                        },
+                        {"type": "STOP_RUN"},
+                    ],
+                },
+                {
+                    "name": "OUTER-PARA",
+                    "statements": [
+                        {
+                            "type": "PERFORM",
+                            "perform_type": "TIMES",
+                            "times": "3",
+                            "operands": ["INNER-PARA"],
+                        },
+                    ],
+                },
+                {
+                    "name": "INNER-PARA",
+                    "statements": [
+                        {"type": "ADD", "operands": ["1", "WS-CTR"]},
+                    ],
+                },
+            ],
+        }
+        frontend = CobolFrontend(make_cobol_parser())
+        instructions = frontend.lower_from_ast_dict(data)
+        cfg = build_cfg(instructions)
+        registry = build_registry(instructions, cfg)
+
+        vm, _ = _execute_cobol_program(cfg, registry, max_steps=2000)
+
+        region = vm.region_get(list(vm.region_keys())[0])
+        assert _decode_zoned_unsigned(region, 0, 4) == 6
+
+
+class TestGotoInsidePerform:
+    """Tests for GO TO within and outside PERFORM ranges."""
+
+    @covers(
+        CobolFeature.GO_TO,
+        CobolFeature.ADD,
+        CobolFeature.STOP_RUN,
+        CobolFeature.NUMERIC_EXECUTION,
+        CobolFeature.DATA_LAYOUT_ENGINE,
+    )
+    def test_goto_within_perform_range(self):
+        """GO TO jumps forward within the PERFORM paragraph range.
+
+        PERFORM WORK-PARA: ADD 10, GO TO SKIP-PARA, ADD 999 (should be skipped)
+        SKIP-PARA: ADD 1
+        Expected: 0 + 10 + 1 = 11 (the ADD 999 is skipped)
+        """
+        data = {
+            "data_fields": [
+                {
+                    "name": "WS-VAL",
+                    "level": 77,
+                    "pic": "9(4)",
+                    "usage": "DISPLAY",
+                    "offset": 0,
+                    "value": "0",
+                },
+            ],
+            "paragraphs": [
+                {
+                    "name": "MAIN-PARA",
+                    "statements": [
+                        {"type": "ADD", "operands": ["10", "WS-VAL"]},
+                        {
+                            "type": "GOTO",
+                            "form": "simple",
+                            "target": {"paragraph": "SKIP-PARA", "section": ""},
+                        },
+                        {"type": "ADD", "operands": ["999", "WS-VAL"]},
+                    ],
+                },
+                {
+                    "name": "SKIP-PARA",
+                    "statements": [
+                        {"type": "ADD", "operands": ["1", "WS-VAL"]},
+                        {"type": "STOP_RUN"},
+                    ],
+                },
+            ],
+        }
+        frontend = CobolFrontend(make_cobol_parser())
+        instructions = frontend.lower_from_ast_dict(data)
+        cfg = build_cfg(instructions)
+        registry = build_registry(instructions, cfg)
+
+        vm, _ = _execute_cobol_program(cfg, registry, max_steps=500)
+
+        region = vm.region_get(list(vm.region_keys())[0])
+        assert _decode_zoned_unsigned(region, 0, 4) == 11
+
+    @covers(
+        CobolFeature.GO_TO,
+        CobolFeature.ADD,
+        CobolFeature.STOP_RUN,
+        CobolFeature.NUMERIC_EXECUTION,
+        CobolFeature.DATA_LAYOUT_ENGINE,
+    )
+    def test_goto_skips_code_in_paragraph(self):
+        """GO TO from PARA-A to PARA-C, skipping PARA-B entirely.
+
+        PARA-A: ADD 1, GO TO PARA-C
+        PARA-B: ADD 100 (should be skipped)
+        PARA-C: ADD 10, STOP RUN
+        Expected: 0 + 1 + 10 = 11
+        """
+        data = {
+            "data_fields": [
+                {
+                    "name": "WS-VAL",
+                    "level": 77,
+                    "pic": "9(4)",
+                    "usage": "DISPLAY",
+                    "offset": 0,
+                    "value": "0",
+                },
+            ],
+            "paragraphs": [
+                {
+                    "name": "PARA-A",
+                    "statements": [
+                        {"type": "ADD", "operands": ["1", "WS-VAL"]},
+                        {
+                            "type": "GOTO",
+                            "form": "simple",
+                            "target": {"paragraph": "PARA-C", "section": ""},
+                        },
+                    ],
+                },
+                {
+                    "name": "PARA-B",
+                    "statements": [
+                        {"type": "ADD", "operands": ["100", "WS-VAL"]},
+                    ],
+                },
+                {
+                    "name": "PARA-C",
+                    "statements": [
+                        {"type": "ADD", "operands": ["10", "WS-VAL"]},
+                        {"type": "STOP_RUN"},
+                    ],
+                },
+            ],
+        }
+        frontend = CobolFrontend(make_cobol_parser())
+        instructions = frontend.lower_from_ast_dict(data)
+        cfg = build_cfg(instructions)
+        registry = build_registry(instructions, cfg)
+
+        vm, _ = _execute_cobol_program(cfg, registry, max_steps=500)
+
+        region = vm.region_get(list(vm.region_keys())[0])
+        assert _decode_zoned_unsigned(region, 0, 4) == 11
+
+    @covers(
+        CobolFeature.PERFORM,
+        CobolFeature.GO_TO,
+        CobolFeature.ADD,
+        CobolFeature.STOP_RUN,
+        CobolFeature.NUMERIC_EXECUTION,
+        CobolFeature.DATA_LAYOUT_ENGINE,
+    )
+    def test_goto_exits_performed_paragraph(self):
+        """PERFORM WORK-PARA, where WORK-PARA does GO TO EXIT-PARA.
+
+        MAIN: PERFORM WORK-PARA, ADD 1 TO WS-VAL, STOP RUN
+        WORK-PARA: ADD 10, GO TO EXIT-PARA
+        EXIT-PARA: ADD 100
+
+        GO TO from a PERFORMed paragraph jumps to EXIT-PARA, which
+        falls through (no continuation set for EXIT-PARA). The ADD 1
+        after the PERFORM in MAIN may or may not execute depending on
+        continuation mechanics.
+        """
+        data = {
+            "data_fields": [
+                {
+                    "name": "WS-VAL",
+                    "level": 77,
+                    "pic": "9(4)",
+                    "usage": "DISPLAY",
+                    "offset": 0,
+                    "value": "0",
+                },
+            ],
+            "paragraphs": [
+                {
+                    "name": "MAIN-PARA",
+                    "statements": [
+                        {"type": "PERFORM", "operands": ["WORK-PARA"]},
+                        {"type": "ADD", "operands": ["1", "WS-VAL"]},
+                        {"type": "STOP_RUN"},
+                    ],
+                },
+                {
+                    "name": "WORK-PARA",
+                    "statements": [
+                        {"type": "ADD", "operands": ["10", "WS-VAL"]},
+                        {
+                            "type": "GOTO",
+                            "form": "simple",
+                            "target": {"paragraph": "EXIT-PARA", "section": ""},
+                        },
+                    ],
+                },
+                {
+                    "name": "EXIT-PARA",
+                    "statements": [
+                        {"type": "ADD", "operands": ["100", "WS-VAL"]},
+                    ],
+                },
+            ],
+        }
+        frontend = CobolFrontend(make_cobol_parser())
+        instructions = frontend.lower_from_ast_dict(data)
+        cfg = build_cfg(instructions)
+        registry = build_registry(instructions, cfg)
+
+        vm, _ = _execute_cobol_program(cfg, registry, max_steps=500)
+
+        region = vm.region_get(list(vm.region_keys())[0])
+        # WORK-PARA adds 10, GO TO jumps to EXIT-PARA which adds 100.
+        # The GO TO bypasses WORK-PARA's end label, so the PERFORM
+        # continuation is never triggered — control does NOT return to
+        # MAIN-PARA. The ADD 1 after the PERFORM never executes.
+        # Total: 10 + 100 = 110 (would be 111 if continuation ran).
+        val = _decode_zoned_unsigned(region, 0, 4)
+        assert val == 110
+        assert val != 111, "ADD 1 after PERFORM should not have executed"
+
+
+class TestPicXDigitOnlyValue:
+    """Regression tests for vt2i: PIC X VALUE with digit-only strings."""
+
+    def _decode_alpha(self, region: list[int], offset: int, length: int) -> str:
+        """Decode EBCDIC bytes to ASCII string."""
+        raw = bytes(region[offset : offset + length])
+        return raw.decode("cp500").rstrip()
+
+    @covers(CobolFeature.VALUE_CLAUSE, CobolFeature.PIC_CLAUSE)
+    def test_pic_x_value_digit_string_stored_as_text(self):
+        """PIC X(5) VALUE '12345' must store EBCDIC '12345', not zeros."""
+        data = {
+            "data_fields": [
+                {
+                    "name": "WS-TEXT",
+                    "level": 77,
+                    "pic": "X(5)",
+                    "usage": "DISPLAY",
+                    "offset": 0,
+                    "value": "12345",
+                }
+            ],
+            "paragraphs": [{"name": "MAIN-PARA", "statements": [{"type": "STOP_RUN"}]}],
+        }
+        frontend = CobolFrontend(make_cobol_parser())
+        instructions = frontend.lower_from_ast_dict(data)
+
+        vm = _execute_straight_line(instructions)
+        raw = vm.region_get(list(vm.region_keys())[0])
+        assert raw is not None
+        region = list(raw)
+
+        assert region != [0] * 5, "digit-only VALUE stored as zeros (vt2i regression)"
+        expected = list("12345".encode("cp500"))
+        assert region == expected, f"expected EBCDIC '12345', got {region}"
+
+    @covers(CobolFeature.MOVE, CobolFeature.PIC_CLAUSE)
+    def test_move_digit_literal_to_pic_x(self):
+        """MOVE '67890' TO WS-DEST (PIC X) must write EBCDIC '67890', not zeros."""
+        data = {
+            "data_fields": [
+                {
+                    "name": "WS-DEST",
+                    "level": 77,
+                    "pic": "X(5)",
+                    "usage": "DISPLAY",
+                    "offset": 0,
+                }
+            ],
+            "paragraphs": [
+                {
+                    "name": "MAIN-PARA",
+                    "statements": [
+                        {"type": "MOVE", "operands": ["67890", "WS-DEST"]},
+                        {"type": "STOP_RUN"},
+                    ],
+                }
+            ],
+        }
+        frontend = CobolFrontend(make_cobol_parser())
+        instructions = frontend.lower_from_ast_dict(data)
+        cfg = build_cfg(instructions)
+        registry = build_registry(instructions, cfg)
+
+        vm, _ = _execute_cobol_program(cfg, registry, max_steps=500)
+        region = list(vm.region_get(list(vm.region_keys())[0]))
+
+        assert (
+            region != [0] * 5
+        ), "digit-only MOVE literal stored as zeros (vt2i regression)"
+        expected = list("67890".encode("cp500"))
+        assert region == expected, f"expected EBCDIC '67890', got {region}"

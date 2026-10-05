@@ -1,0 +1,16 @@
+{
+  "name": "cannery-line",
+  "private": true,
+  "version": "1.0.0",
+  "dependencies": {
+    "vendor-gpl-widget": "file:./vendor/vendor-gpl-widget",
+    "vendor-nolicense-gadget": "file:./vendor/vendor-nolicense-gadget",
+    "vendor-mpl-tool": "file:./vendor/vendor-mpl-tool",
+    "vendor-mit-ok": "file:./vendor/vendor-mit-ok"
+  },
+  "devDependencies": {
+    "@cyclonedx/cdxgen": "8.6.3",
+    "typescript": "5.0.4",
+    "@types/node": "^12"
+  }
+}

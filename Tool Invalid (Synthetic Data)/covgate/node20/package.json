@@ -1,0 +1,12 @@
+{
+  "name": "smokehouse-batch",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "devDependencies": {
+    "vitest": "4.1.11",
+    "@vitest/coverage-v8": "4.1.11",
+    "typescript": "5.9.3",
+    "@types/node": "^20"
+  }
+}

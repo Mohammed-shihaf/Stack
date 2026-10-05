@@ -1,0 +1,313 @@
+"""Tests for execute_cfg — calling the VM execution loop directly with hand-built CFGs."""
+
+import logging
+
+import pytest
+
+from interpreter.cfg import build_cfg
+from interpreter.ir import CodeLabel, Opcode
+from interpreter.register import Register
+from interpreter.registry import FunctionRegistry, build_registry
+from interpreter.run import ExecutionStats, VMConfig, execute_cfg, initial_vm_state
+from interpreter.types.typed_value import unwrap
+from interpreter.var_name import VarName
+from tests.unit.cfg_helpers import (
+    build_simple_cfg as _build_simple_cfg,
+)
+from tests.unit.cfg_helpers import (
+    make_instructions as _make_instructions,
+)
+
+
+class TestExecuteCfgBasic:
+    def test_const_and_store_sets_variable(self):
+        instructions = _make_instructions(
+            (Opcode.LABEL, {"label": CodeLabel("entry")}),
+            (Opcode.CONST, {"result_reg": Register("%0"), "operands": [42]}),
+            (Opcode.STORE_VAR, {"operands": ["x", "%0"]}),
+            (Opcode.RETURN, {"operands": ["%0"]}),
+        )
+        cfg, registry = _build_simple_cfg(instructions)
+
+        vm, _stats = execute_cfg(
+            cfg,
+            "entry",
+            registry,
+            vm=initial_vm_state(),
+        )
+
+        assert unwrap(vm.current_frame.local_vars[VarName("x")]) == 42
+
+    def test_returns_execution_stats(self):
+        instructions = _make_instructions(
+            (Opcode.LABEL, {"label": CodeLabel("entry")}),
+            (Opcode.CONST, {"result_reg": Register("%0"), "operands": [1]}),
+            (Opcode.RETURN, {"operands": ["%0"]}),
+        )
+        cfg, registry = _build_simple_cfg(instructions)
+
+        _vm, stats = execute_cfg(
+            cfg,
+            "entry",
+            registry,
+            vm=initial_vm_state(),
+        )
+
+        assert isinstance(stats, ExecutionStats)
+        assert stats.steps > 0
+        assert stats.llm_calls == 0
+
+    def test_max_steps_limits_execution(self):
+        instructions = _make_instructions(
+            (Opcode.LABEL, {"label": CodeLabel("entry")}),
+            (Opcode.CONST, {"result_reg": Register("%0"), "operands": [1]}),
+            (Opcode.STORE_VAR, {"operands": ["x", "%0"]}),
+            (Opcode.CONST, {"result_reg": Register("%1"), "operands": [2]}),
+            (Opcode.STORE_VAR, {"operands": ["y", "%1"]}),
+            (Opcode.CONST, {"result_reg": Register("%2"), "operands": [3]}),
+            (Opcode.STORE_VAR, {"operands": ["z", "%2"]}),
+            (Opcode.RETURN, {"operands": ["%2"]}),
+        )
+        cfg, registry = _build_simple_cfg(instructions)
+        config = VMConfig(max_steps=3)
+
+        _vm, stats = execute_cfg(
+            cfg,
+            "entry",
+            registry,
+            config,
+            vm=initial_vm_state(),
+        )
+
+        assert stats.steps == 3
+
+    def test_default_config_uses_sensible_defaults(self):
+        config = VMConfig()
+        assert config.backend == "claude"
+        assert config.max_steps == 100
+        assert config.verbose is False
+
+    def test_config_is_frozen(self):
+        config = VMConfig()
+        with pytest.raises(AttributeError):
+            config.backend = "openai"
+
+    def test_execution_records_steps_and_entry(self):
+        instructions = _make_instructions(
+            (Opcode.LABEL, {"label": CodeLabel("entry")}),
+            (Opcode.CONST, {"result_reg": Register("%0"), "operands": [99]}),
+            (Opcode.STORE_VAR, {"operands": ["result", "%0"]}),
+            (Opcode.RETURN, {"operands": ["%0"]}),
+        )
+        cfg, registry = _build_simple_cfg(instructions)
+
+        vm, stats = execute_cfg(
+            cfg,
+            "entry",
+            registry,
+            vm=initial_vm_state(),
+        )
+
+        assert unwrap(vm.current_frame.local_vars[VarName("result")]) == 99
+        assert stats.steps > 0, "execution must have taken at least one step"
+        assert cfg.entry == "entry", f"CFG entry should be 'entry', got {cfg.entry}"
+
+    def test_invalid_entry_point_raises(self):
+        instructions = _make_instructions(
+            (Opcode.LABEL, {"label": CodeLabel("entry")}),
+            (Opcode.RETURN, {"operands": ["%0"]}),
+        )
+        cfg, registry = _build_simple_cfg(instructions)
+
+        with pytest.raises(ValueError, match="not found in CFG"):
+            execute_cfg(
+                cfg,
+                "nonexistent_label",
+                registry,
+                vm=initial_vm_state(),
+            )
+
+    def test_empty_registry_works_for_simple_programs(self):
+        instructions = _make_instructions(
+            (Opcode.LABEL, {"label": CodeLabel("entry")}),
+            (Opcode.CONST, {"result_reg": Register("%0"), "operands": [7]}),
+            (Opcode.STORE_VAR, {"operands": ["v", "%0"]}),
+            (Opcode.RETURN, {"operands": ["%0"]}),
+        )
+        cfg = build_cfg(instructions)
+        empty_registry = FunctionRegistry()
+
+        vm, _stats = execute_cfg(
+            cfg,
+            "entry",
+            empty_registry,
+            vm=initial_vm_state(),
+        )
+
+        assert unwrap(vm.current_frame.local_vars[VarName("v")]) == 7
+
+    def test_unconditional_branch_jumps_to_target(self):
+        instructions = _make_instructions(
+            (Opcode.LABEL, {"label": CodeLabel("entry")}),
+            (Opcode.BRANCH, {"label": CodeLabel("target")}),
+            (Opcode.LABEL, {"label": CodeLabel("target")}),
+            (Opcode.CONST, {"result_reg": Register("%0"), "operands": [42]}),
+            (Opcode.STORE_VAR, {"operands": ["result", "%0"]}),
+            (Opcode.RETURN, {"operands": ["%0"]}),
+        )
+        cfg, registry = _build_simple_cfg(instructions)
+
+        vm, _stats = execute_cfg(
+            cfg,
+            "entry",
+            registry,
+            vm=initial_vm_state(),
+        )
+
+        assert unwrap(vm.current_frame.local_vars[VarName("result")]) == 42
+
+    def test_conditional_branch_takes_true_path(self):
+        instructions = _make_instructions(
+            (Opcode.LABEL, {"label": CodeLabel("entry")}),
+            (Opcode.CONST, {"result_reg": Register("%0"), "operands": [True]}),
+            (
+                Opcode.BRANCH_IF,
+                {
+                    "operands": ["%0"],
+                    "branch_targets": [
+                        CodeLabel("then_block"),
+                        CodeLabel("else_block"),
+                    ],
+                },
+            ),
+            (Opcode.LABEL, {"label": CodeLabel("then_block")}),
+            (Opcode.CONST, {"result_reg": Register("%1"), "operands": [10]}),
+            (Opcode.STORE_VAR, {"operands": ["result", "%1"]}),
+            (Opcode.RETURN, {"operands": ["%1"]}),
+            (Opcode.LABEL, {"label": CodeLabel("else_block")}),
+            (Opcode.CONST, {"result_reg": Register("%2"), "operands": [20]}),
+            (Opcode.STORE_VAR, {"operands": ["result", "%2"]}),
+            (Opcode.RETURN, {"operands": ["%2"]}),
+        )
+        cfg, registry = _build_simple_cfg(instructions)
+
+        vm, _stats = execute_cfg(
+            cfg,
+            "entry",
+            registry,
+            vm=initial_vm_state(),
+        )
+
+        assert unwrap(vm.current_frame.local_vars[VarName("result")]) == 10
+
+    def test_stats_reports_zero_llm_calls_for_local_execution(self):
+        instructions = _make_instructions(
+            (Opcode.LABEL, {"label": CodeLabel("entry")}),
+            (Opcode.CONST, {"result_reg": Register("%0"), "operands": [5]}),
+            (Opcode.CONST, {"result_reg": Register("%1"), "operands": [3]}),
+            (
+                Opcode.BINOP,
+                {"result_reg": Register("%2"), "operands": ["+", "%0", "%1"]},
+            ),
+            (Opcode.STORE_VAR, {"operands": ["sum", "%2"]}),
+            (Opcode.RETURN, {"operands": ["%2"]}),
+        )
+        cfg, registry = _build_simple_cfg(instructions)
+
+        vm, stats = execute_cfg(
+            cfg,
+            "entry",
+            registry,
+            vm=initial_vm_state(),
+        )
+
+        assert stats.llm_calls == 0
+        assert unwrap(vm.current_frame.local_vars[VarName("sum")]) == 8
+
+    def test_execute_cfg_accepts_prebuilt_vm(self):
+        """execute_cfg should reuse a pre-built VM instead of creating a fresh one."""
+        source = "x = 42"
+        from interpreter.constants import Language
+        from interpreter.frontend import get_frontend
+
+        frontend = get_frontend(Language.PYTHON)
+        instructions = frontend.lower(source.encode("utf-8"))
+        cfg = build_cfg(instructions)
+        registry = build_registry(instructions, cfg)
+
+        # Pre-build a VM with a variable already set
+        from interpreter.func_name import FuncName
+        from interpreter.types.type_expr import UNKNOWN
+        from interpreter.types.typed_value import typed
+        from interpreter.var_name import VarName
+        from interpreter.vm.vm import StackFrame, VMState
+
+        vm = VMState()
+        vm.call_stack.append(StackFrame(function_name=FuncName("__main__")))
+        vm.current_frame.local_vars[VarName("preexisting")] = typed("hello", UNKNOWN)
+
+        vm_out, _stats = execute_cfg(cfg, "entry", registry, vm=vm)
+
+        # The preexisting variable should still be in scope
+        assert VarName("preexisting") in vm_out.current_frame.local_vars
+        assert vm_out.current_frame.local_vars[VarName("preexisting")].value == "hello"
+        # And the new variable from execution should also be there
+        assert VarName("x") in vm_out.current_frame.local_vars
+
+    def test_verbose_mode_produces_step_log(self, caplog):
+        instructions = _make_instructions(
+            (Opcode.LABEL, {"label": CodeLabel("entry")}),
+            (Opcode.CONST, {"result_reg": Register("%0"), "operands": [1]}),
+            (Opcode.RETURN, {"operands": ["%0"]}),
+        )
+        cfg, registry = _build_simple_cfg(instructions)
+
+        # Run without verbose — capture baseline logs
+        with caplog.at_level(logging.INFO, logger="interpreter.run"):
+            execute_cfg(
+                cfg,
+                "entry",
+                registry,
+                VMConfig(verbose=False),
+                vm=initial_vm_state(),
+            )
+        quiet_log = caplog.text
+        caplog.clear()
+
+        # Run with verbose — should produce additional output
+        with caplog.at_level(logging.INFO, logger="interpreter.run"):
+            execute_cfg(
+                cfg,
+                "entry",
+                registry,
+                VMConfig(verbose=True),
+                vm=initial_vm_state(),
+            )
+        verbose_log = caplog.text
+
+        assert "step" in verbose_log.lower()
+        assert len(verbose_log) > len(quiet_log)
+
+
+class TestExecuteCfgHalt:
+    def test_halt_stops_execution_before_later_instructions_run(self):
+        instructions = _make_instructions(
+            (Opcode.LABEL, {"label": CodeLabel("entry")}),
+            (Opcode.CONST, {"result_reg": Register("%0"), "operands": [1]}),
+            (Opcode.STORE_VAR, {"operands": ["before_halt", "%0"]}),
+            (Opcode.HALT, {}),
+            (Opcode.CONST, {"result_reg": Register("%1"), "operands": [2]}),
+            (Opcode.STORE_VAR, {"operands": ["after_halt", "%1"]}),
+            (Opcode.RETURN, {"operands": ["%1"]}),
+        )
+        cfg, registry = _build_simple_cfg(instructions)
+
+        vm, _stats = execute_cfg(
+            cfg,
+            "entry",
+            registry,
+            vm=initial_vm_state(),
+        )
+
+        assert unwrap(vm.current_frame.local_vars[VarName("before_halt")]) == 1
+        assert VarName("after_halt") not in vm.current_frame.local_vars

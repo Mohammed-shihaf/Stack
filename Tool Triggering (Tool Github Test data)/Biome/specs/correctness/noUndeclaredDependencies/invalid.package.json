@@ -1,0 +1,10 @@
+{
+	"dependencies": {
+		"react": "1.0.0"
+	},
+  "devDependencies": {
+    "@testing-library/react": "1.0.0"
+  },
+	"bundleDependencies": true,
+	"bundledDependencies": false
+}

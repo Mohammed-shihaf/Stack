@@ -1,0 +1,31 @@
+"""Integration tests for builtins returning Pointer values."""
+
+from interpreter.constants import Language
+from interpreter.project.entry_point import EntryPoint
+from interpreter.run import run
+from interpreter.types.typed_value import unwrap_locals
+from interpreter.var_name import VarName
+from interpreter.vm.vm_types import Pointer
+
+
+class TestBuiltinArrayPointer:
+    def test_kotlin_array_of_produces_pointer(self):
+        vm = run(
+            "val arr = arrayOf(1, 2, 3)",
+            language=Language.KOTLIN,
+            max_steps=100,
+            entry_point=EntryPoint.top_level(),
+        )
+        locals_ = unwrap_locals(vm.call_stack[0].local_vars)
+        assert isinstance(locals_[VarName("arr")], Pointer)
+        assert locals_[VarName("arr")].base.startswith("arr_")
+
+    def test_js_spread_array_produces_pointer(self):
+        vm = run(
+            "let a = [1, 2, 3]; let b = [...a, 4];",
+            language=Language.JAVASCRIPT,
+            max_steps=200,
+            entry_point=EntryPoint.top_level(),
+        )
+        locals_ = unwrap_locals(vm.call_stack[0].local_vars)
+        assert isinstance(locals_[VarName("b")], Pointer)

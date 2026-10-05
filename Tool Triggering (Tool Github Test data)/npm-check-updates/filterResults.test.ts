@@ -1,0 +1,54 @@
+import fs from 'node:fs/promises'
+import path from 'node:path'
+import { describe, expect, it } from 'vitest'
+import ncu from '../src/index.ts'
+import makeTempDir from './helpers/makeTempDir.ts'
+import removeDir from './helpers/removeDir.ts'
+import stubVersions from './helpers/stubVersions.ts'
+
+describe('filterResults', () => {
+  it('should return only major versions updated', async () => {
+    const dependencies = { 'ncu-test-v2': '2.0.0', 'ncu-test-return-version': '1.0.0', 'ncu-test-tag': '1.0.0' }
+    const stub = stubVersions(
+      {
+        'ncu-test-v2': '3.0.0',
+        'ncu-test-tag': '2.1.0',
+        'ncu-test-return-version': '1.2.0',
+      },
+      { spawn: true },
+    )
+    const tempDir = await makeTempDir()
+    const pkgFile = path.join(tempDir, 'package.json')
+    await fs.writeFile(
+      pkgFile,
+      JSON.stringify({
+        dependencies,
+      }),
+      'utf-8',
+    )
+
+    try {
+      const upgraded = await ncu({
+        packageFile: pkgFile,
+        filterResults: (
+          packageName,
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          { currentVersion, currentVersionSemver, upgradedVersion, upgradedVersionSemver },
+        ) => {
+          const currentMajorVersion = currentVersionSemver?.[0]?.major
+          const upgradedMajorVersion = upgradedVersionSemver?.major
+          if (currentMajorVersion && upgradedMajorVersion) {
+            return currentMajorVersion < upgradedMajorVersion
+          }
+          return true
+        },
+      })
+      expect(upgraded).toHaveProperty('ncu-test-tag', '2.1.0')
+      expect(upgraded).toHaveProperty('ncu-test-v2', '3.0.0')
+      expect(upgraded).not.toHaveProperty('ncu-test-return-version')
+    } finally {
+      await removeDir(tempDir)
+      stub.restore()
+    }
+  })
+})

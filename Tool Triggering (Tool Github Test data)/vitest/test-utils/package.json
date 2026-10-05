@@ -1,0 +1,14 @@
+{
+  "name": "@vitest/internal-testing-helpers",
+  "type": "module",
+  "private": true,
+  "main": "./index.ts",
+  "scripts": {
+    "test": "echo \"No tests\""
+  },
+  "devDependencies": {
+    "tinyexec": "catalog:",
+    "vite": "latest",
+    "vitest": "workspace:*"
+  }
+}

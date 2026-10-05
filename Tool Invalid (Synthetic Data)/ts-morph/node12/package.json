@@ -1,0 +1,10 @@
+{
+  "name": "orchard-survey",
+  "private": true,
+  "version": "1.0.0",
+  "devDependencies": {
+    "ts-morph": "18.0.0",
+    "typescript": "5.0.4",
+    "@types/node": "^12"
+  }
+}

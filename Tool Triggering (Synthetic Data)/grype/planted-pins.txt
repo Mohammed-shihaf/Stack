@@ -1,0 +1,5 @@
+lodash 4.17.15
+minimist 1.2.5
+axios 0.21.0
+node-fetch 2.6.0
+tar 6.1.0

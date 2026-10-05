@@ -1,0 +1,45 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-cjs.cjs
+---
+# Input
+```cjs
+const fs = require('fs');
+const path = require('node:path');
+
+```
+
+# Diagnostics
+```
+invalid-cjs.cjs:1:20 lint/correctness/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import references a Node.js builtin module.
+  
+  > 1 │ const fs = require('fs');
+      │                    ^^^^
+    2 │ const path = require('node:path');
+    3 │ 
+  
+  i Node.js builtin modules are unavailable outside the Node.js runtime, so this import breaks client-side and other non-Node.js environments.
+  
+  i Remove this import or replace it with a runtime-agnostic alternative.
+  
+
+```
+
+```
+invalid-cjs.cjs:2:22 lint/correctness/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import references a Node.js builtin module.
+  
+    1 │ const fs = require('fs');
+  > 2 │ const path = require('node:path');
+      │                      ^^^^^^^^^^^
+    3 │ 
+  
+  i Node.js builtin modules are unavailable outside the Node.js runtime, so this import breaks client-side and other non-Node.js environments.
+  
+  i Remove this import or replace it with a runtime-agnostic alternative.
+  
+
+```

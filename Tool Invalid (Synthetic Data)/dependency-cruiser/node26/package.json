@@ -1,0 +1,10 @@
+{
+  "name": "spice-market",
+  "private": true,
+  "version": "1.0.0",
+  "devDependencies": {
+    "dependency-cruiser": "18.5.0",
+    "typescript": "5.9.3",
+    "@types/node": "^26"
+  }
+}

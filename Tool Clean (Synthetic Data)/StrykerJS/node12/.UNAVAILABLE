@@ -1,0 +1,5 @@
+vitest
+@vitest/coverage-v8
+@stryker-mutator/core
+@stryker-mutator/vitest-runner
+@stryker-mutator/typescript-checker

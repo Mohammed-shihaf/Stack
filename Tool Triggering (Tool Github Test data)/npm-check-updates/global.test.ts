@@ -1,0 +1,15 @@
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import spawn from 'spawn-please'
+import { describe, expect, it } from 'vitest'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
+const bin = path.join(__dirname, '../build/cli.js')
+
+describe('global', () => {
+  it('global should run', async () => {
+    const { stdout } = await spawn('node', [bin, '--jsonUpgraded', '--global', 'npm'])
+    expect(() => JSON.parse(stdout)).not.toThrow()
+  })
+})

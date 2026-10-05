@@ -1,0 +1,10 @@
+{
+  "name": "lockkeeper-log",
+  "private": true,
+  "version": "1.0.0",
+  "devDependencies": {
+    "knip": "6.38.0",
+    "typescript": "5.9.3",
+    "@types/node": "26.6.3"
+  }
+}

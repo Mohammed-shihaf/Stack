@@ -1,0 +1,48 @@
+"""Tests for _unwrap_builtin_result helper."""
+
+import logging
+
+from interpreter.address import Address
+from interpreter.type_name import TypeName
+from interpreter.types.type_expr import pointer, scalar
+from interpreter.types.typed_value import TypedValue, typed
+from interpreter.vm.executor import _unwrap_builtin_result
+from interpreter.vm.vm_types import BuiltinResult, Pointer
+
+
+class TestUnwrapBuiltinResult:
+    def test_passes_through_typed_value(self):
+        tv = typed(
+            Pointer(base=Address("arr_0"), offset=0), pointer(scalar(TypeName("Array")))
+        )
+        result = BuiltinResult(value=tv)
+        assert _unwrap_builtin_result(result, "test") is tv
+
+    def test_wraps_bare_int_via_typed_from_runtime(self):
+        result = BuiltinResult(value=42)
+        tv = _unwrap_builtin_result(result, "len")
+        assert isinstance(tv, TypedValue)
+        assert tv.value == 42
+
+    def test_wraps_bare_string_via_typed_from_runtime(self):
+        result = BuiltinResult(value="hello")
+        tv = _unwrap_builtin_result(result, "str")
+        assert isinstance(tv, TypedValue)
+        assert tv.value == "hello"
+
+    def test_wraps_none_result(self):
+        result = BuiltinResult(value=None)
+        tv = _unwrap_builtin_result(result, "print")
+        assert isinstance(tv, TypedValue)
+
+    def test_plain_numeric_string_does_not_warn(self, caplog):
+        """A plain str() result like "7" is NOT a heap address — no warning."""
+        with caplog.at_level(logging.WARNING):
+            _unwrap_builtin_result(BuiltinResult(value="7"), "str")
+        assert "bare heap address" not in caplog.text
+
+    def test_address_shaped_string_still_warns(self, caplog):
+        """An address-shaped string (obj_ prefix) still triggers the warning."""
+        with caplog.at_level(logging.WARNING):
+            _unwrap_builtin_result(BuiltinResult(value="obj_Point_1"), "make")
+        assert "bare heap address" in caplog.text

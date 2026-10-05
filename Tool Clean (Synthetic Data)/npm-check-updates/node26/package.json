@@ -1,0 +1,10 @@
+{
+  "name": "distillery-batch",
+  "private": true,
+  "version": "1.0.0",
+  "devDependencies": {
+    "@types/node": "^26",
+    "npm-check-updates": "23.1.0",
+    "typescript": "7.0.2"
+  }
+}

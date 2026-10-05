@@ -1,0 +1,101 @@
+/*
+ * SonarQube JavaScript Plugin
+ * Copyright (C) SonarSource Sàrl
+ * mailto:info AT sonarsource DOT com
+ *
+ * You can redistribute and/or modify this program under the terms of
+ * the Sonar Source-Available License Version 1, as published by SonarSource Sàrl.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the Sonar Source-Available License for more details.
+ *
+ * You should have received a copy of the Sonar Source-Available License
+ * along with this program; if not, see https://sonarsource.com/license/ssal/
+ */
+import { collectNclocLines } from '../../../../src/jsts/analysis/file-artifacts.js';
+import {
+  buildTsParserOptions,
+  buildVueParserOptions,
+} from '../../../../src/jsts/parsers/options.js';
+import { parse } from '../../../../src/jsts/parsers/parse.js';
+import { parsersMap } from '../../../../src/jsts/parsers/eslint.js';
+import { describe, it } from 'node:test';
+import { expect } from 'expect';
+
+describe('collectNclocLines', () => {
+  it('should find the line numbers of code', () => {
+    const sourceCode = parseJavaScriptSource(`/*
+ * header
+ */
+class /*after first token*/ A {
+
+  get b() { // comment
+    return \`hello
+      world\`;
+  }
+  // comment
+}
+/* multi
+line
+comment */`);
+    const nloc = collectNclocLines(sourceCode);
+    expect(nloc).toEqual([4, 6, 7, 8, 9, 11]);
+  });
+
+  it('should preserve ECMAScript lines before scanner output conversion', () => {
+    const sourceCode = parseJavaScriptSource(
+      `const payload = 'line1\\nline2\\rline3\u2028line4\u2029end';\nconst next = 42;`,
+    );
+
+    expect(collectNclocLines(sourceCode)).toEqual([1, 2, 3, 4]);
+  });
+
+  it('should find the line numbers of code in Vue.js', () => {
+    const sourceCode = parseVueSource(`<template>
+  <div>
+    <h1>Hello, world!</h1>
+    <!--
+      HTML comment
+    -->
+    <p v-if="isEnabled">Howdy!</p>
+  </div>
+</template>
+
+<script>
+export default {
+  data() {
+    return {
+      /*
+        JavaScript comment
+      */
+      isEnabled: true,
+    }
+  },
+}
+</script>
+
+<style>
+p {
+  /*
+    CSS comment
+  */
+
+  color: red;
+}
+</style>`);
+    const nloc = collectNclocLines(sourceCode);
+    expect(nloc).toEqual([
+      1, 2, 3, 7, 8, 9, 11, 12, 13, 14, 18, 19, 20, 21, 22, 24, 25, 30, 31, 32,
+    ]);
+  });
+});
+
+function parseJavaScriptSource(source: string) {
+  return parse(source, parsersMap.typescript, buildTsParserOptions()).sourceCode;
+}
+
+function parseVueSource(source: string) {
+  return parse(source, parsersMap.vuejs, buildVueParserOptions('ts')).sourceCode;
+}

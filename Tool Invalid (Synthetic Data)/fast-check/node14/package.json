@@ -1,0 +1,11 @@
+{
+  "name": "brew-kettle",
+  "private": true,
+  "version": "1.0.0",
+  "devDependencies": {
+    "fast-check": "4.10.2",
+    "vitest": "0.34.6",
+    "typescript": "5.1.6",
+    "@types/node": "^14"
+  }
+}

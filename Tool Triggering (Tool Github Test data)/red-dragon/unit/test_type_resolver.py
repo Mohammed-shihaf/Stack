@@ -1,0 +1,134 @@
+"""Tests for TypeResolver and NullTypeResolver."""
+
+from interpreter.constants import FoundationTypeName
+from interpreter.types.coercion.conversion_result import IDENTITY_CONVERSION
+from interpreter.types.coercion.default_conversion_rules import (
+    DefaultTypeConversionRules,
+)
+from interpreter.types.null_type_resolver import NullTypeResolver
+from interpreter.types.type_expr import UNKNOWN, ScalarType, scalar
+from interpreter.types.type_resolver import TypeResolver
+
+
+def _resolver() -> TypeResolver:
+    return TypeResolver(DefaultTypeConversionRules())
+
+
+class TestTypeResolverWithHints:
+    def test_int_plus_float_delegates_to_rules(self):
+        result = _resolver().resolve_binop(
+            "+", FoundationTypeName.INT, FoundationTypeName.FLOAT
+        )
+        assert result.result_type == FoundationTypeName.FLOAT
+
+    def test_int_div_int_returns_floor_div_override(self):
+        result = _resolver().resolve_binop(
+            "/", FoundationTypeName.INT, FoundationTypeName.INT
+        )
+        assert result.operator_override == "//"
+        assert result.result_type == FoundationTypeName.INT
+
+    def test_comparison_returns_bool_type(self):
+        result = _resolver().resolve_binop(
+            "==", FoundationTypeName.INT, FoundationTypeName.FLOAT
+        )
+        assert result.result_type == FoundationTypeName.BOOL
+
+
+class TestTypeResolverWithoutHints:
+    def test_both_empty_returns_identity(self):
+        result = _resolver().resolve_binop("+", "", "")
+        assert result is IDENTITY_CONVERSION
+
+    def test_no_operator_override_when_no_hints(self):
+        result = _resolver().resolve_binop("/", "", "")
+        assert result.operator_override == ""
+
+    def test_identity_coercers_when_no_hints(self):
+        result = _resolver().resolve_binop("+", "", "")
+        assert result.left_coercer(42) == 42
+        assert result.right_coercer(3.14) == 3.14
+
+
+class TestTypeResolverPartialHints:
+    def test_left_hint_only_assumes_symmetric(self):
+        result = _resolver().resolve_binop("/", FoundationTypeName.INT, "")
+        assert result.operator_override == "//"
+        assert result.result_type == FoundationTypeName.INT
+
+    def test_right_hint_only_assumes_symmetric(self):
+        result = _resolver().resolve_binop("/", "", FoundationTypeName.INT)
+        assert result.operator_override == "//"
+        assert result.result_type == FoundationTypeName.INT
+
+
+class TestTypeResolverWithIdentityRules:
+    def test_always_returns_identity_regardless_of_hints(self):
+        from interpreter.types.coercion.identity_conversion_rules import (
+            IdentityConversionRules,
+        )
+
+        resolver = TypeResolver(IdentityConversionRules())
+        result = resolver.resolve_binop(
+            "/", FoundationTypeName.INT, FoundationTypeName.INT
+        )
+        assert result is IDENTITY_CONVERSION
+
+
+class TestNullTypeResolver:
+    def test_always_returns_identity_conversion(self):
+        resolver = NullTypeResolver()
+        result = resolver.resolve_binop(
+            "+", FoundationTypeName.INT, FoundationTypeName.FLOAT
+        )
+        assert result is IDENTITY_CONVERSION
+
+    def test_ignores_type_hints_entirely(self):
+        resolver = NullTypeResolver()
+        result = resolver.resolve_binop(
+            "/", FoundationTypeName.INT, FoundationTypeName.INT
+        )
+        assert result.operator_override == ""
+
+    def test_no_operator_override(self):
+        resolver = NullTypeResolver()
+        result = resolver.resolve_binop(
+            "/", FoundationTypeName.FLOAT, FoundationTypeName.INT
+        )
+        assert result.operator_override == ""
+
+
+class TestTypeResolverTypeExpr:
+    """TypeResolver accepts and returns TypeExpr objects."""
+
+    def test_resolve_binop_accepts_type_expr(self):
+        result = _resolver().resolve_binop(
+            "+", scalar(FoundationTypeName.INT), scalar(FoundationTypeName.FLOAT)
+        )
+        assert isinstance(result.result_type, ScalarType)
+        assert result.result_type == FoundationTypeName.FLOAT
+
+    def test_resolve_binop_with_unknown_returns_identity(self):
+        result = _resolver().resolve_binop("+", UNKNOWN, UNKNOWN)
+        assert result is IDENTITY_CONVERSION
+
+    def test_resolve_binop_partial_hint_left_only(self):
+        result = _resolver().resolve_binop("/", scalar(FoundationTypeName.INT), UNKNOWN)
+        assert result.result_type == FoundationTypeName.INT
+        assert result.operator_override == "//"
+
+    def test_resolve_binop_partial_hint_right_only(self):
+        result = _resolver().resolve_binop("/", UNKNOWN, scalar(FoundationTypeName.INT))
+        assert result.result_type == FoundationTypeName.INT
+
+    def test_resolve_assignment_accepts_type_expr(self):
+        coercer = _resolver().resolve_assignment(
+            scalar(FoundationTypeName.FLOAT), scalar(FoundationTypeName.INT)
+        )
+        assert coercer(3.7) == 3
+
+    def test_resolve_assignment_with_unknown_returns_identity(self):
+        from interpreter.types.coercion.conversion_result import _identity
+
+        coercer = _resolver().resolve_assignment(UNKNOWN, UNKNOWN)
+        assert coercer is _identity

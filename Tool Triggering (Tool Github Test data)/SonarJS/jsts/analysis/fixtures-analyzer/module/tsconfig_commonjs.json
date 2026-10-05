@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "outDir": "./lib",
+    "lib": ["ESNext"],
+    "module": "commonjs",
+    "moduleResolution": "node10"
+  },
+  "include": ["file.ts"]
+}

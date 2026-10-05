@@ -1,0 +1,14 @@
+{
+  "name": "distillery-batch",
+  "private": true,
+  "version": "1.0.0",
+  "devDependencies": {
+    "@types/node": "^20",
+    "npm-check-updates": "22.2.9",
+    "typescript": "7.0.2",
+    "eslint": "5.16.0",
+    "prettier": "1.19.1",
+    "lodash": "3.10.1",
+    "chalk": "1.1.3"
+  }
+}

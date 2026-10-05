@@ -1,0 +1,19 @@
+tool: github-advisories
+label: "Dependabot / GitHub Security Advisories API"
+language: typescript
+node_version: "12"
+typescript_version: "5.0.4"
+branch: "TS-008"
+scenario: "2 - Microservices"
+architecture: "Microservices"
+module: "workspace"
+package_manager: "bun"
+bundler: "esbuild"
+project: packages/domain/package.json
+tests: tests/
+tools_project: tools/
+pinned-version: null  # not an npm package -- see the runner
+config: null
+target_files: [package.json]
+command: "bash tools/github-advisories/run_github_advisories.sh"
+expects_findings: true

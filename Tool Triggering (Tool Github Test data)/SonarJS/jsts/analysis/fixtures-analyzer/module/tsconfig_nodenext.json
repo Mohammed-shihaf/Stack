@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "outDir": "./lib",
+    "lib": ["ESNext"],
+    "module": "nodenext",
+    "moduleResolution": "nodenext"
+  },
+  "include": ["file.ts"]
+}

@@ -1,0 +1,122 @@
+# CI for branch TS-008.
+#
+# The point of this file: it INVOKES EVERY WIRED TOOL and uploads what they
+# produce. FlintAtlas and WillowBrook ran only `npm install` and `npm test`, so
+# not one of their declared tools was ever executed in CI. Gate G6.
+name: TS-008
+
+on:
+  push:
+    branches: ["TS-008"]
+  pull_request:
+    branches: ["TS-008"]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # history tools need the full log
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "12.22.12"
+
+      - name: Package manager
+        run: # bun is a standalone binary, not an npm package -- see tools/npm-audit/run_npm_audit.sh
+
+      - name: Install (frozen -- gate G4)
+        run: bun install --frozen-lockfile
+
+      - name: Verify every tool is wired
+        run: node_modules/.bin/ts-node tools/tool_integration.ts --verify
+
+      - name: Cross-file consistency audit
+        run: node_modules/.bin/ts-node tools/full_check.ts
+
+      - name: Type check and emit
+        run: bash tools/typescript/run_tsc.sh
+
+      - name: Bundle and run the bundle
+        run: bash tools/esbuild/run_esbuild.sh
+
+      - name: Tests
+        run: bash tools/mocha/run_mocha.sh
+
+      - name: Coverage -- c8 (primary)
+        run: bash tools/c8/run_c8.sh
+
+      - name: Coverage -- nyc + ts-node (cross-check)
+        run: bash tools/nyc/run_nyc.sh
+
+      - name: Lint
+        run: bash tools/eslint/run_eslint.sh
+
+      - name: Cognitive complexity
+        run: bash tools/sonarjs/run_sonarjs.sh
+
+      - name: Security rules
+        run: bash tools/security/run_security.sh
+
+      - name: Duplication
+        run: bash tools/jscpd/run_jscpd.sh
+
+      - name: Dead code
+        run: |
+          bash tools/ts-prune/run_ts_prune.sh
+          node tools/eslint-scope/run_eslint_scope.js
+
+      - name: Structure
+        run: |
+          node tools/ts-morph/run_ts_morph.js
+          bash tools/madge/run_madge.sh
+          bash tools/dependency-cruiser/run_depcruise.sh
+
+      - name: Property-based tests
+        run: bash tools/fast-check/run_fastcheck.sh
+
+      - name: Mutation testing
+        run: bash tools/stryker/run_stryker.sh
+
+      - name: SBOM and licences
+        run: |
+          bash tools/cdxgen/run_cdxgen.sh
+          bash tools/ort/run_ort.sh
+
+      - name: Supply chain
+        run: |
+          bash tools/npm-audit/run_npm_audit.sh
+          bash tools/ncu/run_ncu.sh
+          bash tools/grype/run_grype.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Advisories and upstream metadata
+        run: |
+          bash tools/github-advisories/run_github_advisories.sh
+          bash tools/github-api/run_github_api.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Observability
+        run: bash tools/opentelemetry/run_otel.sh
+
+      - name: History mining
+        run: python3 tools/pydriller/run_pydriller.py
+
+      - name: Complexity (tokeniser cross-check)
+        run: |
+          python3 -m pip install --quiet lizard
+          bash tools/lizard/run_lizard.sh
+
+      - name: Upload tool output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tool-reports-TS-008
+          path: |
+            reports/
+            coverage/
+            coverage-nyc/

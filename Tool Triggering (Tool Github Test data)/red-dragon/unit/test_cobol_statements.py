@@ -1,0 +1,1493 @@
+"""Tests for typed COBOL statement hierarchy — round-trip and dispatch."""
+
+import pytest
+
+from cobol_asg.cobol_statements import (
+    AcceptStatement,
+    AlteredGoto,
+    AlterStatement,
+    ArithmeticStatement,
+    CallStatement,
+    CallTarget,
+    CancelStatement,
+    CloseStatement,
+    ComputedGoto,
+    ComputeStatement,
+    ComputeTarget,
+    ContinueStatement,
+    DeleteStatement,
+    DisplayStatement,
+    EntryStatement,
+    EvaluateStatement,
+    ExitStatement,
+    GotoStatement,
+    IfStatement,
+    InitializeStatement,
+    InspectStatement,
+    MoveStatement,
+    OpenStatement,
+    PerformStatement,
+    PerformTimesSpec,
+    PerformUntilSpec,
+    PerformVaryingSpec,
+    ProcedureRef,
+    ReadStatement,
+    RewriteStatement,
+    SearchStatement,
+    SetStatement,
+    SimpleGoto,
+    StartStatement,
+    StopRunStatement,
+    StringSending,
+    StringStatement,
+    UnstringStatement,
+    WhenOtherStatement,
+    WhenStatement,
+    WriteStatement,
+    XmlGenerateStatement,
+    parse_statement,
+)
+from cobol_asg.ref_mod import RefModOperand
+from interpreter.cobol.features import CobolFeature
+from tests.covers import covers
+
+
+def _ref(name: str) -> dict:
+    """Structured field-reference dict, as the Java bridge serializes it."""
+    return {"kind": "ref", "name": name}
+
+
+def _lit(value: str) -> dict:
+    """Structured numeric-literal dict, as the Java bridge serializes it."""
+    return {"kind": "lit", "value": value}
+
+
+def _binop(op: str, left: dict, right: dict) -> dict:
+    """Structured binary-operation dict, as the Java bridge serializes it."""
+    return {"kind": "binop", "op": op, "left": left, "right": right}
+
+
+class TestParseStatementDispatch:
+    @covers(CobolFeature.MOVE)
+    def test_move(self):
+        stmt = parse_statement({"type": "MOVE", "operands": ["123", "WS-A"]})
+        assert isinstance(stmt, MoveStatement)
+        assert stmt.source.name == "123"
+        assert stmt.targets[0].name == "WS-A"
+
+    @covers(CobolFeature.MOVE)
+    def test_move_multi_target(self):
+        # MOVE X TO A B C distributes the source to every receiving field.
+        stmt = parse_statement(
+            {"type": "MOVE", "operands": ["WS-X", "WS-A", "WS-B", "WS-C"]}
+        )
+        assert isinstance(stmt, MoveStatement)
+        assert stmt.source.name == "WS-X"
+        assert [t.name for t in stmt.targets] == ["WS-A", "WS-B", "WS-C"]
+
+    @covers(CobolFeature.ADD)
+    def test_add(self):
+        stmt = parse_statement({"type": "ADD", "operands": ["5", "WS-A"]})
+        assert isinstance(stmt, ArithmeticStatement)
+        assert stmt.op == "ADD"
+        assert stmt.source.name == "5"
+        assert stmt.target.name == "WS-A"
+
+    @covers(CobolFeature.ADD, CobolFeature.GIVING_CLAUSE)
+    def test_add_giving(self):
+        stmt = parse_statement(
+            {"type": "ADD", "operands": ["5", "WS-A"], "giving": ["WS-R"]}
+        )
+        assert isinstance(stmt, ArithmeticStatement)
+        assert stmt.op == "ADD"
+        assert stmt.source.name == "5"
+        assert stmt.target.name == "WS-A"
+        assert [g.name for g in stmt.giving] == ["WS-R"]
+
+    @covers(CobolFeature.SUBTRACT)
+    def test_subtract(self):
+        stmt = parse_statement({"type": "SUBTRACT", "operands": ["3", "WS-A"]})
+        assert isinstance(stmt, ArithmeticStatement)
+        assert stmt.op == "SUBTRACT"
+
+    @covers(CobolFeature.SUBTRACT, CobolFeature.GIVING_CLAUSE)
+    def test_subtract_giving(self):
+        stmt = parse_statement(
+            {"type": "SUBTRACT", "operands": ["WS-B", "WS-A"], "giving": ["WS-R"]}
+        )
+        assert isinstance(stmt, ArithmeticStatement)
+        assert stmt.op == "SUBTRACT"
+        assert stmt.source.name == "WS-B"
+        assert stmt.target.name == "WS-A"
+        assert [g.name for g in stmt.giving] == ["WS-R"]
+
+    @covers(CobolFeature.MULTIPLY)
+    def test_multiply(self):
+        stmt = parse_statement({"type": "MULTIPLY", "operands": ["2", "WS-A"]})
+        assert isinstance(stmt, ArithmeticStatement)
+        assert stmt.op == "MULTIPLY"
+
+    @covers(CobolFeature.DIVIDE)
+    def test_divide(self):
+        stmt = parse_statement({"type": "DIVIDE", "operands": ["4", "WS-A"]})
+        assert isinstance(stmt, ArithmeticStatement)
+        assert stmt.op == "DIVIDE"
+
+    @covers(CobolFeature.COMPUTE)
+    def test_compute(self):
+        stmt = parse_statement(
+            {
+                "type": "COMPUTE",
+                "expression": _binop(
+                    "+", _ref("WS-A"), _binop("*", _ref("WS-B"), _lit("2"))
+                ),
+                "targets": ["WS-RESULT"],
+            }
+        )
+        assert isinstance(stmt, ComputeStatement)
+        # expression is now an ExprNode, so we check its structure
+        from cobol_asg.cobol_expression import BinOpNode
+
+        assert isinstance(stmt.expression, BinOpNode)
+        assert stmt.targets == [ComputeTarget(name="WS-RESULT")]
+
+    @covers(CobolFeature.COMPUTE)
+    def test_compute_multiple_targets(self):
+        stmt = parse_statement(
+            {
+                "type": "COMPUTE",
+                "expression": _binop("-", _lit("100"), _ref("WS-A")),
+                "targets": ["WS-C", "WS-D"],
+            }
+        )
+        assert isinstance(stmt, ComputeStatement)
+        assert len(stmt.targets) == 2
+
+    @covers(CobolFeature.IF_ELSE)
+    def test_if(self):
+        stmt = parse_statement(
+            {
+                "type": "IF",
+                "condition": {
+                    "not": False,
+                    "relation": {
+                        "left": {"kind": "ref", "name": "WS-A"},
+                        "op": ">",
+                        "right": {"kind": "lit", "value": "0"},
+                    },
+                },
+                "children": [{"type": "DISPLAY", "operands": [{"name": "POSITIVE"}]}],
+            }
+        )
+        assert isinstance(stmt, IfStatement)
+        assert stmt.condition == {
+            "not": False,
+            "relation": {
+                "left": {"kind": "ref", "name": "WS-A"},
+                "op": ">",
+                "right": {"kind": "lit", "value": "0"},
+            },
+        }
+        assert len(stmt.children) == 1
+        assert isinstance(stmt.children[0], DisplayStatement)
+
+    @covers(CobolFeature.IF_ELSE)
+    def test_if_with_else(self):
+        stmt = parse_statement(
+            {
+                "type": "IF",
+                "condition": {
+                    "not": False,
+                    "relation": {
+                        "left": {"kind": "ref", "name": "WS-A"},
+                        "op": ">",
+                        "right": {"kind": "lit", "value": "0"},
+                    },
+                },
+                "children": [{"type": "DISPLAY", "operands": [{"name": "YES"}]}],
+                "else_children": [{"type": "DISPLAY", "operands": [{"name": "NO"}]}],
+            }
+        )
+        assert isinstance(stmt, IfStatement)
+        assert len(stmt.children) == 1
+        assert len(stmt.else_children) == 1
+        assert isinstance(stmt.else_children[0], DisplayStatement)
+        assert stmt.else_children[0].operands[0].name == "NO"
+
+    @covers(CobolFeature.IF_ELSE)
+    def test_if_without_else_has_empty_else_children(self):
+        stmt = parse_statement(
+            {
+                "type": "IF",
+                "condition": {
+                    "not": False,
+                    "relation": {
+                        "left": {"kind": "ref", "name": "WS-A"},
+                        "op": ">",
+                        "right": {"kind": "lit", "value": "0"},
+                    },
+                },
+                "children": [{"type": "DISPLAY", "operands": [{"name": "YES"}]}],
+            }
+        )
+        assert isinstance(stmt, IfStatement)
+        assert stmt.else_children == []
+
+    @covers(CobolFeature.EVALUATE, CobolFeature.EVALUATE_WHEN_OTHER)
+    def test_evaluate(self):
+        stmt = parse_statement(
+            {
+                "type": "EVALUATE",
+                "children": [
+                    {
+                        "type": "WHEN",
+                        "condition": "WS-A = 1",
+                        "children": [
+                            {"type": "DISPLAY", "operands": [{"name": "ONE"}]}
+                        ],
+                    },
+                    {
+                        "type": "WHEN_OTHER",
+                        "children": [
+                            {"type": "DISPLAY", "operands": [{"name": "OTHER"}]}
+                        ],
+                    },
+                ],
+            }
+        )
+        assert isinstance(stmt, EvaluateStatement)
+        assert len(stmt.children) == 2
+        assert isinstance(stmt.children[0], WhenStatement)
+        assert isinstance(stmt.children[1], WhenOtherStatement)
+
+    @covers(CobolFeature.DISPLAY)
+    def test_display(self):
+        stmt = parse_statement(
+            {"type": "DISPLAY", "operands": [{"name": "WS-A"}, {"name": '" lit"'}]}
+        )
+        assert isinstance(stmt, DisplayStatement)
+        # All operands are kept, in order (regression: only the first survived).
+        assert [op.name for op in stmt.operands] == ["WS-A", '" lit"']
+        assert all(isinstance(op, RefModOperand) for op in stmt.operands)
+
+    @covers(CobolFeature.GO_TO)
+    def test_goto(self):
+        stmt = parse_statement(
+            {
+                "type": "GOTO",
+                "form": "simple",
+                "target": {"paragraph": "OTHER-PARA", "section": ""},
+            }
+        )
+        assert isinstance(stmt, GotoStatement)
+        assert isinstance(stmt.form, SimpleGoto)
+        assert stmt.form.target.paragraph == "OTHER-PARA"
+
+    @covers(CobolFeature.STOP_RUN)
+    def test_stop_run(self):
+        stmt = parse_statement({"type": "STOP_RUN"})
+        assert isinstance(stmt, StopRunStatement)
+
+    @covers(CobolFeature.PERFORM)
+    def test_perform_procedure(self):
+        stmt = parse_statement({"type": "PERFORM", "operands": ["WORK-PARA"]})
+        assert isinstance(stmt, PerformStatement)
+        assert stmt.target == "WORK-PARA"
+        assert stmt.thru == ""
+        assert stmt.spec is None
+
+    @covers(CobolFeature.PERFORM, CobolFeature.PERFORM_THRU)
+    def test_perform_thru(self):
+        stmt = parse_statement(
+            {"type": "PERFORM", "operands": ["FIRST-PARA"], "thru": "LAST-PARA"}
+        )
+        assert isinstance(stmt, PerformStatement)
+        assert stmt.target == "FIRST-PARA"
+        assert stmt.thru == "LAST-PARA"
+
+    @covers(CobolFeature.PERFORM, CobolFeature.PERFORM_INLINE)
+    def test_perform_inline(self):
+        stmt = parse_statement(
+            {
+                "type": "PERFORM",
+                "children": [{"type": "DISPLAY", "operands": [{"name": "IN-LOOP"}]}],
+            }
+        )
+        assert isinstance(stmt, PerformStatement)
+        assert stmt.target == ""
+        assert len(stmt.children) == 1
+
+    @covers(CobolFeature.CONTINUE)
+    def test_continue(self):
+        stmt = parse_statement({"type": "CONTINUE"})
+        assert isinstance(stmt, ContinueStatement)
+
+    @covers(CobolFeature.EXIT)
+    def test_exit(self):
+        stmt = parse_statement({"type": "EXIT"})
+        assert isinstance(stmt, ExitStatement)
+
+    @covers(CobolFeature.INITIALIZE)
+    def test_initialize(self):
+        stmt = parse_statement({"type": "INITIALIZE", "operands": ["WS-A", "WS-B"]})
+        assert isinstance(stmt, InitializeStatement)
+        assert stmt.operands == ["WS-A", "WS-B"]
+
+    @covers(CobolFeature.SET_TO)
+    def test_set_to(self):
+        stmt = parse_statement(
+            {"type": "SET", "set_type": "TO", "targets": ["WS-IDX"], "values": ["5"]}
+        )
+        assert isinstance(stmt, SetStatement)
+        assert stmt.set_type == "TO"
+        assert stmt.targets == ["WS-IDX"]
+        assert stmt.values == ["5"]
+
+    @covers(CobolFeature.SET_UP_BY)
+    def test_set_by_up(self):
+        stmt = parse_statement(
+            {
+                "type": "SET",
+                "set_type": "BY",
+                "by_type": "UP",
+                "targets": ["WS-IDX"],
+                "value": "1",
+            }
+        )
+        assert isinstance(stmt, SetStatement)
+        assert stmt.set_type == "BY"
+        assert stmt.by_type == "UP"
+        assert stmt.values == ["1"]
+
+    @covers(CobolFeature.STRING_VERB, CobolFeature.STRING_DELIMITED_BY)
+    def test_string(self):
+        stmt = parse_statement(
+            {
+                "type": "STRING",
+                "sendings": [
+                    {"value": {"name": "WS-FIRST"}, "delimited_by": "SPACES"},
+                    {"value": {"name": "WS-LAST"}, "delimited_by": "SIZE"},
+                ],
+                "into": "WS-RESULT",
+            }
+        )
+        assert isinstance(stmt, StringStatement)
+        assert len(stmt.sendings) == 2
+        assert stmt.sendings[0].value.name == "WS-FIRST"
+        assert stmt.sendings[0].delimited_by == "SPACES"
+        assert stmt.into.name == "WS-RESULT"
+
+    @covers(CobolFeature.UNSTRING_VERB, CobolFeature.UNSTRING_DELIMITED_BY)
+    def test_unstring(self):
+        stmt = parse_statement(
+            {
+                "type": "UNSTRING",
+                "source": {"name": "WS-FULL"},
+                "delimiters": ["SPACES"],
+                "into": ["WS-FIRST", "WS-LAST"],
+            }
+        )
+        assert isinstance(stmt, UnstringStatement)
+        assert stmt.source.name == "WS-FULL"
+        assert stmt.delimiters == ["SPACES"]
+        assert [i.name for i in stmt.into] == ["WS-FIRST", "WS-LAST"]
+
+    @covers(CobolFeature.INSPECT_TALLYING)
+    def test_inspect_tallying(self):
+        stmt = parse_statement(
+            {
+                "type": "INSPECT",
+                "inspect_type": "TALLYING",
+                "source": "WS-DATA",
+                "tallying_groups": [
+                    {
+                        "target": "WS-COUNT",
+                        "patterns": [{"mode": "ALL", "pattern": "A"}],
+                    }
+                ],
+            }
+        )
+        assert isinstance(stmt, InspectStatement)
+        assert stmt.inspect_type == "TALLYING"
+        assert len(stmt.tallying_groups) == 1
+        assert stmt.tallying_groups[0].target == "WS-COUNT"
+        assert len(stmt.tallying_groups[0].patterns) == 1
+        assert stmt.tallying_groups[0].patterns[0].mode == "ALL"
+
+    @covers(CobolFeature.INSPECT_REPLACING)
+    def test_inspect_replacing(self):
+        stmt = parse_statement(
+            {
+                "type": "INSPECT",
+                "inspect_type": "REPLACING",
+                "source": "WS-DATA",
+                "replacings": [{"mode": "ALL", "from": "A", "to": "B"}],
+            }
+        )
+        assert isinstance(stmt, InspectStatement)
+        assert stmt.inspect_type == "REPLACING"
+        assert len(stmt.replacings) == 1
+        assert stmt.replacings[0].from_pattern == "A"
+        assert stmt.replacings[0].to_pattern == "B"
+
+    @covers(
+        CobolFeature.SEARCH_LINEAR,
+        CobolFeature.SEARCH_VARYING,
+        CobolFeature.SEARCH_WHEN_CONDITIONS,
+    )
+    def test_search_basic(self):
+        stmt = parse_statement(
+            {
+                "type": "SEARCH",
+                "table": "WS-TABLE",
+                "varying": "WS-IDX",
+                "whens": [
+                    {
+                        "condition": "WS-IDX = 5",
+                        "children": [
+                            {"type": "DISPLAY", "operands": [{"name": "FOUND"}]}
+                        ],
+                    }
+                ],
+            }
+        )
+        assert isinstance(stmt, SearchStatement)
+        assert stmt.table == "WS-TABLE"
+        assert stmt.varying == "WS-IDX"
+        assert len(stmt.whens) == 1
+        assert stmt.whens[0].condition == "WS-IDX = 5"
+        assert len(stmt.whens[0].children) == 1
+
+    @covers(CobolFeature.SEARCH_LINEAR, CobolFeature.SEARCH_AT_END)
+    def test_search_with_at_end(self):
+        stmt = parse_statement(
+            {
+                "type": "SEARCH",
+                "table": "WS-TABLE",
+                "whens": [{"condition": "WS-A = 1"}],
+                "at_end": [{"type": "DISPLAY", "operands": [{"name": "NOT FOUND"}]}],
+            }
+        )
+        assert isinstance(stmt, SearchStatement)
+        assert len(stmt.at_end) == 1
+
+    @covers(CobolFeature.CALL, CobolFeature.CALL_USING, CobolFeature.USING_BY_REFERENCE)
+    def test_call_basic(self):
+        stmt = parse_statement(
+            {
+                "type": "CALL",
+                "program": "SUBPROG",
+                "using": [{"name": "WS-A", "type": "REFERENCE"}],
+            }
+        )
+        assert isinstance(stmt, CallStatement)
+        assert stmt.target == CallTarget.of_literal("SUBPROG")
+        assert len(stmt.using) == 1
+        assert stmt.using[0].name == "WS-A"
+        assert stmt.using[0].param_type == "REFERENCE"
+        assert not stmt.target.resolved_at_runtime
+
+    @covers(CobolFeature.CALL_BY_IDENTIFIER, CobolFeature.OCCURS_FIXED)
+    def test_call_by_identifier_carries_the_operand_machinery(self):
+        """The identifier arm is the ordinary operand model, subscripts and all."""
+        stmt = parse_statement(
+            {
+                "type": "CALL",
+                "program_ref": {
+                    "name": "WS-PROGS",
+                    "subscripts": [{"kind": "ref", "name": "I"}],
+                    "qualifiers": ["WS-GRP"],
+                },
+            }
+        )
+        assert isinstance(stmt, CallStatement)
+        assert stmt.target.resolved_at_runtime
+        assert stmt.target.literal == ""
+        operand = stmt.target.identifier
+        assert operand is not None
+        assert operand.name == "WS-PROGS"
+        assert len(operand.subscripts) == 1
+        assert operand.qualifiers == ("WS-GRP",)
+
+    @covers(
+        CobolFeature.CALL,
+        CobolFeature.CALL_USING,
+        CobolFeature.CALL_GIVING,
+        CobolFeature.USING_BY_CONTENT,
+        CobolFeature.USING_BY_VALUE,
+    )
+    def test_call_with_giving(self):
+        stmt = parse_statement(
+            {
+                "type": "CALL",
+                "program": "CALC",
+                "using": [
+                    {"name": "WS-A", "type": "CONTENT"},
+                    {"name": "WS-B", "type": "VALUE"},
+                ],
+                "giving": "WS-RESULT",
+            }
+        )
+        assert isinstance(stmt, CallStatement)
+        assert stmt.giving == "WS-RESULT"
+        assert len(stmt.using) == 2
+
+    @covers(CobolFeature.ALTER)
+    def test_alter(self):
+        stmt = parse_statement(
+            {
+                "type": "ALTER",
+                "proceed_tos": [{"source": "PARA-1", "target": "PARA-2"}],
+            }
+        )
+        assert isinstance(stmt, AlterStatement)
+        assert len(stmt.proceed_tos) == 1
+        assert stmt.proceed_tos[0].source == "PARA-1"
+        assert stmt.proceed_tos[0].target == "PARA-2"
+
+    @covers(CobolFeature.ENTRY)
+    def test_entry(self):
+        stmt = parse_statement(
+            {"type": "ENTRY", "entry_name": "ALT-ENTRY", "using": ["WS-A"]}
+        )
+        assert isinstance(stmt, EntryStatement)
+        assert stmt.entry_name == "ALT-ENTRY"
+        assert stmt.using == ["WS-A"]
+
+    @covers(CobolFeature.CANCEL)
+    def test_cancel(self):
+        stmt = parse_statement({"type": "CANCEL", "programs": ["SUBPROG"]})
+        assert isinstance(stmt, CancelStatement)
+        assert stmt.programs == ["SUBPROG"]
+
+    @covers(CobolFeature.ACCEPT)
+    def test_accept_basic(self):
+        stmt = parse_statement({"type": "ACCEPT", "target": "WS-INPUT"})
+        assert isinstance(stmt, AcceptStatement)
+        assert stmt.target == "WS-INPUT"
+        assert stmt.from_device == "CONSOLE"
+
+    @covers(CobolFeature.ACCEPT)
+    def test_accept_with_device(self):
+        stmt = parse_statement(
+            {"type": "ACCEPT", "target": "WS-DATE", "from_device": "DATE"}
+        )
+        assert isinstance(stmt, AcceptStatement)
+        assert stmt.from_device == "DATE"
+
+    @covers(CobolFeature.OPEN)
+    def test_open(self):
+        from cobol_asg.file_enums import OpenMode
+
+        stmt = parse_statement(
+            {
+                "type": "OPEN",
+                "mode_groups": [
+                    {"mode": "INPUT", "files": ["CUST-FILE", "ORDER-FILE"]}
+                ],
+            }
+        )
+        assert isinstance(stmt, OpenStatement)
+        assert len(stmt.mode_groups) == 1
+        assert stmt.mode_groups[0] == (OpenMode.INPUT, ["CUST-FILE", "ORDER-FILE"])
+
+    @covers(CobolFeature.CLOSE)
+    def test_close(self):
+        stmt = parse_statement({"type": "CLOSE", "files": ["CUST-FILE", "ORDER-FILE"]})
+        assert isinstance(stmt, CloseStatement)
+        assert stmt.files == ["CUST-FILE", "ORDER-FILE"]
+
+    @covers(CobolFeature.READ)
+    def test_read_basic(self):
+        stmt = parse_statement({"type": "READ", "file_name": "CUST-FILE"})
+        assert isinstance(stmt, ReadStatement)
+        assert stmt.file_name == "CUST-FILE"
+        assert stmt.into == ""
+
+    @covers(CobolFeature.READ, CobolFeature.READ_INTO)
+    def test_read_with_into(self):
+        stmt = parse_statement(
+            {"type": "READ", "file_name": "CUST-FILE", "into": "WS-RECORD"}
+        )
+        assert isinstance(stmt, ReadStatement)
+        assert stmt.into == "WS-RECORD"
+
+    @covers(CobolFeature.WRITE)
+    def test_write_basic(self):
+        stmt = parse_statement({"type": "WRITE", "record_name": "CUST-REC"})
+        assert isinstance(stmt, WriteStatement)
+        assert stmt.record_name == "CUST-REC"
+        assert stmt.from_field == ""
+
+    @covers(CobolFeature.WRITE, CobolFeature.WRITE_FROM)
+    def test_write_with_from(self):
+        stmt = parse_statement(
+            {"type": "WRITE", "record_name": "CUST-REC", "from_field": "WS-OUTPUT"}
+        )
+        assert isinstance(stmt, WriteStatement)
+        assert stmt.from_field == "WS-OUTPUT"
+
+    @covers(CobolFeature.REWRITE)
+    def test_rewrite_basic(self):
+        stmt = parse_statement({"type": "REWRITE", "record_name": "CUST-REC"})
+        assert isinstance(stmt, RewriteStatement)
+        assert stmt.record_name == "CUST-REC"
+        assert stmt.from_field == ""
+
+    @covers(CobolFeature.REWRITE, CobolFeature.WRITE_FROM)
+    def test_rewrite_with_from(self):
+        stmt = parse_statement(
+            {"type": "REWRITE", "record_name": "CUST-REC", "from_field": "WS-OUTPUT"}
+        )
+        assert isinstance(stmt, RewriteStatement)
+        assert stmt.from_field == "WS-OUTPUT"
+
+    @covers(CobolFeature.START)
+    def test_start_basic(self):
+        stmt = parse_statement({"type": "START", "file_name": "CUST-FILE"})
+        assert isinstance(stmt, StartStatement)
+        assert stmt.file_name == "CUST-FILE"
+        assert stmt.key == ""
+
+    @covers(CobolFeature.START)
+    def test_start_with_key(self):
+        stmt = parse_statement(
+            {"type": "START", "file_name": "CUST-FILE", "key": "CUST-ID"}
+        )
+        assert isinstance(stmt, StartStatement)
+        assert stmt.key == "CUST-ID"
+
+    @covers(CobolFeature.DELETE_RECORD)
+    def test_delete_basic(self):
+        stmt = parse_statement({"type": "DELETE", "file_name": "CUST-FILE"})
+        assert isinstance(stmt, DeleteStatement)
+        assert stmt.file_name == "CUST-FILE"
+
+    def test_xml_generate_basic(self):
+        stmt = parse_statement(
+            {
+                "type": "XML_GENERATE",
+                "xml_document": "WRITE-REC",
+                "from_record": "SOME-RECORD",
+            }
+        )
+        assert stmt == XmlGenerateStatement(
+            xml_document="WRITE-REC", from_record="SOME-RECORD"
+        )
+
+    def test_xml_generate_carries_count_and_exception_phrases(self):
+        stmt = parse_statement(
+            {
+                "type": "XML_GENERATE",
+                "xml_document": "WRITE-REC",
+                "from_record": "SOME-RECORD",
+                "count_in": "WS-XML-LEN",
+                "on_exception": [{"type": "MOVE", "operands": ["'Y'", "WS-FAILED"]}],
+                "not_on_exception": [
+                    {"type": "MOVE", "operands": ["'N'", "WS-FAILED"]}
+                ],
+            }
+        )
+        assert isinstance(stmt, XmlGenerateStatement)
+        assert stmt.count_in == "WS-XML-LEN"
+        assert len(stmt.on_exception) == 1
+        assert len(stmt.not_on_exception) == 1
+
+    def test_xml_generate_round_trips(self):
+        data = {
+            "type": "XML_GENERATE",
+            "xml_document": "WRITE-REC",
+            "from_record": "SOME-RECORD",
+            "count_in": "WS-XML-LEN",
+        }
+        assert parse_statement(data).to_dict() == data
+
+    def test_unknown_type_raises(self):
+        with pytest.raises(ValueError, match="Unknown COBOL statement type"):
+            parse_statement({"type": "BOGUS"})
+
+
+class TestPerformSpecs:
+    @covers(CobolFeature.PERFORM, CobolFeature.PERFORM_TIMES)
+    def test_times_spec(self):
+        stmt = parse_statement(
+            {
+                "type": "PERFORM",
+                "operands": ["WORK-PARA"],
+                "perform_type": "TIMES",
+                "times": "5",
+            }
+        )
+        assert isinstance(stmt, PerformStatement)
+        assert isinstance(stmt.spec, PerformTimesSpec)
+        assert stmt.spec.times == "5"
+
+    @covers(
+        CobolFeature.PERFORM,
+        CobolFeature.PERFORM_UNTIL,
+        CobolFeature.PERFORM_TEST_BEFORE,
+    )
+    def test_until_spec_test_before(self):
+        stmt = parse_statement(
+            {
+                "type": "PERFORM",
+                "operands": ["WORK-PARA"],
+                "perform_type": "UNTIL",
+                "until": {
+                    "not": False,
+                    "relation": {
+                        "left": {"kind": "ref", "name": "WS-A"},
+                        "op": ">",
+                        "right": {"kind": "lit", "value": "10"},
+                    },
+                },
+                "test_before": True,
+            }
+        )
+        assert isinstance(stmt.spec, PerformUntilSpec)
+        assert stmt.spec.condition == {
+            "not": False,
+            "relation": {
+                "left": {"kind": "ref", "name": "WS-A"},
+                "op": ">",
+                "right": {"kind": "lit", "value": "10"},
+            },
+        }
+        assert stmt.spec.test_before is True
+
+    @covers(
+        CobolFeature.PERFORM,
+        CobolFeature.PERFORM_UNTIL,
+        CobolFeature.PERFORM_TEST_AFTER,
+    )
+    def test_until_spec_test_after(self):
+        stmt = parse_statement(
+            {
+                "type": "PERFORM",
+                "operands": ["WORK-PARA"],
+                "perform_type": "UNTIL",
+                "until": {
+                    "not": False,
+                    "relation": {
+                        "left": {"kind": "ref", "name": "WS-A"},
+                        "op": ">",
+                        "right": {"kind": "lit", "value": "10"},
+                    },
+                },
+                "test_before": False,
+            }
+        )
+        assert isinstance(stmt.spec, PerformUntilSpec)
+        assert stmt.spec.test_before is False
+
+    @covers(
+        CobolFeature.PERFORM,
+        CobolFeature.PERFORM_VARYING,
+        CobolFeature.PERFORM_INLINE,
+        CobolFeature.PERFORM_TEST_BEFORE,
+    )
+    def test_varying_spec(self):
+        stmt = parse_statement(
+            {
+                "type": "PERFORM",
+                "children": [{"type": "DISPLAY", "operands": [{"name": "LOOP"}]}],
+                "perform_type": "VARYING",
+                "varying_var": "WS-IDX",
+                "varying_from": "1",
+                "varying_by": "1",
+                "until": {
+                    "not": False,
+                    "relation": {
+                        "left": {"kind": "ref", "name": "WS-IDX"},
+                        "op": ">",
+                        "right": {"kind": "lit", "value": "10"},
+                    },
+                },
+                "test_before": True,
+            }
+        )
+        assert isinstance(stmt.spec, PerformVaryingSpec)
+        assert stmt.spec.varying_var == "WS-IDX"
+        assert stmt.spec.varying_from == "1"
+        assert stmt.spec.varying_by == "1"
+        assert stmt.spec.condition == {
+            "not": False,
+            "relation": {
+                "left": {"kind": "ref", "name": "WS-IDX"},
+                "op": ">",
+                "right": {"kind": "lit", "value": "10"},
+            },
+        }
+
+    @covers(CobolFeature.PERFORM)
+    def test_no_perform_type_gives_none_spec(self):
+        stmt = parse_statement({"type": "PERFORM", "operands": ["WORK-PARA"]})
+        assert stmt.spec is None
+
+    @covers(CobolFeature.PERFORM_VARYING_AFTER)
+    def test_varying_spec_with_after_specs(self):
+        """PERFORM VARYING with one AFTER clause deserializes both loop variables."""
+        stmt = parse_statement(
+            {
+                "type": "PERFORM",
+                "perform_type": "VARYING",
+                "varying_var": "WS-I",
+                "varying_from": "1",
+                "varying_by": "1",
+                "until": {
+                    "not": False,
+                    "relation": {
+                        "left": {"kind": "ref", "name": "WS-I"},
+                        "op": ">",
+                        "right": {"kind": "lit", "value": "3"},
+                    },
+                },
+                "test_before": True,
+                "after_specs": [
+                    {
+                        "varying_var": "WS-J",
+                        "varying_from": "1",
+                        "varying_by": "1",
+                        "until": {
+                            "not": False,
+                            "relation": {
+                                "left": {"kind": "ref", "name": "WS-J"},
+                                "op": ">",
+                                "right": {"kind": "lit", "value": "3"},
+                            },
+                        },
+                    }
+                ],
+            }
+        )
+        assert isinstance(stmt.spec, PerformVaryingSpec)
+        assert len(stmt.spec.after_specs) == 1
+        inner = stmt.spec.after_specs[0]
+        assert inner.varying_var == "WS-J"
+        assert inner.varying_from == "1"
+        assert inner.varying_by == "1"
+
+
+class TestRoundTrip:
+    """Each statement type round-trips through to_dict / parse_statement."""
+
+    def _round_trip(self, data: dict) -> dict:
+        stmt = parse_statement(data)
+        return stmt.to_dict()
+
+    @covers(CobolFeature.MOVE)
+    def test_move_round_trip(self):
+        data = {"type": "MOVE", "operands": [{"name": "123"}, {"name": "WS-A"}]}
+        assert self._round_trip(data) == data
+
+    def _round_tripped(self, operands: list[dict]) -> list[dict]:
+        statement = MoveStatement.from_dict({"type": "MOVE", "operands": operands})
+        return statement.to_dict()["operands"]
+
+    @covers(CobolFeature.MOVE)
+    def test_a_plain_operand_serialises_exactly_as_before(self):
+        """The compact form is load-bearing: existing caches and fixtures use it."""
+        operands = [{"name": "FLD-A"}, {"name": "FLD-B"}]
+        assert self._round_tripped(operands) == operands
+
+    @covers(CobolFeature.MOVE)
+    def test_reference_modification_survives_the_round_trip(self):
+        operands = [
+            {
+                "name": "FLD-A",
+                "ref_mod_start": {"kind": "lit", "value": "2"},
+                "ref_mod_length": {"kind": "lit", "value": "3"},
+            },
+            {"name": "FLD-B"},
+        ]
+        assert self._round_tripped(operands) == operands
+
+    @covers(CobolFeature.MOVE)
+    def test_a_subscript_survives_the_round_trip(self):
+        operands = [
+            {"name": "TBL-ROW", "subscripts": [{"kind": "ref", "name": "IDX-A"}]},
+            {"name": "FLD-B"},
+        ]
+        assert self._round_tripped(operands) == operands
+
+    @covers(CobolFeature.MOVE)
+    def test_a_length_of_source_keeps_its_data_name(self):
+        """from_dict puts the data name in length_of and leaves name empty.
+
+        Without a matching writer this operand serialises to {"name": ""} -- an
+        operand that resolves as no field at all.
+        """
+        operands = [{"kind": "length_of", "name": "REC-MASTER"}, {"name": "FLD-N"}]
+        assert self._round_tripped(operands) == operands
+
+    @covers(CobolFeature.MOVE)
+    def test_qualifiers_survive_the_round_trip(self):
+        operands = [
+            {"name": "FLD-A", "qualifiers": ["REC-A", "GRP-X"]},
+            {"name": "FLD-B"},
+        ]
+        assert self._round_tripped(operands) == operands
+
+    @covers(CobolFeature.MOVE)
+    def test_rounded_survives_the_round_trip(self):
+        operands = [{"name": "FLD-A"}, {"name": "FLD-B", "rounded": True}]
+        assert self._round_tripped(operands) == operands
+
+    @covers(CobolFeature.ADD)
+    def test_add_round_trip(self):
+        data = {"type": "ADD", "operands": [{"name": "5"}, {"name": "WS-A"}]}
+        assert self._round_trip(data) == data
+
+    @covers(CobolFeature.ADD, CobolFeature.GIVING_CLAUSE)
+    def test_add_giving_round_trip(self):
+        data = {
+            "type": "ADD",
+            "operands": [{"name": "5"}, {"name": "WS-A"}],
+            "giving": [{"name": "WS-R"}],
+        }
+        assert self._round_trip(data) == data
+
+    @covers(CobolFeature.SUBTRACT, CobolFeature.GIVING_CLAUSE)
+    def test_subtract_giving_round_trip(self):
+        data = {
+            "type": "SUBTRACT",
+            "operands": [{"name": "WS-B"}, {"name": "WS-A"}],
+            "giving": [{"name": "WS-R"}],
+        }
+        assert self._round_trip(data) == data
+
+    @covers(CobolFeature.DISPLAY)
+    def test_display_round_trip(self):
+        data = {"type": "DISPLAY", "operands": [{"name": "HELLO"}]}
+        assert self._round_trip(data) == data
+
+    @covers(CobolFeature.GO_TO)
+    def test_goto_round_trip(self):
+        data = {
+            "type": "GOTO",
+            "form": "simple",
+            "target": {"paragraph": "PARA-X", "section": ""},
+        }
+        assert self._round_trip(data) == data
+
+    @covers(CobolFeature.STOP_RUN)
+    def test_stop_run_round_trip(self):
+        data = {"type": "STOP_RUN"}
+        assert self._round_trip(data) == data
+
+    @covers(CobolFeature.IF_ELSE)
+    def test_if_round_trip(self):
+        data = {
+            "type": "IF",
+            "condition": {
+                "not": False,
+                "relation": {
+                    "left": {"kind": "ref", "name": "WS-A"},
+                    "op": ">",
+                    "right": {"kind": "lit", "value": "0"},
+                },
+            },
+            "children": [{"type": "DISPLAY", "operands": [{"name": "YES"}]}],
+        }
+        assert self._round_trip(data) == data
+
+    @covers(CobolFeature.IF_ELSE)
+    def test_if_else_round_trip(self):
+        data = {
+            "type": "IF",
+            "condition": {
+                "not": False,
+                "relation": {
+                    "left": {"kind": "ref", "name": "WS-A"},
+                    "op": ">",
+                    "right": {"kind": "lit", "value": "0"},
+                },
+            },
+            "children": [{"type": "DISPLAY", "operands": [{"name": "YES"}]}],
+            "else_children": [{"type": "DISPLAY", "operands": [{"name": "NO"}]}],
+        }
+        assert self._round_trip(data) == data
+
+    @covers(CobolFeature.COMPUTE)
+    def test_compute_round_trip(self):
+        data = {
+            "type": "COMPUTE",
+            "expression": _binop(
+                "+", _ref("WS-A"), _binop("*", _ref("WS-B"), _lit("2"))
+            ),
+            "targets": [{"name": "WS-RESULT"}],
+        }
+        assert self._round_trip(data) == data
+
+    @covers(CobolFeature.COMPUTE)
+    def test_compute_multiple_targets_round_trip(self):
+        data = {
+            "type": "COMPUTE",
+            "expression": _binop(
+                "*", _binop("+", _ref("WS-A"), _ref("WS-B")), _lit("100")
+            ),
+            "targets": [{"name": "WS-C"}, {"name": "WS-D"}],
+        }
+        assert self._round_trip(data) == data
+
+    @covers(CobolFeature.PERFORM)
+    def test_perform_procedure_round_trip(self):
+        data = {"type": "PERFORM", "operands": ["WORK-PARA"]}
+        assert self._round_trip(data) == data
+
+    @covers(CobolFeature.PERFORM, CobolFeature.PERFORM_THRU)
+    def test_perform_thru_round_trip(self):
+        data = {"type": "PERFORM", "operands": ["FIRST"], "thru": "LAST"}
+        assert self._round_trip(data) == data
+
+    @covers(CobolFeature.PERFORM, CobolFeature.PERFORM_TIMES)
+    def test_perform_times_round_trip(self):
+        data = {
+            "type": "PERFORM",
+            "operands": ["WORK"],
+            "perform_type": "TIMES",
+            "times": "5",
+        }
+        assert self._round_trip(data) == data
+
+    @covers(
+        CobolFeature.PERFORM,
+        CobolFeature.PERFORM_UNTIL,
+        CobolFeature.PERFORM_TEST_BEFORE,
+    )
+    def test_perform_until_round_trip(self):
+        data = {
+            "type": "PERFORM",
+            "operands": ["WORK"],
+            "perform_type": "UNTIL",
+            "until": {
+                "not": False,
+                "relation": {
+                    "left": {"kind": "ref", "name": "WS-A"},
+                    "op": ">",
+                    "right": {"kind": "lit", "value": "10"},
+                },
+            },
+            "test_before": True,
+        }
+        assert self._round_trip(data) == data
+
+    @covers(
+        CobolFeature.PERFORM,
+        CobolFeature.PERFORM_VARYING,
+        CobolFeature.PERFORM_TEST_BEFORE,
+    )
+    def test_perform_varying_round_trip(self):
+        data = {
+            "type": "PERFORM",
+            "operands": ["WORK"],
+            "perform_type": "VARYING",
+            "varying_var": "WS-IDX",
+            "varying_from": "1",
+            "varying_by": "1",
+            "until": {
+                "not": False,
+                "relation": {
+                    "left": {"kind": "ref", "name": "WS-IDX"},
+                    "op": ">",
+                    "right": {"kind": "lit", "value": "10"},
+                },
+            },
+            "test_before": True,
+        }
+        assert self._round_trip(data) == data
+
+    @covers(CobolFeature.PERFORM_VARYING_AFTER)
+    def test_perform_varying_after_round_trip(self):
+        """PerformVaryingSpec with after_specs survives dict → spec → dict."""
+        data = {
+            "type": "PERFORM",
+            "perform_type": "VARYING",
+            "varying_var": "WS-I",
+            "varying_from": "1",
+            "varying_by": "1",
+            "until": {
+                "not": False,
+                "relation": {
+                    "left": {"kind": "ref", "name": "WS-I"},
+                    "op": ">",
+                    "right": {"kind": "lit", "value": "3"},
+                },
+            },
+            "test_before": True,
+            "after_specs": [
+                {
+                    "varying_var": "WS-J",
+                    "varying_from": "1",
+                    "varying_by": "1",
+                    "until": {
+                        "not": False,
+                        "relation": {
+                            "left": {"kind": "ref", "name": "WS-J"},
+                            "op": ">",
+                            "right": {"kind": "lit", "value": "3"},
+                        },
+                    },
+                }
+            ],
+        }
+        stmt = parse_statement(data)
+        assert isinstance(stmt, PerformStatement)
+        from cobol_asg.cobol_statements import _spec_to_dict
+
+        result = _spec_to_dict(stmt.spec)
+        assert result["after_specs"][0]["varying_var"] == "WS-J"
+        assert result["after_specs"][0]["varying_by"] == "1"
+
+    @covers(CobolFeature.EVALUATE, CobolFeature.EVALUATE_WHEN_OTHER)
+    def test_evaluate_round_trip(self):
+        data = {
+            "type": "EVALUATE",
+            "children": [
+                {
+                    "type": "WHEN",
+                    "condition": "WS-A = 1",
+                    "children": [{"type": "DISPLAY", "operands": [{"name": "ONE"}]}],
+                },
+                {
+                    "type": "WHEN_OTHER",
+                    "children": [{"type": "DISPLAY", "operands": [{"name": "OTHER"}]}],
+                },
+            ],
+        }
+        assert self._round_trip(data) == data
+
+    @covers(CobolFeature.CONTINUE)
+    def test_continue_round_trip(self):
+        data = {"type": "CONTINUE"}
+        assert self._round_trip(data) == data
+
+    @covers(CobolFeature.EXIT)
+    def test_exit_round_trip(self):
+        data = {"type": "EXIT"}
+        assert self._round_trip(data) == data
+
+    @covers(CobolFeature.INITIALIZE)
+    def test_initialize_round_trip(self):
+        data = {"type": "INITIALIZE", "operands": ["WS-A", "WS-B"]}
+        assert self._round_trip(data) == data
+
+    @covers(CobolFeature.SET_TO)
+    def test_set_to_round_trip(self):
+        data = {"type": "SET", "set_type": "TO", "targets": ["WS-IDX"], "values": ["5"]}
+        assert self._round_trip(data) == data
+
+    @covers(CobolFeature.SET_UP_BY)
+    def test_set_by_round_trip(self):
+        data = {
+            "type": "SET",
+            "set_type": "BY",
+            "targets": ["WS-IDX"],
+            "by_type": "UP",
+            "value": "1",
+        }
+        assert self._round_trip(data) == data
+
+    @covers(CobolFeature.STRING_VERB, CobolFeature.STRING_DELIMITED_BY)
+    def test_string_round_trip(self):
+        data = {
+            "type": "STRING",
+            "sendings": [
+                {"value": {"name": "WS-FIRST"}, "delimited_by": "SPACES"},
+                {"value": {"name": "WS-LAST"}, "delimited_by": "SIZE"},
+            ],
+            "into": {"name": "WS-RESULT"},
+        }
+        assert self._round_trip(data) == data
+
+    @covers(CobolFeature.STRING_VERB, CobolFeature.STRING_TARGET_REF_MOD)
+    def test_string_into_ref_mod_round_trip(self):
+        data = {
+            "type": "STRING",
+            "sendings": [{"value": {"name": "WS-SRC"}, "delimited_by": "SIZE"}],
+            "into": {
+                "name": "WS-DST",
+                "ref_mod_start": {"kind": "lit", "value": "3"},
+                "ref_mod_length": {"kind": "lit", "value": "5"},
+            },
+        }
+        assert self._round_trip(data) == data
+
+    @covers(CobolFeature.UNSTRING_VERB, CobolFeature.UNSTRING_DELIMITED_BY)
+    def test_unstring_round_trip(self):
+        data = {
+            "type": "UNSTRING",
+            "source": {"name": "WS-FULL"},
+            "delimiters": [" "],
+            "into": [{"name": "WS-FIRST"}, {"name": "WS-LAST"}],
+        }
+        assert self._round_trip(data) == data
+
+    @covers(CobolFeature.INSPECT_TALLYING)
+    def test_inspect_tallying_round_trip(self):
+        data = {
+            "type": "INSPECT",
+            "inspect_type": "TALLYING",
+            "source": {"name": "WS-DATA"},
+            "tallying_groups": [
+                {
+                    "target": "WS-COUNT",
+                    "patterns": [{"mode": "ALL", "pattern": "A"}],
+                }
+            ],
+        }
+        assert self._round_trip(data) == data
+
+    @covers(CobolFeature.INSPECT_REPLACING)
+    def test_inspect_replacing_round_trip(self):
+        data = {
+            "type": "INSPECT",
+            "inspect_type": "REPLACING",
+            "source": {"name": "WS-DATA"},
+            "replacings": [{"mode": "ALL", "from": "A", "to": "B"}],
+        }
+        assert self._round_trip(data) == data
+
+    @covers(
+        CobolFeature.SEARCH_LINEAR,
+        CobolFeature.SEARCH_VARYING,
+        CobolFeature.SEARCH_WHEN_CONDITIONS,
+    )
+    def test_search_round_trip(self):
+        data = {
+            "type": "SEARCH",
+            "table": "WS-TABLE",
+            "varying": "WS-IDX",
+            "whens": [
+                {
+                    "condition": "WS-IDX = 5",
+                    "children": [{"type": "DISPLAY", "operands": [{"name": "FOUND"}]}],
+                }
+            ],
+        }
+        assert self._round_trip(data) == data
+
+    @covers(CobolFeature.SEARCH_LINEAR, CobolFeature.SEARCH_AT_END)
+    def test_search_with_at_end_round_trip(self):
+        data = {
+            "type": "SEARCH",
+            "table": "WS-TABLE",
+            "whens": [{"condition": "WS-A = 1"}],
+            "at_end": [{"type": "DISPLAY", "operands": [{"name": "NOT FOUND"}]}],
+        }
+        assert self._round_trip(data) == data
+
+    @covers(
+        CobolFeature.CALL,
+        CobolFeature.CALL_USING,
+        CobolFeature.CALL_GIVING,
+        CobolFeature.USING_BY_REFERENCE,
+    )
+    def test_call_round_trip(self):
+        data = {
+            "type": "CALL",
+            "program": "SUBPROG",
+            "using": [{"name": "WS-A", "type": "REFERENCE"}],
+            "giving": "WS-RESULT",
+        }
+        assert self._round_trip(data) == data
+
+    @covers(CobolFeature.CALL_BY_IDENTIFIER, CobolFeature.REFERENCE_MODIFICATION)
+    def test_call_by_identifier_round_trip(self):
+        """A runtime-resolved callee survives the round trip with its ref-mod.
+
+        `CALL WS-PROG(1:8)` is the idiom that a plain-name model would parse and
+        then call the wrong program with.
+        """
+        data = {
+            "type": "CALL",
+            "program_ref": {
+                "name": "WS-PROG",
+                "ref_mod_start": {"kind": "lit", "value": "1"},
+                "ref_mod_length": {"kind": "lit", "value": "8"},
+            },
+            "using": [{"name": "WS-A", "type": "REFERENCE"}],
+        }
+        assert self._round_trip(data) == data
+
+    @covers(CobolFeature.ALTER)
+    def test_alter_round_trip(self):
+        data = {
+            "type": "ALTER",
+            "proceed_tos": [{"source": "PARA-1", "target": "PARA-2"}],
+        }
+        assert self._round_trip(data) == data
+
+    @covers(CobolFeature.ENTRY)
+    def test_entry_round_trip(self):
+        data = {"type": "ENTRY", "entry_name": "ALT-ENTRY", "using": ["WS-A"]}
+        assert self._round_trip(data) == data
+
+    @covers(CobolFeature.CANCEL)
+    def test_cancel_round_trip(self):
+        data = {"type": "CANCEL", "programs": ["SUBPROG"]}
+        assert self._round_trip(data) == data
+
+    @covers(CobolFeature.ACCEPT)
+    def test_accept_round_trip(self):
+        data = {"type": "ACCEPT", "target": "WS-INPUT"}
+        assert self._round_trip(data) == data
+
+    @covers(CobolFeature.ACCEPT)
+    def test_accept_with_device_round_trip(self):
+        data = {"type": "ACCEPT", "target": "WS-DATE", "from_device": "DATE"}
+        assert self._round_trip(data) == data
+
+    @covers(CobolFeature.OPEN)
+    def test_open_round_trip(self):
+        data = {
+            "type": "OPEN",
+            "mode_groups": [{"mode": "INPUT", "files": ["CUST-FILE"]}],
+        }
+        assert self._round_trip(data) == data
+
+    @covers(CobolFeature.CLOSE)
+    def test_close_round_trip(self):
+        data = {"type": "CLOSE", "files": ["CUST-FILE", "ORDER-FILE"]}
+        assert self._round_trip(data) == data
+
+    @covers(CobolFeature.READ)
+    def test_read_round_trip(self):
+        data = {"type": "READ", "file_name": "CUST-FILE"}
+        assert self._round_trip(data) == data
+
+    @covers(CobolFeature.READ, CobolFeature.READ_INTO)
+    def test_read_with_into_round_trip(self):
+        data = {"type": "READ", "file_name": "CUST-FILE", "into": "WS-RECORD"}
+        assert self._round_trip(data) == data
+
+    @covers(CobolFeature.WRITE)
+    def test_write_round_trip(self):
+        data = {"type": "WRITE", "record_name": "CUST-REC"}
+        assert self._round_trip(data) == data
+
+    @covers(CobolFeature.WRITE, CobolFeature.WRITE_FROM)
+    def test_write_with_from_round_trip(self):
+        data = {"type": "WRITE", "record_name": "CUST-REC", "from_field": "WS-OUTPUT"}
+        assert self._round_trip(data) == data
+
+    @covers(CobolFeature.REWRITE)
+    def test_rewrite_round_trip(self):
+        data = {"type": "REWRITE", "record_name": "CUST-REC"}
+        assert self._round_trip(data) == data
+
+    @covers(CobolFeature.REWRITE, CobolFeature.WRITE_FROM)
+    def test_rewrite_with_from_round_trip(self):
+        data = {"type": "REWRITE", "record_name": "CUST-REC", "from_field": "WS-OUTPUT"}
+        assert self._round_trip(data) == data
+
+    @covers(CobolFeature.START)
+    def test_start_round_trip(self):
+        data = {"type": "START", "file_name": "CUST-FILE"}
+        assert self._round_trip(data) == data
+
+    @covers(CobolFeature.START)
+    def test_start_with_key_round_trip(self):
+        data = {"type": "START", "file_name": "CUST-FILE", "key": "CUST-ID"}
+        assert self._round_trip(data) == data
+
+    @covers(CobolFeature.DELETE_RECORD)
+    def test_delete_round_trip(self):
+        data = {"type": "DELETE", "file_name": "CUST-FILE"}
+        assert self._round_trip(data) == data
+
+    @covers(CobolFeature.MOVE_CORRESPONDING)
+    def test_parse_move_corresponding_statement(self):
+        from cobol_asg.cobol_statements import MoveCorrespondingStatement
+
+        data = {
+            "type": "MOVE_CORRESPONDING",
+            "source": "WS-SRC",
+            "targets": ["WS-DST1", "WS-DST2"],
+        }
+        stmt = parse_statement(data)
+        assert isinstance(stmt, MoveCorrespondingStatement)
+        assert stmt.source == "WS-SRC"
+        assert stmt.targets == ["WS-DST1", "WS-DST2"]
+
+
+class TestStringRefModAst:
+    def test_string_sending_from_dict_plain_field(self):
+        """StringSending with plain field name produces RefModOperand with no ref_mod."""
+        sending = StringSending.from_dict(
+            {"value": {"name": "WS-SRC"}, "delimited_by": "SIZE"}
+        )
+        assert isinstance(sending.value, RefModOperand)
+        assert sending.value.name == "WS-SRC"
+        assert sending.value.ref_mod_start is None
+
+    def test_string_sending_from_dict_with_ref_mod(self):
+        """StringSending from_dict preserves ref_mod_start and ref_mod_length."""
+        sending = StringSending.from_dict(
+            {
+                "value": {
+                    "name": "WS-SRC",
+                    "ref_mod_start": {"kind": "lit", "value": "2"},
+                    "ref_mod_length": {"kind": "lit", "value": "3"},
+                },
+                "delimited_by": "SIZE",
+            }
+        )
+        assert isinstance(sending.value, RefModOperand)
+        assert sending.value.name == "WS-SRC"
+        assert sending.value.ref_mod_start is not None
+        assert sending.value.ref_mod_length is not None
+
+    def test_unstring_statement_from_dict(self):
+        """UnstringStatement.source is a RefModOperand after from_dict."""
+        stmt = UnstringStatement.from_dict(
+            {
+                "source": {"name": "WS-SRC"},
+                "delimited_by": "SPACE",
+                "into": ["WS-A"],
+            }
+        )
+        assert isinstance(stmt.source, RefModOperand)
+        assert stmt.source.name == "WS-SRC"
+        assert stmt.source.ref_mod_start is None
+
+
+class TestGotoVariants:
+    @covers(CobolFeature.GO_TO)
+    def test_simple_goto_round_trip(self):
+        d = {
+            "type": "GOTO",
+            "form": "simple",
+            "target": {"paragraph": "REAL-PARA", "section": ""},
+        }
+        stmt = GotoStatement.from_dict(d)
+        assert isinstance(stmt.form, SimpleGoto)
+        assert stmt.form.target == ProcedureRef(paragraph="REAL-PARA", section="")
+        assert stmt.to_dict() == d
+
+    @covers(CobolFeature.GO_TO)
+    def test_altered_goto_round_trip(self):
+        d = {"type": "GOTO", "form": "altered"}
+        stmt = GotoStatement.from_dict(d)
+        assert isinstance(stmt.form, AlteredGoto)
+        assert stmt.to_dict() == d
+
+    @covers(CobolFeature.GO_TO)
+    def test_computed_goto_round_trip_with_structured_index(self):
+        d = {
+            "type": "GOTO",
+            "form": "computed",
+            "targets": [
+                {"paragraph": "PARA-1", "section": "SECT-A"},
+                {"paragraph": "MENU-RTN", "section": ""},
+            ],
+            "index": {"name": "WS-SEL", "qualifiers": ["WS-CTL"]},
+        }
+        stmt = GotoStatement.from_dict(d)
+        assert isinstance(stmt.form, ComputedGoto)
+        assert stmt.form.targets == (
+            ProcedureRef(paragraph="PARA-1", section="SECT-A"),
+            ProcedureRef(paragraph="MENU-RTN", section=""),
+        )
+        assert stmt.form.index == RefModOperand(name="WS-SEL", qualifiers=("WS-CTL",))
+        assert stmt.to_dict() == d

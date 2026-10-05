@@ -1,0 +1,11 @@
+{
+  "name": "beacon-signal",
+  "private": true,
+  "version": "1.0.0",
+  "devDependencies": {
+    "eslint": "8.57.1",
+    "typescript": "5.0.4",
+    "@typescript-eslint/parser": "5.62.0",
+    "@typescript-eslint/eslint-plugin": "5.62.0"
+  }
+}

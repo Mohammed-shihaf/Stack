@@ -1,0 +1,75 @@
+"""Integration test: Go type_conversion_expression through the full VM pipeline.
+
+Verifies that Go type conversions like []byte(s) and simple int(x)
+produce valid IR that the VM can execute end-to-end.
+"""
+
+from __future__ import annotations
+
+from interpreter.constants import Language
+from interpreter.frontends.go.features import GoFeature
+from interpreter.var_name import VarName
+from tests.covers import covers
+from tests.integration.exec_helpers import run_locals
+
+
+def _run_go(source: str, max_steps: int = 500) -> dict:
+    return run_locals(source, Language.GO, max_steps)
+
+
+class TestGoTypeConversionExecution:
+    @covers(GoFeature.TYPE_CONVERSION)
+    def test_int_conversion_executes(self):
+        """int(y) should execute without errors (call_expression path)."""
+        source = """\
+package main
+func main() {
+    y := 3
+    x := int(y)
+}
+"""
+        vars_ = _run_go(source)
+        assert vars_[VarName("x")] == 3
+
+    @covers(GoFeature.TYPE_CONVERSION)
+    def test_type_conversion_in_arithmetic(self):
+        """Type conversion result used in arithmetic should work."""
+        source = """\
+package main
+func main() {
+    a := 10
+    b := int(a) + 5
+}
+"""
+        vars_ = _run_go(source)
+        assert vars_[VarName("b")] == 15
+
+    @covers(GoFeature.TYPE_CONVERSION)
+    def test_slice_byte_conversion_does_not_crash(self):
+        """[]byte(s) should produce IR that does not crash the VM.
+
+        The VM may not fully execute the conversion, but the lowering
+        must not produce unsupported symbolics that abort execution.
+        """
+        source = """\
+package main
+func main() {
+    s := "hello"
+    b := []byte(s)
+}
+"""
+        # Should not raise — the lowering produces a CALL_FUNCTION
+        _run_go(source)
+
+    @covers(GoFeature.TYPE_CONVERSION)
+    def test_float_to_int_truncation(self):
+        """int(3.7) should truncate to 3."""
+        source = """\
+package main
+func main() {
+    x := 3.7
+    y := int(x)
+}
+"""
+        vars_ = _run_go(source)
+        assert vars_[VarName("y")] == 3

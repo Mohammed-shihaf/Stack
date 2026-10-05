@@ -1,0 +1,589 @@
+/*
+ * SonarQube JavaScript Plugin
+ * Copyright (C) SonarSource Sàrl
+ * mailto:info AT sonarsource DOT com
+ *
+ * You can redistribute and/or modify this program under the terms of
+ * the Sonar Source-Available License Version 1, as published by SonarSource Sàrl.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the Sonar Source-Available License for more details.
+ *
+ * You should have received a copy of the Sonar Source-Available License
+ * along with this program; if not, see https://sonarsource.com/license/ssal/
+ */
+import path from 'node:path/posix';
+import { describe, it, beforeEach } from 'node:test';
+import { expect } from 'expect';
+import ts from 'typescript';
+import { normalizePath, normalizeToAbsolutePath } from '../../../../shared/src/helpers/files.js';
+import {
+  computeLibJson,
+  createProgramOptions,
+  createProgramOptionsFromJson,
+  defaultCompilerOptions,
+  esLibToYear,
+  nodeVersionToEs,
+  parseMaxNodeMajor,
+  tsTargetToEsYear,
+} from '../../../src/jsts/program/tsconfig/options.js';
+import { clearProgramOptionsCache } from '../../../src/jsts/program/cache/programOptionsCache.js';
+import { clearTsConfigContentCache } from '../../../src/jsts/program/cache/tsconfigCache.js';
+
+const fixtures = normalizeToAbsolutePath(path.join(normalizePath(import.meta.dirname), 'fixtures'));
+
+describe('createProgramOptions', () => {
+  beforeEach(() => {
+    clearProgramOptionsCache();
+    clearTsConfigContentCache();
+  });
+
+  describe('tsconfig parsing', () => {
+    it('should parse tsconfig and return program options', () => {
+      const tsConfig = path.join(fixtures, 'tsconfig.json');
+
+      const result = createProgramOptions(tsConfig, undefined, true);
+
+      expect(result).toBeDefined();
+      expect(result.rootNames).toBeDefined();
+      expect(result.options).toBeDefined();
+      expect(result.missingTsConfig).toBe(false);
+    });
+
+    it('should include files from tsconfig', () => {
+      const tsConfig = path.join(fixtures, 'tsconfig.json');
+
+      const result = createProgramOptions(tsConfig, undefined, true);
+
+      expect(result.rootNames).toContain(path.join(fixtures, 'file.ts'));
+    });
+
+    it('should apply compiler options from tsconfig', () => {
+      const tsConfig = path.join(fixtures, 'tsconfig_found.json');
+
+      const { options, missingTsConfig } = createProgramOptions(tsConfig, undefined, true);
+
+      expect(missingTsConfig).toBe(false);
+      expect(options).toBeDefined();
+      expect(options.target).toBe(ts.ScriptTarget.ES2020);
+      expect(options.module).toBe(ts.ModuleKind.CommonJS);
+    });
+
+    it('should include Vue files', () => {
+      const tsConfig = path.join(fixtures, 'vue', 'tsconfig.json');
+
+      const result = createProgramOptions(tsConfig, undefined, true);
+
+      expect(result.rootNames).toContain(path.join(fixtures, 'vue', 'file.vue'));
+    });
+  });
+
+  describe('tsconfig with provided contents', () => {
+    it('should parse provided tsconfig contents', () => {
+      const result = createProgramOptions('tsconfig.json', '{ "files": ["/foo/file.ts"] }', true);
+
+      expect(result).toMatchObject({
+        rootNames: ['/foo/file.ts'],
+        projectReferences: undefined,
+      });
+    });
+
+    it('should parse project references from contents', () => {
+      const result = createProgramOptions(
+        'tsconfig.json',
+        '{ "files": [], "references": [{ "path": "foo" }] }',
+        true,
+      );
+
+      expect(result).toMatchObject({
+        rootNames: [],
+        projectReferences: [expect.objectContaining({ path: 'foo' })],
+      });
+    });
+  });
+
+  describe('error handling', () => {
+    it('should throw on syntactically incorrect tsconfig', () => {
+      const tsConfig = path.join(fixtures, 'tsconfig.syntax.json');
+
+      expect(() => createProgramOptions(tsConfig, undefined, true)).toThrow();
+    });
+
+    it('should throw on semantically incorrect tsconfig', () => {
+      const tsConfig = path.join(fixtures, 'tsconfig.semantic.json');
+
+      expect(() => createProgramOptions(tsConfig, undefined, true)).toThrow(
+        /^Unknown compiler option 'targetSomething'./,
+      );
+    });
+
+    it('should throw on empty files list', () => {
+      expect(() => createProgramOptions('tsconfig.json', '{ "files": [] }', true)).toThrow(
+        `The 'files' list in config file 'tsconfig.json' is empty.`,
+      );
+    });
+  });
+
+  describe('missing extended tsconfig', () => {
+    it('should still create options when extended tsconfig does not exist', () => {
+      const tsConfig = path.join(fixtures, 'tsconfig_missing.json');
+
+      const result = createProgramOptions(tsConfig, undefined, true);
+
+      expect(result).toBeDefined();
+      expect(result.rootNames).toContain(path.join(fixtures, 'file.ts'));
+      expect(result.missingTsConfig).toBe(true);
+    });
+
+    it('should generate compilerOptions on missing extended tsconfig', () => {
+      const tsConfig = path.join(fixtures, 'tsconfig_missing.json');
+
+      const programOptions = createProgramOptions(tsConfig, undefined, true);
+
+      expect(programOptions.options).toEqual({
+        configFilePath: path.join(fixtures, 'tsconfig_missing.json'),
+        noEmit: true,
+        allowNonTsExtensions: true,
+      });
+      expect(programOptions.missingTsConfig).toBe(true);
+    });
+  });
+
+  describe('lib enrichment', () => {
+    const nodeSignalsBaseDir = normalizeToAbsolutePath(
+      path.join(import.meta.dirname, 'fixtures/node-signals'),
+    );
+
+    it('should enrich lib from node signals when tsconfig has no lib', () => {
+      // tsconfig with target but no lib, no extends — node signal should be applied
+      const { options } = createProgramOptions(
+        'tsconfig.json',
+        '{ "compilerOptions": { "target": "ES5" }, "files": ["/tmp/a.ts"] }',
+        true,
+        undefined,
+        nodeSignalsBaseDir,
+      );
+
+      // @types/node ^18 → ES2022; target ES5 → ES2020; max = ES2022
+      expect(options.lib).toBeDefined();
+      expect(options.lib!.some(l => l.includes('es2022'))).toBe(true);
+    });
+
+    it('should respect lib inherited from extended tsconfig, not overwrite with computed value', () => {
+      const tsConfig = path.join(fixtures, 'lib-inheritance', 'tsconfig.child.json');
+
+      // node-signals would give ES2022, but parent sets ['esnext','dom','dom.iterable']
+      const { options } = createProgramOptions(
+        tsConfig,
+        undefined,
+        true,
+        undefined,
+        nodeSignalsBaseDir,
+      );
+
+      // Inherited lib must be preserved — esnext and dom.iterable must survive
+      expect(options.lib!.some(l => l.includes('esnext'))).toBe(true);
+      expect(options.lib!.some(l => l.includes('dom.iterable'))).toBe(true);
+    });
+
+    it('should not overwrite lib set directly in tsconfig', () => {
+      // tsconfig with explicit lib: ['es5'] — node signal (ES2022) must not override it
+      const { options } = createProgramOptions(
+        'tsconfig.json',
+        '{ "compilerOptions": { "lib": ["es5"] }, "files": ["/tmp/a.ts"] }',
+        true,
+        undefined,
+        nodeSignalsBaseDir,
+      );
+
+      expect(options.lib!.some(l => l.includes('es5'))).toBe(true);
+      expect(options.lib!.some(l => l.includes('es2022'))).toBe(false);
+    });
+
+    it('should use the effective target inherited through extends when computing lib', () => {
+      const tsConfig = path.join(nodeSignalsBaseDir, 'inherited-target', 'tsconfig.child.json');
+
+      const { options } = createProgramOptions(
+        tsConfig,
+        undefined,
+        true,
+        undefined,
+        nodeSignalsBaseDir,
+      );
+
+      // Root node-signals fixture has @types/node ^18 → ES2022, while the base config
+      // contributes target ES2024 through extends. The computed lib must keep the max.
+      expect(options.lib).toBeDefined();
+      expect(options.lib!.some(l => l.includes('es2024'))).toBe(true);
+      expect(options.lib!.some(l => l.includes('es2022'))).toBe(false);
+    });
+  });
+
+  describe('strictness compatibility', () => {
+    const strictnessTs5BaseDir = normalizeToAbsolutePath(path.join(fixtures, 'strictness-ts5'));
+    const strictnessTs6BaseDir = normalizeToAbsolutePath(path.join(fixtures, 'strictness-ts6'));
+
+    it('should apply pre-TS6 strictness defaults when strict options are not configured', () => {
+      const tsConfig = path.join(strictnessTs5BaseDir, 'tsconfig.no-strict.json');
+
+      const { options } = createProgramOptions(
+        tsConfig,
+        undefined,
+        true,
+        undefined,
+        strictnessTs5BaseDir,
+      );
+
+      expect(options.strict).toBe(false);
+      expect(options.strictNullChecks).toBe(false);
+      expect(options.noImplicitAny).toBe(false);
+      expect(options.strictFunctionTypes).toBe(false);
+    });
+
+    it('should preserve explicit strict sub-options and default only missing ones for TS < 6', () => {
+      const tsConfig = path.join(strictnessTs5BaseDir, 'tsconfig.suboption.json');
+
+      const { options } = createProgramOptions(
+        tsConfig,
+        undefined,
+        true,
+        undefined,
+        strictnessTs5BaseDir,
+      );
+
+      expect(options.strict).toBe(false);
+      expect(options.strictNullChecks).toBe(true);
+      expect(options.noImplicitAny).toBe(false);
+      expect(options.strictFunctionTypes).toBe(false);
+    });
+
+    it('should respect strict explicitly configured in extended tsconfig for TS < 6', () => {
+      const tsConfig = path.join(strictnessTs5BaseDir, 'tsconfig.extends-strict.json');
+
+      const { options } = createProgramOptions(
+        tsConfig,
+        undefined,
+        true,
+        undefined,
+        strictnessTs5BaseDir,
+      );
+
+      expect(options.strict).toBe(true);
+      expect(options.strictNullChecks).toBeUndefined();
+      expect(options.noImplicitAny).toBeUndefined();
+    });
+
+    it('should keep TypeScript 6 strict defaults for TS >= 6 projects', () => {
+      const tsConfig = path.join(strictnessTs6BaseDir, 'tsconfig.no-strict.json');
+
+      const { options } = createProgramOptions(
+        tsConfig,
+        undefined,
+        true,
+        undefined,
+        strictnessTs6BaseDir,
+      );
+
+      expect(options.strict).toBeUndefined();
+      expect(options.strictNullChecks).toBeUndefined();
+      expect(options.noImplicitAny).toBeUndefined();
+    });
+  });
+
+  describe('caching', () => {
+    it('should cache program options', () => {
+      const tsConfig = path.join(fixtures, 'tsconfig.json');
+
+      const result1 = createProgramOptions(tsConfig, undefined, true);
+      const result2 = createProgramOptions(tsConfig, undefined, true);
+
+      expect(result1).toBe(result2);
+    });
+
+    it('should use different cache entries for different tsconfig contents', () => {
+      const result1 = createProgramOptions('tsconfig.json', '{ "files": ["/a.ts"] }', true);
+      const result2 = createProgramOptions('tsconfig.json', '{ "files": ["/b.ts"] }', true);
+
+      expect(result1).not.toBe(result2);
+      expect(result1.rootNames).toEqual(['/a.ts']);
+      expect(result2.rootNames).toEqual(['/b.ts']);
+    });
+  });
+});
+
+describe('createProgramOptionsFromJson', () => {
+  it('should create program options from JSON', () => {
+    const json = { target: 'ES2020', strict: true };
+    const rootNames = [normalizeToAbsolutePath('/project/src/index.ts')];
+
+    const result = createProgramOptionsFromJson(json, rootNames, '/project');
+
+    expect(result.rootNames).toEqual(rootNames);
+    expect(result.options.target).toBe(ts.ScriptTarget.ES2020);
+    expect(result.options.strict).toBe(true);
+    expect(result.missingTsConfig).toBe(false);
+  });
+
+  it('should resolve paths relative to baseDir', () => {
+    const json = { outDir: './dist' };
+    const rootNames = [normalizeToAbsolutePath('/project/src/index.ts')];
+
+    const result = createProgramOptionsFromJson(json, rootNames, '/project');
+
+    expect(result.options.outDir).toBe('/project/dist');
+  });
+
+  it('should handle empty options', () => {
+    const rootNames = [normalizeToAbsolutePath('/project/src/index.ts')];
+
+    const result = createProgramOptionsFromJson({}, rootNames, '/project');
+
+    expect(result.rootNames).toEqual(rootNames);
+    expect(result.missingTsConfig).toBe(false);
+  });
+});
+
+describe('defaultCompilerOptions', () => {
+  it('should have expected default values', () => {
+    expect(defaultCompilerOptions.allowJs).toBe(true);
+    expect(defaultCompilerOptions.noImplicitAny).toBe(true);
+    expect(defaultCompilerOptions.strict).toBe(false);
+    expect(defaultCompilerOptions.lib).toBeUndefined();
+  });
+});
+
+describe('computeLibJson', () => {
+  const baseDir = normalizeToAbsolutePath('/tmp');
+
+  it('should use ecmaScriptVersion override, ignoring other signals', () => {
+    // target=ES2023 would give ES2023, but ecmaScriptVersion=ES2022 wins
+    expect(computeLibJson('ES2022', 'ES2023', baseDir)).toEqual(['es2022', 'dom']);
+  });
+
+  it('should be case-insensitive for ecmaScriptVersion', () => {
+    expect(computeLibJson('es2022', undefined, baseDir)).toEqual(['es2022', 'dom']);
+  });
+
+  it('should use tsconfig target string when it is the only signal', () => {
+    expect(computeLibJson(undefined, 'ES2022', baseDir)).toEqual(['es2022', 'dom']);
+  });
+
+  it('should map ES3 and ES5 targets to ES2020', () => {
+    expect(computeLibJson(undefined, 'ES3', baseDir)).toEqual(['es2020', 'dom']);
+    expect(computeLibJson(undefined, 'ES5', baseDir)).toEqual(['es2020', 'dom']);
+  });
+
+  it('should return esnext for ESNext target with no node signals', () => {
+    expect(computeLibJson(undefined, 'ESNext', baseDir)).toEqual(['esnext', 'dom']);
+  });
+
+  it('should fall back to esnext when no signals at all', () => {
+    expect(computeLibJson(undefined, undefined, baseDir)).toEqual(['esnext', 'dom']);
+  });
+
+  it('should take the maximum of target and node signals', () => {
+    // target=ES2020, node signal from package.json gives ES2022 → ES2022 wins
+    // We use the fixtures dir which has a package.json with @types/node ^18 → ES2022
+    const fixturesBaseDir = normalizeToAbsolutePath(
+      path.join(import.meta.dirname, 'fixtures/node-signals'),
+    );
+    expect(computeLibJson(undefined, 'ES2020', fixturesBaseDir)).toEqual(['es2022', 'dom']);
+  });
+
+  describe('per-package node signal resolution (monorepo)', () => {
+    const monorepoBaseDir = normalizeToAbsolutePath(
+      path.join(import.meta.dirname, 'fixtures/node-signals/monorepo'),
+    );
+    const pkgADir = normalizeToAbsolutePath(
+      path.join(import.meta.dirname, 'fixtures/node-signals/monorepo/packages/a'),
+    );
+    const pkgBDir = normalizeToAbsolutePath(
+      path.join(import.meta.dirname, 'fixtures/node-signals/monorepo/packages/b'),
+    );
+    const pkgCDir = normalizeToAbsolutePath(
+      path.join(import.meta.dirname, 'fixtures/node-signals/monorepo/packages/c'),
+    );
+    const pkgDDir = normalizeToAbsolutePath(
+      path.join(import.meta.dirname, 'fixtures/node-signals/monorepo/packages/d'),
+    );
+
+    it('should use nested @types/node when packageDir points to nested package', () => {
+      // Root has @types/node ^16 → ES2021. Nested package a has @types/node ^20 → ES2023.
+      // packageDir = nested → ES2023 wins.
+      expect(computeLibJson(undefined, undefined, pkgADir, monorepoBaseDir)).toEqual([
+        'es2023',
+        'dom',
+      ]);
+    });
+
+    it('should use nested engines.node when nested package has no @types/node', () => {
+      // Nested package b has only engines.node >=22 → ES2024. Root has @types/node ^16.
+      // packageDir = nested → ES2024 wins (closest package, engines.node fallback).
+      expect(computeLibJson(undefined, undefined, pkgBDir, monorepoBaseDir)).toEqual([
+        'es2024',
+        'dom',
+      ]);
+    });
+
+    it('should fall through to root when nested package has no node signal', () => {
+      // Nested package c has no node signal. Root has @types/node ^16 → ES2021.
+      // Walk up reaches root → ES2021.
+      expect(computeLibJson(undefined, undefined, pkgCDir, monorepoBaseDir)).toEqual([
+        'es2021',
+        'dom',
+      ]);
+    });
+
+    it('should ignore invalid nested engines.node values and continue to a valid parent signal', () => {
+      // Nested package d has engines.node "*", which is not a usable Node signal.
+      // Walk continues to the root @types/node ^16 → ES2021.
+      expect(computeLibJson(undefined, undefined, pkgDDir, monorepoBaseDir)).toEqual([
+        'es2021',
+        'dom',
+      ]);
+    });
+
+    it('should still take max of target and per-package node signal', () => {
+      // Nested package a → @types/node ^20 → ES2023. Target ES2024 wins.
+      expect(computeLibJson(undefined, 'ES2024', pkgADir, monorepoBaseDir)).toEqual([
+        'es2024',
+        'dom',
+      ]);
+      // Nested package a → ES2023, target ES2020 → ES2023 wins.
+      expect(computeLibJson(undefined, 'ES2020', pkgADir, monorepoBaseDir)).toEqual([
+        'es2023',
+        'dom',
+      ]);
+    });
+
+    it('should use root signal when packageDir is the analysis baseDir', () => {
+      // packageDir == baseDir == monorepo root → root @types/node ^16 → ES2021.
+      expect(computeLibJson(undefined, undefined, monorepoBaseDir, monorepoBaseDir)).toEqual([
+        'es2021',
+        'dom',
+      ]);
+    });
+
+    it('should walk up from a subdirectory to find the closest package signal', () => {
+      // Subdirectory inside packages/a (has no package.json itself).
+      // Walk up reaches packages/a/package.json with @types/node ^20 → ES2023.
+      const subDir = normalizeToAbsolutePath(
+        path.join(import.meta.dirname, 'fixtures/node-signals/monorepo/packages/a/src'),
+      );
+      expect(computeLibJson(undefined, undefined, subDir, monorepoBaseDir)).toEqual([
+        'es2023',
+        'dom',
+      ]);
+    });
+  });
+});
+
+describe('parseMaxNodeMajor', () => {
+  it('should return the highest major from a simple version', () => {
+    expect(parseMaxNodeMajor('18.0.0')).toBe(18);
+  });
+
+  it('should handle caret ranges', () => {
+    expect(parseMaxNodeMajor('^18')).toBe(18);
+    expect(parseMaxNodeMajor('^18.0.0')).toBe(18);
+  });
+
+  it('should handle >= ranges', () => {
+    expect(parseMaxNodeMajor('>=16.0.0')).toBe(16);
+  });
+
+  it('should handle x-ranges', () => {
+    expect(parseMaxNodeMajor('14.x')).toBe(14);
+  });
+
+  it('should return the highest version from OR ranges', () => {
+    expect(parseMaxNodeMajor('>=16 || >=18')).toBe(18);
+    expect(parseMaxNodeMajor('>=16 || >=18 || 22')).toBe(22);
+  });
+
+  it('should return null for wildcard', () => {
+    expect(parseMaxNodeMajor('*')).toBeNull();
+  });
+
+  it('should return null for latest', () => {
+    expect(parseMaxNodeMajor('latest')).toBeNull();
+  });
+
+  it('should return null for empty string', () => {
+    expect(parseMaxNodeMajor('')).toBeNull();
+  });
+
+  it('should ignore versions below 8', () => {
+    expect(parseMaxNodeMajor('6.0.0')).toBeNull();
+  });
+});
+
+describe('nodeVersionToEs', () => {
+  it('should map Node 22 to ES2024', () => {
+    expect(nodeVersionToEs(22)).toBe(2024);
+  });
+
+  it('should map Node 18 to ES2022', () => {
+    expect(nodeVersionToEs(18)).toBe(2022);
+  });
+
+  it('should map Node 16 to ES2021', () => {
+    expect(nodeVersionToEs(16)).toBe(2021);
+  });
+
+  it('should map unknown high version to most recent ES year', () => {
+    expect(nodeVersionToEs(99)).toBe(2024);
+  });
+
+  it('should map Node 8 to ES2017', () => {
+    expect(nodeVersionToEs(8)).toBe(2017);
+  });
+});
+
+describe('esLibToYear', () => {
+  it('should extract the year from a normalized lib array', () => {
+    expect(esLibToYear(['lib.es2022.d.ts', 'lib.dom.d.ts'])).toBe(2022);
+    expect(esLibToYear(['lib.es2015.d.ts', 'lib.dom.d.ts'])).toBe(2015);
+  });
+
+  it('should return the maximum year when multiple year libs are present', () => {
+    // e.g. a tsconfig with lib: ['es2015', 'es2017', 'es2019'] — max is 2019
+    expect(esLibToYear(['lib.es2015.d.ts', 'lib.es2017.d.ts', 'lib.es2019.d.ts'])).toBe(2019);
+  });
+
+  it('should return null for esnext lib (no restriction)', () => {
+    expect(esLibToYear(['lib.esnext.d.ts', 'lib.dom.d.ts'])).toBeNull();
+  });
+
+  it('should return null when esnext is mixed with year libs', () => {
+    // esnext wins — merged programs can combine e.g. [es2020, esnext]
+    expect(esLibToYear(['lib.es2020.d.ts', 'lib.dom.d.ts', 'lib.esnext.d.ts'])).toBeNull();
+  });
+
+  it('should return null for undefined lib', () => {
+    expect(esLibToYear(undefined)).toBeNull();
+  });
+
+  it('should return null for empty lib array', () => {
+    expect(esLibToYear([])).toBeNull();
+  });
+});
+
+describe('tsTargetToEsYear', () => {
+  it('should keep year-based targets unchanged', () => {
+    expect(tsTargetToEsYear(ts.ScriptTarget.ES2017)).toBe(2017);
+    expect(tsTargetToEsYear(ts.ScriptTarget.ES2021)).toBe(2021);
+  });
+
+  it('should treat legacy targets as pre-ES2015', () => {
+    expect(tsTargetToEsYear(ts.ScriptTarget.ES3)).toBe(2014);
+    expect(tsTargetToEsYear(ts.ScriptTarget.ES5)).toBe(2014);
+  });
+
+  it('should return null for targets without a fixed year', () => {
+    expect(tsTargetToEsYear(ts.ScriptTarget.ESNext)).toBeNull();
+    expect(tsTargetToEsYear(undefined)).toBeNull();
+  });
+});

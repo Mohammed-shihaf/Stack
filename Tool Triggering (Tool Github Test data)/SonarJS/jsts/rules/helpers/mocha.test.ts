@@ -1,0 +1,57 @@
+/*
+ * SonarQube JavaScript Plugin
+ * Copyright (C) SonarSource Sàrl
+ * mailto:info AT sonarsource DOT com
+ *
+ * You can redistribute and/or modify this program under the terms of
+ * the Sonar Source-Available License Version 1, as published by SonarSource Sàrl.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the Sonar Source-Available License for more details.
+ *
+ * You should have received a copy of the Sonar Source-Available License
+ * along with this program; if not, see https://sonarsource.com/license/ssal/
+ */
+import esprima from 'esprima';
+import type estree from 'estree';
+import {
+  extractTestCase,
+  isTestCase,
+  isTestConstruct,
+} from '../../../../src/jsts/rules/helpers/testing/mocha.js';
+import { describe, it } from 'node:test';
+import { expect } from 'expect';
+
+describe('Mocha.js', () => {
+  it('should recognize test constructs', () => {
+    const program = esprima.parse(`it('foo', () => {})`);
+    const node: estree.Node = program.body[0].expression;
+    expect(isTestConstruct(node)).toEqual(true);
+  });
+
+  it('should recognize special test constructs', () => {
+    const program = esprima.parse(`it.only('foo', () => {})`);
+    const node: estree.Node = program.body[0].expression;
+    expect(isTestConstruct(node)).toEqual(true);
+  });
+
+  it('should recognize test case aliases', () => {
+    const program = esprima.parse(`test.only('foo', () => {})`);
+    const node: estree.Node = program.body[0].expression;
+    expect(isTestCase(node)).toEqual(true);
+  });
+
+  it('should extract test case aliases', () => {
+    const program = esprima.parse(`test('foo', () => {})`);
+    const node: estree.Node = program.body[0].expression;
+    expect(extractTestCase(node)?.callback.type).toEqual('ArrowFunctionExpression');
+  });
+
+  it('should not recognize garbage', () => {
+    const program = esprima.parse(`'foo'`);
+    const node: estree.Node = program.body[0].expression;
+    expect(isTestConstruct(node)).toEqual(false);
+  });
+});

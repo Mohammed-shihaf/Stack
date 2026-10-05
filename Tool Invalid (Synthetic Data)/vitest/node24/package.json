@@ -1,0 +1,11 @@
+{
+  "name": "tidepool-log",
+  "private": true,
+  "version": "1.0.0",
+  "devDependencies": {
+    "vitest": "5.0.3",
+    "typescript": "5.9.3",
+    "@types/node": "^24",
+    "vite": "^7"
+  }
+}

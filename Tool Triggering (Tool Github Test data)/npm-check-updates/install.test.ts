@@ -1,0 +1,223 @@
+import fs from 'node:fs/promises'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { stripVTControlCharacters as stripAnsi } from 'node:util'
+import spawn from 'spawn-please'
+import { describe, expect, it } from 'vitest'
+import exists from '../src/lib/exists.ts'
+import makeTempDir from './helpers/makeTempDir.ts'
+import removeDir from './helpers/removeDir.ts'
+import stubVersions from './helpers/stubVersions.ts'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
+const bin = path.join(__dirname, '../build/cli.js')
+
+describe('install', () => {
+  describe('non-interactive', () => {
+    it('print install hint without --install', async () => {
+      const pkgData = {
+        dependencies: {
+          'ncu-test-v2': '1.0.0',
+        },
+      }
+
+      const stub = stubVersions('2.0.0', { spawn: true })
+      const tempDir = await makeTempDir()
+      const pkgFile = path.join(tempDir, 'package.json')
+      await fs.writeFile(pkgFile, JSON.stringify(pkgData), 'utf-8')
+
+      try {
+        const { stdout } = await spawn('node', [bin, '-u', '--packageFile', pkgFile])
+        expect(stripAnsi(stdout)).toMatch(/Run (npm|yarn) install to install new versions/)
+        expect(await exists(path.join(tempDir, 'package-lock.json'))).toBe(false)
+        expect(await exists(path.join(tempDir, 'yarn.lock'))).toBe(false)
+        expect(await exists(path.join(tempDir, 'node_modules'))).toBe(false)
+      } finally {
+        await removeDir(tempDir)
+        stub.restore()
+      }
+    })
+
+    it('install packages and do not print install hint with --install always', async () => {
+      const pkgData = {
+        dependencies: {
+          'ncu-test-v2': '1.0.0',
+        },
+      }
+
+      const stub = stubVersions('2.0.0', { spawn: true })
+      const tempDir = await makeTempDir()
+      const pkgFile = path.join(tempDir, 'package.json')
+      await fs.writeFile(pkgFile, JSON.stringify(pkgData), 'utf-8')
+
+      try {
+        const { stdout } = await spawn('node', [bin, '-u', '--packageFile', pkgFile, '--install', 'always'])
+        expect(stripAnsi(stdout)).not.toMatch(/Run (npm|yarn) install to install new versions/)
+        expect(await exists(path.join(tempDir, 'package-lock.json'))).toBe(true)
+        expect(await exists(path.join(tempDir, 'node_modules'))).toBe(true)
+      } finally {
+        await removeDir(tempDir)
+        stub.restore()
+      }
+    })
+
+    it('do not print install hint with --install never', async () => {
+      const pkgData = {
+        dependencies: {
+          'ncu-test-v2': '1.0.0',
+        },
+      }
+
+      const stub = stubVersions('2.0.0', { spawn: true })
+      const tempDir = await makeTempDir()
+      const pkgFile = path.join(tempDir, 'package.json')
+      await fs.writeFile(pkgFile, JSON.stringify(pkgData), 'utf-8')
+
+      try {
+        const { stdout } = await spawn('node', [bin, '-u', '--packageFile', pkgFile, '--install', 'never'])
+        expect(stripAnsi(stdout)).not.toMatch(/Run (npm|yarn) install to install new versions/)
+        expect(await exists(path.join(tempDir, 'package-lock.json'))).toBe(false)
+        expect(await exists(path.join(tempDir, 'yarn.lock'))).toBe(false)
+        expect(await exists(path.join(tempDir, 'node_modules'))).toBe(false)
+      } finally {
+        await removeDir(tempDir)
+        stub.restore()
+      }
+    })
+  })
+
+  describe('interactive', () => {
+    it('install when responding yes to prompt without --install', async () => {
+      const pkgData = {
+        dependencies: {
+          'ncu-test-v2': '1.0.0',
+        },
+      }
+
+      const stub = stubVersions('2.0.0', { spawn: true })
+      const tempDir = await makeTempDir()
+      const pkgFile = path.join(tempDir, 'package.json')
+      await fs.writeFile(pkgFile, JSON.stringify(pkgData), 'utf-8')
+
+      try {
+        await spawn(
+          'node',
+          [bin, '-iu', '--packageFile', pkgFile],
+          {},
+          {
+            env: {
+              ...process.env,
+              INJECT_PROMPTS: JSON.stringify([['ncu-test-v2'], true]),
+            },
+          },
+        )
+        expect(await exists(path.join(tempDir, 'package-lock.json'))).toBe(true)
+        expect(await exists(path.join(tempDir, 'node_modules'))).toBe(true)
+      } finally {
+        await removeDir(tempDir)
+        stub.restore()
+      }
+    })
+
+    it('do not install when responding no to prompt without --install', async () => {
+      const pkgData = {
+        dependencies: {
+          'ncu-test-v2': '1.0.0',
+        },
+      }
+
+      const stub = stubVersions('2.0.0', { spawn: true })
+      const tempDir = await makeTempDir()
+      const pkgFile = path.join(tempDir, 'package.json')
+      await fs.writeFile(pkgFile, JSON.stringify(pkgData), 'utf-8')
+
+      try {
+        await spawn(
+          'node',
+          [bin, '-iu', '--packageFile', pkgFile],
+          {},
+          {
+            env: {
+              ...process.env,
+              INJECT_PROMPTS: JSON.stringify([['ncu-test-v2'], false]),
+            },
+          },
+        )
+        expect(await exists(path.join(tempDir, 'package-lock.json'))).toBe(false)
+        expect(await exists(path.join(tempDir, 'node_modules'))).toBe(false)
+      } finally {
+        await removeDir(tempDir)
+        stub.restore()
+      }
+    })
+
+    it('install with --install always', async () => {
+      const pkgData = {
+        dependencies: {
+          'ncu-test-v2': '1.0.0',
+        },
+      }
+
+      const stub = stubVersions('2.0.0', { spawn: true })
+      const tempDir = await makeTempDir()
+      const pkgFile = path.join(tempDir, 'package.json')
+      await fs.writeFile(pkgFile, JSON.stringify(pkgData), 'utf-8')
+
+      try {
+        await spawn(
+          'node',
+          [bin, '-iu', '--packageFile', pkgFile, '--install', 'always'],
+          {},
+          {
+            env: {
+              ...process.env,
+              // NOTE: We can inject values, but we cannot test if the prompt was actually shown or not.
+              // i.e. Testing that the prompt is not shown with --install always must be done manually.
+              INJECT_PROMPTS: JSON.stringify([['ncu-test-v2']]),
+            },
+          },
+        )
+        expect(await exists(path.join(tempDir, 'package-lock.json'))).toBe(true)
+        expect(await exists(path.join(tempDir, 'node_modules'))).toBe(true)
+      } finally {
+        await removeDir(tempDir)
+        stub.restore()
+      }
+    })
+
+    it('do not install with --install never', async () => {
+      const pkgData = {
+        dependencies: {
+          'ncu-test-v2': '1.0.0',
+        },
+      }
+
+      const stub = stubVersions('2.0.0', { spawn: true })
+      const tempDir = await makeTempDir()
+      const pkgFile = path.join(tempDir, 'package.json')
+      await fs.writeFile(pkgFile, JSON.stringify(pkgData), 'utf-8')
+
+      try {
+        await spawn(
+          'node',
+          [bin, '-iu', '--packageFile', pkgFile, '--install', 'never'],
+          {},
+          {
+            env: {
+              ...process.env,
+              // NOTE: We can inject values, but we cannot test if the prompt was actually shown or not.
+              // i.e. Testing that the prompt is not shown with --install never must be done manually.
+              INJECT_PROMPTS: JSON.stringify([['ncu-test-v2']]),
+            },
+          },
+        )
+        expect(await exists(path.join(tempDir, 'package-lock.json'))).toBe(false)
+        expect(await exists(path.join(tempDir, 'node_modules'))).toBe(false)
+      } finally {
+        await removeDir(tempDir)
+        stub.restore()
+      }
+    })
+  })
+})

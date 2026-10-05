@@ -1,0 +1,8 @@
+{
+  "format": ["typescript"],
+  "ignore": ["**/node_modules/**", "**/dist/**", "**/build/**", "**/*.d.ts"],
+  "reporters": ["console", "json"],
+  "output": "reports/jscpd",
+  "absolute": false,
+  "gitignore": true
+}

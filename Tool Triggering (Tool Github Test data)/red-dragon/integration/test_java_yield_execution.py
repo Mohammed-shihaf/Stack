@@ -1,0 +1,74 @@
+"""Integration tests for Java yield_statement -- end-to-end VM execution."""
+
+from __future__ import annotations
+
+from interpreter.constants import Language
+from interpreter.frontends.java.features import JavaFeature
+from interpreter.var_name import VarName
+from tests.covers import covers
+from tests.integration.exec_helpers import run_locals
+
+
+def _run_java(source: str, max_steps: int = 500) -> dict:
+    return run_locals(source, Language.JAVA, max_steps)
+
+
+class TestJavaYieldExecution:
+    @covers(JavaFeature.YIELD)
+    def test_yield_in_switch_expression(self):
+        """yield inside switch expression block arm should produce correct value."""
+        source = """\
+class M {
+    int compute(int x) {
+        return switch (x) {
+            case 1 -> { yield 10; }
+            case 2 -> { yield 20; }
+            default -> { yield 0; }
+        };
+    }
+}
+
+M m = new M();
+int result = m.compute(2);
+"""
+        local_vars = _run_java(source)
+        assert local_vars[VarName("result")] == 20
+
+    @covers(JavaFeature.YIELD)
+    def test_yield_with_computation(self):
+        """yield with computed expression should evaluate correctly."""
+        source = """\
+class M {
+    int compute(int x) {
+        return switch (x) {
+            case 1 -> { int y = x * 10; yield y; }
+            default -> { yield -1; }
+        };
+    }
+}
+
+M m = new M();
+int result = m.compute(1);
+"""
+        local_vars = _run_java(source)
+        assert local_vars[VarName("result")] == 10
+
+    @covers(JavaFeature.YIELD)
+    def test_yield_default_arm(self):
+        """When no case matches, the default arm's yield should produce the value."""
+        source = """\
+class M {
+    int compute(int x) {
+        return switch (x) {
+            case 1 -> { yield 10; }
+            case 2 -> { yield 20; }
+            default -> { yield 99; }
+        };
+    }
+}
+
+M m = new M();
+int result = m.compute(999);
+"""
+        local_vars = _run_java(source)
+        assert local_vars[VarName("result")] == 99

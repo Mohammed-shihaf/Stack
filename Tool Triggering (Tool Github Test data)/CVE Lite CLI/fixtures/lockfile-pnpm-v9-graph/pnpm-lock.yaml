@@ -1,0 +1,46 @@
+lockfileVersion: '9.0'
+
+importers:
+
+  .:
+    dependencies:
+      express:
+        specifier: ^4.17.1
+        version: 4.17.1
+    devDependencies:
+      vite:
+        specifier: ^5.0.0
+        version: 5.0.0
+
+packages:
+
+  express@4.17.1:
+    resolution: {integrity: sha512-fake}
+  vite@5.0.0:
+    resolution: {integrity: sha512-fake}
+  body-parser@1.19.0:
+    resolution: {integrity: sha512-fake}
+  postcss@8.4.0:
+    resolution: {integrity: sha512-fake}
+  ms@2.0.0:
+    resolution: {integrity: sha512-fake}
+
+snapshots:
+
+  express@4.17.1:
+    dependencies:
+      body-parser: 1.19.0
+      ms: 2.0.0
+
+  vite@5.0.0:
+    dependencies:
+      postcss: 8.4.0
+      ms: 2.0.0
+
+  body-parser@1.19.0:
+    dependencies:
+      ms: 2.0.0
+
+  postcss@8.4.0: {}
+
+  ms@2.0.0: {}

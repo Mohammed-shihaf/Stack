@@ -1,0 +1,145 @@
+/*
+ * SonarQube JavaScript Plugin
+ * Copyright (C) SonarSource Sàrl
+ * mailto:info AT sonarsource DOT com
+ *
+ * You can redistribute and/or modify this program under the terms of
+ * the Sonar Source-Available License Version 1, as published by SonarSource Sàrl.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the Sonar Source-Available License for more details.
+ *
+ * You should have received a copy of the Sonar Source-Available License
+ * along with this program; if not, see https://sonarsource.com/license/ssal/
+ */
+import { beforeEach, describe, it, Mock } from 'node:test';
+import { tsConfigStore, sourceFileStore, initFileStores } from '../src/file-stores/index.js';
+import { expect } from 'expect';
+import { join, relative } from 'node:path/posix';
+import { normalizePath, normalizeToAbsolutePath } from '../../shared/src/helpers/files.js';
+import { createConfiguration } from '../src/common/configuration.js';
+
+const fixtures = normalizeToAbsolutePath(
+  join(normalizePath(import.meta.dirname), 'fixtures-tsconfigs'),
+);
+
+describe('tsconfigs', () => {
+  beforeEach(() => {
+    tsConfigStore.clearCache();
+    sourceFileStore.clearCache();
+  });
+
+  it('should return the TSconfig files via lookup', async () => {
+    const configuration = createConfiguration({ baseDir: fixtures });
+    await initFileStores(configuration);
+    expect(tsConfigStore.getTsConfigs().length).toBeGreaterThanOrEqual(3);
+  });
+
+  it('should validate the provided TSconfig files', async () => {
+    let configuration = createConfiguration({ baseDir: fixtures });
+    await initFileStores(configuration);
+    const tsConfigPaths = tsConfigStore
+      .getTsConfigs()
+      .map(tsconfig => relative(fixtures, tsconfig))
+      .concat('fake_dir/tsconfig.json');
+    configuration = createConfiguration({ baseDir: fixtures, tsConfigPaths });
+    tsConfigStore.clearCache();
+    await initFileStores(configuration);
+    // Should find at least the provided tsconfigs (excluding the fake one)
+    expect(tsConfigStore.getTsConfigs().length).toBeGreaterThanOrEqual(3);
+  });
+
+  it('should work with absolute paths', async () => {
+    let configuration = createConfiguration({ baseDir: fixtures });
+    await initFileStores(configuration);
+    const foundTsconfigs = tsConfigStore.getTsConfigs();
+    configuration = createConfiguration({ baseDir: fixtures, tsConfigPaths: foundTsconfigs });
+    tsConfigStore.clearCache();
+    await initFileStores(configuration);
+    expect(tsConfigStore.getTsConfigs().length).toBeGreaterThanOrEqual(3);
+  });
+
+  it('should prioritize provided paths over lookup', async () => {
+    let configuration = createConfiguration({ baseDir: fixtures });
+    await initFileStores(configuration);
+    expect(tsConfigStore.getTsConfigs().length).toBeGreaterThanOrEqual(3);
+    const tsConfigPaths = [relative(fixtures, tsConfigStore.getTsConfigs()[0])];
+    configuration = createConfiguration({ baseDir: fixtures, tsConfigPaths });
+    tsConfigStore.clearCache();
+    await initFileStores(configuration);
+    expect(tsConfigStore.getTsConfigs().length).toEqual(1);
+  });
+
+  it('should log when no tsconfigs are found with the provided property', async ({ mock }) => {
+    mock.method(console, 'error');
+
+    const configuration = createConfiguration({
+      baseDir: fixtures,
+      tsConfigPaths: ['tsconfig.fake.json'],
+    });
+    await initFileStores(configuration);
+    // Should fall back to lookup when provided paths don't exist
+    expect(tsConfigStore.getTsConfigs().length).toBeGreaterThanOrEqual(3);
+
+    expect(
+      (console.error as Mock<typeof console.error>).mock.calls.map(call => call.arguments[0]),
+    ).toContain(
+      `Failed to find any of the provided tsconfig.json files: ${join(fixtures, 'tsconfig.fake.json')}`,
+    );
+  });
+
+  it('should keep using provided tsconfig paths after project-file discovery resets the cache', async () => {
+    const providedTsconfig = normalizeToAbsolutePath(join(fixtures, 'project3', 'tsconfig.json'));
+    let configuration = createConfiguration({
+      baseDir: fixtures,
+      tsConfigPaths: [providedTsconfig],
+    });
+    await initFileStores(configuration);
+
+    expect(tsConfigStore.getTsConfigs()).toEqual([providedTsconfig]);
+    expect(tsConfigStore.usingPropertyTsConfigs()).toBe(true);
+
+    configuration = createConfiguration({
+      baseDir: fixtures,
+      tsConfigPaths: [providedTsconfig],
+      jsTsExclusions: ['**/project1/**'],
+    });
+    await initFileStores(configuration);
+
+    expect(tsConfigStore.getTsConfigs()).toEqual([providedTsconfig]);
+    expect(tsConfigStore.usingPropertyTsConfigs()).toBe(true);
+  });
+
+  it('should refresh discovered tsconfigs when project-file discovery config changes', async () => {
+    let configuration = createConfiguration({ baseDir: fixtures });
+    await initFileStores(configuration);
+
+    const excludedTsconfig = normalizeToAbsolutePath(join(fixtures, 'project3', 'tsconfig.json'));
+    expect(tsConfigStore.getTsConfigs()).toContain(excludedTsconfig);
+
+    configuration = createConfiguration({
+      baseDir: fixtures,
+      jsTsExclusions: ['**/project3/**'],
+    });
+    await initFileStores(configuration);
+
+    expect(tsConfigStore.getTsConfigs()).not.toContain(excludedTsconfig);
+  });
+
+  it('should keep discovered tsconfigs when only source-file selection changes', async () => {
+    let configuration = createConfiguration({ baseDir: fixtures });
+    await initFileStores(configuration);
+
+    const retainedTsconfig = normalizeToAbsolutePath(join(fixtures, 'project3', 'tsconfig.json'));
+
+    configuration = createConfiguration({
+      baseDir: fixtures,
+      sources: ['project3'],
+    });
+    await initFileStores(configuration);
+
+    expect(tsConfigStore.getTsConfigs()).toContain(retainedTsconfig);
+  });
+});

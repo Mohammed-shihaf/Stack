@@ -1,0 +1,118 @@
+"""End-to-end test: division → array index round-trip with type coercion.
+
+Verifies that when a program computes an array index via division (which
+produces a float in Python), the type-aware executor coerces it to int
+so that STORE_INDEX and LOAD_INDEX use matching heap keys.
+"""
+
+from interpreter.cfg import build_cfg
+from interpreter.constants import FoundationTypeName
+from interpreter.instructions import InstructionBase
+from interpreter.ir import CodeLabel, IRInstruction, Opcode
+from interpreter.register import Register
+from interpreter.registry import build_registry
+from interpreter.run import ExecutionStrategies, execute_cfg, initial_vm_state
+from interpreter.run_types import VMConfig
+from interpreter.types.coercion.default_conversion_rules import (
+    DefaultTypeConversionRules,
+)
+from interpreter.types.type_inference import infer_types
+from interpreter.types.type_resolver import TypeResolver
+from interpreter.types.typed_value import unwrap
+from interpreter.var_name import VarName
+
+
+def _build_division_index_program() -> list[InstructionBase]:
+    """Build IR for: arr[0] = 42; idx = 4 / 2; result = arr[idx]."""
+    return [
+        IRInstruction(opcode=Opcode.LABEL, label=CodeLabel("entry")),
+        # Create array
+        IRInstruction(
+            opcode=Opcode.NEW_ARRAY, result_reg=Register("%arr"), operands=["int"]
+        ),
+        # Store 42 at index 0
+        IRInstruction(
+            opcode=Opcode.CONST, result_reg=Register("%zero"), operands=["0"]
+        ),
+        IRInstruction(
+            opcode=Opcode.CONST, result_reg=Register("%val"), operands=["42"]
+        ),
+        IRInstruction(opcode=Opcode.STORE_INDEX, operands=["%arr", "%zero", "%val"]),
+        # Compute index: 4 / 2 = 2.0 (float in Python)
+        IRInstruction(
+            opcode=Opcode.CONST, result_reg=Register("%four"), operands=["4"]
+        ),
+        IRInstruction(opcode=Opcode.CONST, result_reg=Register("%two"), operands=["2"]),
+        IRInstruction(
+            opcode=Opcode.BINOP,
+            result_reg=Register("%idx"),
+            operands=["/", "%four", "%two"],
+        ),
+        # Store 99 at computed index
+        IRInstruction(
+            opcode=Opcode.CONST, result_reg=Register("%val2"), operands=["99"]
+        ),
+        IRInstruction(opcode=Opcode.STORE_INDEX, operands=["%arr", "%idx", "%val2"]),
+        # Load from int literal 2 — should find value 99
+        IRInstruction(
+            opcode=Opcode.CONST, result_reg=Register("%two_i"), operands=["2"]
+        ),
+        IRInstruction(
+            opcode=Opcode.LOAD_INDEX,
+            result_reg=Register("%result"),
+            operands=["%arr", "%two_i"],
+        ),
+        # Store result in variable for inspection
+        IRInstruction(opcode=Opcode.STORE_VAR, operands=["result", "%result"]),
+        IRInstruction(opcode=Opcode.RETURN, operands=["%result"]),
+    ]
+
+
+class TestTypeCoecionEndToEnd:
+    def test_division_index_round_trip(self):
+        """Division result (float) used as array index should match integer lookup."""
+        instructions = _build_division_index_program()
+        cfg = build_cfg(instructions)
+        registry = build_registry(instructions, cfg)
+
+        conversion_rules = DefaultTypeConversionRules()
+        type_resolver = TypeResolver(conversion_rules)
+        type_env = infer_types(instructions, type_resolver)
+
+        # Verify type inference assigned Int to %idx (Int / Int → Int via floor division)
+        assert type_env.register_types.get(Register("%idx")) == FoundationTypeName.INT
+
+        vm, _stats = execute_cfg(
+            cfg,
+            "entry",
+            registry,
+            VMConfig(max_steps=50),
+            ExecutionStrategies(
+                type_env=type_env,
+                conversion_rules=conversion_rules,
+            ),
+            vm=initial_vm_state(),
+        )
+
+        # The stored value should be retrievable via the integer key
+        assert unwrap(vm.current_frame.local_vars.get(VarName("result"))) == 99
+
+    def test_division_index_without_type_env_mismatches(self):
+        """Without type coercion, float division index produces key '2.0' not '2'."""
+        instructions = _build_division_index_program()
+        cfg = build_cfg(instructions)
+        registry = build_registry(instructions, cfg)
+
+        # No type environment — executor uses identity rules (no coercion)
+        vm, _stats = execute_cfg(
+            cfg,
+            "entry",
+            registry,
+            VMConfig(max_steps=50),
+            vm=initial_vm_state(),
+        )
+
+        # Without coercion, 4/2 = 2.0 (float), stored at key "2.0"
+        # Load with int 2 looks for key "2" — won't find it, gets symbolic
+        result = unwrap(vm.current_frame.local_vars.get(VarName("result")))
+        assert result != 99, "Without type coercion, the round-trip should fail"
