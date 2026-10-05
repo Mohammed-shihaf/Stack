@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# vitest + @vitest/coverage-v8 runner -- branch TS-079 (Node 18, bun, Monolith).
+# vitest + @vitest/coverage-v8 runner -- branch TS-074 (Node 18, npm, Microservices).
 set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
