@@ -1,15 +1,17 @@
 {
-  "name": "typescript-n12-ts-015",
+  "name": "typescript-n12-ts-010",
   "version": "1.0.0",
   "private": true,
-  "description": "Node 12 / vite / bun / Monolith tool-evaluation repository (branch TS-015).",
+  "description": "Node 12 / vite / npm / Microservices tool-evaluation repository (branch TS-010).",
   "license": "MIT",
   "engines": {
     "node": ">=12.20 <13"
   },
-  "packageManager": "bun@1.4.0",
-  "main": "dist/src/index.js",
-  "types": "dist/src/index.d.ts",
+  "packageManager": "npm@8.19.4",
+  "workspaces": [
+    "packages/*",
+    "services/*"
+  ],
   "scripts": {
     "build": "bash tools/typescript/run_tsc.sh",
     "bundle": "bash tools/esbuild/run_esbuild.sh",
