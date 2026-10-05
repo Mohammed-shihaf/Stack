@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# eslint-plugin-security runner -- branch TS-034 (Node 14, npm, Microservices).
+# eslint-plugin-security runner -- branch TS-033 (Node 14, npm, Monolith).
 set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
@@ -22,7 +22,7 @@ echo "[security] eslint-plugin-security $(pkgver eslint-plugin-security)"
 # "Converting circular structure to JSON" while FORMATTING that error -- so the
 # output is a stack trace that never names the cause. .eslintrc.cjs extends
 # `plugin:security/recommended-legacy`. See TOOL-ROSTER.md.
-node_modules/.bin/eslint packages/domain/src/analysis/sast-fixture.ts packages/domain/src/analysis/taint-fixture.ts \
+node_modules/.bin/eslint src/analysis/sast-fixture.ts src/analysis/taint-fixture.ts \
   --no-inline-config --format json > reports/security.json || true
 node -e "
   const files = require('./reports/security.json');
