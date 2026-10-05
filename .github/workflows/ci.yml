@@ -1,15 +1,15 @@
-# CI for branch TS-048.
+# CI for branch TS-047.
 #
 # The point of this file: it INVOKES EVERY WIRED TOOL and uploads what they
 # produce. FlintAtlas and WillowBrook ran only `npm install` and `npm test`, so
 # not one of their declared tools was ever executed in CI. Gate G6.
-name: TS-048
+name: TS-047
 
 on:
   push:
-    branches: ["TS-048"]
+    branches: ["TS-047"]
   pull_request:
-    branches: ["TS-048"]
+    branches: ["TS-047"]
   workflow_dispatch:
 
 jobs:
@@ -121,7 +121,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: tool-reports-TS-048
+          name: tool-reports-TS-047
           path: |
             reports/
             coverage/
