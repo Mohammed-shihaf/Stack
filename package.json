@@ -1,15 +1,17 @@
 {
-  "name": "typescript-n12-ts-095",
+  "name": "typescript-n12-ts-090",
   "version": "1.0.0",
   "private": true,
-  "description": "Node 18 / rollup / bun / Monolith tool-evaluation repository (branch TS-095).",
+  "description": "Node 18 / rollup / npm / Microservices tool-evaluation repository (branch TS-090).",
   "license": "MIT",
   "engines": {
     "node": ">=18.18 <19"
   },
-  "packageManager": "bun@1.3.13",
-  "main": "dist/src/index.js",
-  "types": "dist/src/index.d.ts",
+  "packageManager": "npm@10.9.9",
+  "workspaces": [
+    "packages/*",
+    "services/*"
+  ],
   "scripts": {
     "build": "bash tools/typescript/run_tsc.sh",
     "bundle": "bash tools/esbuild/run_esbuild.sh",
