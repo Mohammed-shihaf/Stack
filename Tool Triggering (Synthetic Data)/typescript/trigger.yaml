@@ -3,17 +3,17 @@ label: "TypeScript compiler (tsc)"
 language: typescript
 node_version: "12"
 typescript_version: "5.0.4"
-branch: "TS-006"
-scenario: "2 - Microservices"
-architecture: "Microservices"
-module: "workspace"
+branch: "TS-005"
+scenario: "1 - Monolithic"
+architecture: "Monolith"
+module: "flat"
 package_manager: "pnpm"
 bundler: "esbuild"
-project: packages/domain/package.json
+project: package.json
 tests: tests/
 tools_project: tools/
 pinned-version: "5.0.4"
 config: "tsconfig.json"
-target_files: [packages/domain/src]
+target_files: [src]
 command: "node_modules/.bin/tsc -p tsconfig.json --noEmit"
 produces: "type diagnostics (must be empty)"

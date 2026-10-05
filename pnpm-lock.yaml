@@ -1,121 +1,90 @@
 lockfileVersion: 5.3
 
-importers:
+specifiers:
+  '@cyclonedx/cdxgen': 8.6.3
+  '@opentelemetry/api': 1.1.0
+  '@opentelemetry/sdk-node': 0.29.2
+  '@opentelemetry/sdk-trace-base': 1.3.1
+  '@stryker-mutator/core': 5.6.1
+  '@stryker-mutator/mocha-runner': 5.6.1
+  '@types/chai': 4.3.5
+  '@types/lodash': 4.14.202
+  '@types/minimist': 1.2.5
+  '@types/mocha': 9.1.1
+  '@types/node': 18.19.50
+  '@types/node-fetch': 2.6.11
+  '@types/tar': 6.1.11
+  '@typescript-eslint/eslint-plugin': 5.62.0
+  '@typescript-eslint/parser': 5.62.0
+  axios: 0.21.0
+  c8: 8.0.1
+  chai: 4.3.10
+  dependency-cruiser: 11.18.0
+  esbuild: 0.21.5
+  eslint: 8.57.1
+  eslint-plugin-security: 2.1.1
+  eslint-plugin-sonarjs: 0.15.0
+  eslint-scope: 7.2.2
+  espree: 9.6.1
+  fast-check: 4.9.0
+  jscpd: 3.2.1
+  lodash: 4.17.15
+  madge: 5.0.2
+  minimist: 1.2.5
+  mocha: 9.2.2
+  node-fetch: 2.6.0
+  npm-check-updates: 12.5.12
+  nyc: 15.1.0
+  source-map-support: 0.5.21
+  tar: 6.1.0
+  ts-morph: 18.0.0
+  ts-node: 10.2.1
+  ts-prune: 0.10.3
+  typescript: 5.0.4
 
-  .:
-    specifiers:
-      '@cyclonedx/cdxgen': 8.6.3
-      '@opentelemetry/api': 1.1.0
-      '@opentelemetry/sdk-node': 0.29.2
-      '@opentelemetry/sdk-trace-base': 1.3.1
-      '@stryker-mutator/core': 5.6.1
-      '@stryker-mutator/mocha-runner': 5.6.1
-      '@types/chai': 4.3.5
-      '@types/lodash': 4.14.202
-      '@types/minimist': 1.2.5
-      '@types/mocha': 9.1.1
-      '@types/node': 18.19.50
-      '@types/node-fetch': 2.6.11
-      '@types/tar': 6.1.11
-      '@typescript-eslint/eslint-plugin': 5.62.0
-      '@typescript-eslint/parser': 5.62.0
-      axios: 0.21.0
-      c8: 8.0.1
-      chai: 4.3.10
-      dependency-cruiser: 11.18.0
-      esbuild: 0.21.5
-      eslint: 8.57.1
-      eslint-plugin-security: 2.1.1
-      eslint-plugin-sonarjs: 0.15.0
-      eslint-scope: 7.2.2
-      espree: 9.6.1
-      fast-check: 4.9.0
-      jscpd: 3.2.1
-      lodash: 4.17.15
-      madge: 5.0.2
-      minimist: 1.2.5
-      mocha: 9.2.2
-      node-fetch: 2.6.0
-      npm-check-updates: 12.5.12
-      nyc: 15.1.0
-      source-map-support: 0.5.21
-      tar: 6.1.0
-      ts-morph: 18.0.0
-      ts-node: 10.2.1
-      ts-prune: 0.10.3
-      typescript: 5.0.4
-    dependencies:
-      '@opentelemetry/api': 1.1.0
-      '@opentelemetry/sdk-node': 0.29.2_@opentelemetry+api@1.1.0
-      '@opentelemetry/sdk-trace-base': 1.3.1_@opentelemetry+api@1.1.0
-      axios: 0.21.0
-      lodash: 4.17.15
-      minimist: 1.2.5
-      node-fetch: 2.6.0
-      tar: 6.1.0
-    devDependencies:
-      '@cyclonedx/cdxgen': 8.6.3
-      '@stryker-mutator/core': 5.6.1_@types+node@18.19.50
-      '@stryker-mutator/mocha-runner': 5.6.1_bca8a0ce25100e265cac6c1e54bdb654
-      '@types/chai': 4.3.5
-      '@types/lodash': 4.14.202
-      '@types/minimist': 1.2.5
-      '@types/mocha': 9.1.1
-      '@types/node': 18.19.50
-      '@types/node-fetch': 2.6.11
-      '@types/tar': 6.1.11
-      '@typescript-eslint/eslint-plugin': 5.62.0_432e4b1881a733218cdb79010d65ec1f
-      '@typescript-eslint/parser': 5.62.0_eslint@8.57.1+typescript@5.0.4
-      c8: 8.0.1
-      chai: 4.3.10
-      dependency-cruiser: 11.18.0
-      esbuild: 0.21.5
-      eslint: 8.57.1
-      eslint-plugin-security: 2.1.1
-      eslint-plugin-sonarjs: 0.15.0_eslint@8.57.1
-      eslint-scope: 7.2.2
-      espree: 9.6.1
-      fast-check: 4.9.0
-      jscpd: 3.2.1
-      madge: 5.0.2
-      mocha: 9.2.2
-      npm-check-updates: 12.5.12
-      nyc: 15.1.0
-      source-map-support: 0.5.21
-      ts-morph: 18.0.0
-      ts-node: 10.2.1_5780936e01007c08dad18b5e40e77099
-      ts-prune: 0.10.3
-      typescript: 5.0.4
+dependencies:
+  '@opentelemetry/api': 1.1.0
+  '@opentelemetry/sdk-node': 0.29.2_@opentelemetry+api@1.1.0
+  '@opentelemetry/sdk-trace-base': 1.3.1_@opentelemetry+api@1.1.0
+  axios: 0.21.0
+  lodash: 4.17.15
+  minimist: 1.2.5
+  node-fetch: 2.6.0
+  tar: 6.1.0
 
-  packages/contracts:
-    specifiers: {}
-
-  packages/domain:
-    specifiers: {}
-
-  services/gateway-service:
-    specifiers:
-      '@orderkit/contracts': 1.0.0
-      '@orderkit/domain': 1.0.0
-    dependencies:
-      '@orderkit/contracts': link:../../packages/contracts
-      '@orderkit/domain': link:../../packages/domain
-
-  services/order-service:
-    specifiers:
-      '@orderkit/contracts': 1.0.0
-      '@orderkit/domain': 1.0.0
-    dependencies:
-      '@orderkit/contracts': link:../../packages/contracts
-      '@orderkit/domain': link:../../packages/domain
-
-  services/pricing-service:
-    specifiers:
-      '@orderkit/contracts': 1.0.0
-      '@orderkit/domain': 1.0.0
-    dependencies:
-      '@orderkit/contracts': link:../../packages/contracts
-      '@orderkit/domain': link:../../packages/domain
+devDependencies:
+  '@cyclonedx/cdxgen': 8.6.3
+  '@stryker-mutator/core': 5.6.1_@types+node@18.19.50
+  '@stryker-mutator/mocha-runner': 5.6.1_bca8a0ce25100e265cac6c1e54bdb654
+  '@types/chai': 4.3.5
+  '@types/lodash': 4.14.202
+  '@types/minimist': 1.2.5
+  '@types/mocha': 9.1.1
+  '@types/node': 18.19.50
+  '@types/node-fetch': 2.6.11
+  '@types/tar': 6.1.11
+  '@typescript-eslint/eslint-plugin': 5.62.0_432e4b1881a733218cdb79010d65ec1f
+  '@typescript-eslint/parser': 5.62.0_eslint@8.57.1+typescript@5.0.4
+  c8: 8.0.1
+  chai: 4.3.10
+  dependency-cruiser: 11.18.0
+  esbuild: 0.21.5
+  eslint: 8.57.1
+  eslint-plugin-security: 2.1.1
+  eslint-plugin-sonarjs: 0.15.0_eslint@8.57.1
+  eslint-scope: 7.2.2
+  espree: 9.6.1
+  fast-check: 4.9.0
+  jscpd: 3.2.1
+  madge: 5.0.2
+  mocha: 9.2.2
+  npm-check-updates: 12.5.12
+  nyc: 15.1.0
+  source-map-support: 0.5.21
+  ts-morph: 18.0.0
+  ts-node: 10.2.1_5780936e01007c08dad18b5e40e77099
+  ts-prune: 0.10.3
+  typescript: 5.0.4
 
 packages:
 
@@ -2084,7 +2053,7 @@ packages:
     dependencies:
       baseline-browser-mapping: 2.11.20
       caniuse-lite: 1.0.30001810
-      electron-to-chromium: 1.5.418
+      electron-to-chromium: 1.5.417
       node-releases: 2.0.54
       update-browserslist-db: 1.3.2_browserslist@4.28.8
     dev: true
@@ -3110,8 +3079,8 @@ packages:
     dev: true
     optional: true
 
-  /electron-to-chromium/1.5.418:
-    resolution: {integrity: sha512-UzS26r3AEbG5wSoGVpJKqwHIU9zwQN7LHdVIThDrJpS0I5KdlXFMEb8543fhc9dVnIIAST6ar8rhwa00AL5MlA==}
+  /electron-to-chromium/1.5.417:
+    resolution: {integrity: sha512-4T+DTDWuMPM4aHlHwWdAVCVWwp7LDilnhzkj+c/Lbj91XSQrLuOmZSLtS9Q4iIqjlPUbPOnC624zDVVHCHaolQ==}
     dev: true
 
   /emoji-regex/8.0.0:
@@ -4074,7 +4043,7 @@ packages:
     engines: {node: '>=0.6.0'}
     hasBin: true
     dependencies:
-      minimist: 1.2.8
+      minimist: 1.2.5
     dev: true
 
   /gopd/1.2.0:
