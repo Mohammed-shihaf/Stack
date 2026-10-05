@@ -246,37 +246,6 @@ importers:
         specifier: 3.2.7
         version: 3.2.7(@types/debug@4.1.13)(@types/node@18.19.50)(jiti@2.7.0)(supports-color@8.1.1)(yaml@2.9.0)
 
-  packages/contracts: {}
-
-  packages/domain: {}
-
-  services/gateway-service:
-    dependencies:
-      '@orderkit/contracts':
-        specifier: workspace:*
-        version: link:../../packages/contracts
-      '@orderkit/domain':
-        specifier: workspace:*
-        version: link:../../packages/domain
-
-  services/order-service:
-    dependencies:
-      '@orderkit/contracts':
-        specifier: workspace:*
-        version: link:../../packages/contracts
-      '@orderkit/domain':
-        specifier: workspace:*
-        version: link:../../packages/domain
-
-  services/pricing-service:
-    dependencies:
-      '@orderkit/contracts':
-        specifier: workspace:*
-        version: link:../../packages/contracts
-      '@orderkit/domain':
-        specifier: workspace:*
-        version: link:../../packages/domain
-
 packages:
 
   '@ampproject/remapping@2.3.0':

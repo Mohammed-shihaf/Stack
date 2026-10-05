@@ -1,17 +1,15 @@
 {
-  "name": "typescript-n12-ts-078",
+  "name": "typescript-n12-ts-077",
   "version": "1.0.0",
   "private": true,
-  "description": "Node 18 / esbuild / pnpm / Microservices tool-evaluation repository (branch TS-078).",
+  "description": "Node 18 / esbuild / pnpm / Monolith tool-evaluation repository (branch TS-077).",
   "license": "MIT",
   "engines": {
     "node": ">=18.18 <19"
   },
   "packageManager": "pnpm@12.2.1",
-  "workspaces": [
-    "packages/*",
-    "services/*"
-  ],
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
   "scripts": {
     "build": "bash tools/typescript/run_tsc.sh",
     "bundle": "bash tools/esbuild/run_esbuild.sh",
