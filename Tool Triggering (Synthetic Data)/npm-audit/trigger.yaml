@@ -3,13 +3,13 @@ label: "npm audit / npm ls"
 language: typescript
 node_version: "16"
 typescript_version: "5.5.4"
-branch: "TS-064"
-scenario: "2 - Microservices"
-architecture: "Microservices"
-module: "workspace"
+branch: "TS-063"
+scenario: "1 - Monolithic"
+architecture: "Monolith"
+module: "flat"
 package_manager: "bun"
 bundler: "vite"
-project: packages/domain/package.json
+project: package.json
 tests: tests/
 tools_project: tools/
 pinned-version: null  # not an npm package -- see the runner
