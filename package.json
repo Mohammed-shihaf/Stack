@@ -1,17 +1,15 @@
 {
-  "name": "typescript-n12-ts-084",
+  "name": "typescript-n12-ts-083",
   "version": "1.0.0",
   "private": true,
-  "description": "Node 18 / vite / yarn (Berry) / Microservices tool-evaluation repository (branch TS-084).",
+  "description": "Node 18 / vite / yarn (Berry) / Monolith tool-evaluation repository (branch TS-083).",
   "license": "MIT",
   "engines": {
     "node": ">=18.18 <19"
   },
   "packageManager": "yarn@4.18.0",
-  "workspaces": [
-    "packages/*",
-    "services/*"
-  ],
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
   "scripts": {
     "build": "bash tools/typescript/run_tsc.sh",
     "bundle": "bash tools/esbuild/run_esbuild.sh",
