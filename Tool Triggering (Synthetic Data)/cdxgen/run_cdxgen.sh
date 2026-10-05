@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# @cyclonedx/cdxgen runner -- branch TS-066 (Node 16, npm, Microservices).
+# @cyclonedx/cdxgen runner -- branch TS-065 (Node 16, npm, Monolith).
 set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
