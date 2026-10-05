@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# @opentelemetry/sdk-node runner -- branch TS-014 (Node 12, pnpm, Microservices).
+# @opentelemetry/sdk-node runner -- branch TS-013 (Node 12, pnpm, Monolith).
 set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
 mkdir -p reports
 
 echo "[otel] sdk-node: $(node -p "require('@opentelemetry/sdk-node/package.json').version")"
-test -f dist/packages/domain/src/index.js || bash tools/typescript/run_tsc.sh
-node -r ./tools/opentelemetry/otel-bootstrap.js -e "require('./dist/packages/domain/src/index.js').run()"
+test -f dist/src/index.js || bash tools/typescript/run_tsc.sh
+node -r ./tools/opentelemetry/otel-bootstrap.js -e "require('./dist/src/index.js').run()"
 node -e "
   const s = require('./reports/otel-spans.json');
   console.log('[otel] spans captured:', s.length);
