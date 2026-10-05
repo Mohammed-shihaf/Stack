@@ -1,17 +1,15 @@
 {
-  "name": "typescript-n12-ts-032",
+  "name": "typescript-n12-ts-031",
   "version": "1.0.0",
   "private": true,
-  "description": "Node 14 / esbuild / bun / Microservices tool-evaluation repository (branch TS-032).",
+  "description": "Node 14 / esbuild / bun / Monolith tool-evaluation repository (branch TS-031).",
   "license": "MIT",
   "engines": {
     "node": ">=14.17 <15"
   },
   "packageManager": "bun@1.4.0",
-  "workspaces": [
-    "packages/*",
-    "services/*"
-  ],
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
   "scripts": {
     "build": "bash tools/typescript/run_tsc.sh",
     "bundle": "bash tools/esbuild/run_esbuild.sh",
