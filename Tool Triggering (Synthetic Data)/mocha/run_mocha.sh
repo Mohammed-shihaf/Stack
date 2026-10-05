@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# mocha runner -- branch TS-046 (Node 14, pnpm, Microservices).
+# mocha runner -- branch TS-045 (Node 14, pnpm, Monolith).
 set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
