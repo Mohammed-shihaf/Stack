@@ -1,15 +1,17 @@
 {
-  "name": "typescript-n12-ts-041",
+  "name": "typescript-n12-ts-046",
   "version": "1.0.0",
   "private": true,
-  "description": "Node 14 / rollup / npm / Monolith tool-evaluation repository (branch TS-041).",
+  "description": "Node 14 / rollup / pnpm / Microservices tool-evaluation repository (branch TS-046).",
   "license": "MIT",
   "engines": {
     "node": ">=14.17 <15"
   },
-  "packageManager": "npm@9.9.4",
-  "main": "dist/src/index.js",
-  "types": "dist/src/index.d.ts",
+  "packageManager": "pnpm@7.33.7",
+  "workspaces": [
+    "packages/*",
+    "services/*"
+  ],
   "scripts": {
     "build": "bash tools/typescript/run_tsc.sh",
     "bundle": "bash tools/esbuild/run_esbuild.sh",
