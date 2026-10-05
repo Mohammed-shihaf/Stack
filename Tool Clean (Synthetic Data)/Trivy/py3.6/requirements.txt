@@ -1,0 +1,2 @@
+# Intentionally empty: zero dependencies means zero advisories, forever.
+# A pinned-but-currently-clean list would rot the week a CVE lands.

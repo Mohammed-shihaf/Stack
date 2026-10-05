@@ -1,0 +1,304 @@
+"""Tests for output format writers (DOT, TGF, yEd GraphML, SVG, HTML, text)."""
+
+from glob import glob
+import io
+import logging
+import os
+import re
+import shutil
+import xml.etree.ElementTree as ET
+
+import pytest
+
+from pyan.analyzer import CallGraphVisitor
+from pyan.visgraph import VisualGraph
+from pyan.writers import DotWriter, HTMLWriter, SVGWriter, TextWriter, TgfWriter, YedWriter
+
+has_dot = shutil.which("dot") is not None
+
+
+@pytest.fixture
+def graph():
+    """Build a VisualGraph from the standard test_code fixtures."""
+    filenames = glob(os.path.join(os.path.dirname(__file__), "test_code/**/*.py"), recursive=True)
+    visitor = CallGraphVisitor(filenames, root=os.path.dirname(__file__), logger=logging.getLogger())
+    options = {
+        "draw_defines": True,
+        "draw_uses": True,
+        "colored": True,
+        "grouped_alt": False,
+        "grouped": True,
+        "nested_groups": True,
+        "annotated": False,
+    }
+    return VisualGraph.from_visitor(visitor, options=options, logger=logging.getLogger())
+
+
+# ---------------------------------------------------------------------------
+# DOT
+# ---------------------------------------------------------------------------
+
+class TestDotWriter:
+    def test_valid_structure(self, graph):
+        buf = io.StringIO()
+        writer = DotWriter(graph, options=["rankdir=TB"], output=buf, logger=logging.getLogger())
+        writer.run()
+        dot = buf.getvalue()
+        assert dot.startswith("digraph G {")
+        assert dot.rstrip().endswith("}")
+
+    def test_contains_nodes(self, graph):
+        buf = io.StringIO()
+        writer = DotWriter(graph, output=buf, logger=logging.getLogger())
+        writer.run()
+        dot = buf.getvalue()
+        # Should contain at least one node with a label
+        assert "label=" in dot
+
+    def test_contains_edges(self, graph):
+        buf = io.StringIO()
+        writer = DotWriter(graph, output=buf, logger=logging.getLogger())
+        writer.run()
+        dot = buf.getvalue()
+        assert "->" in dot
+
+    def test_defines_edges_dashed(self, graph):
+        buf = io.StringIO()
+        writer = DotWriter(graph, output=buf, logger=logging.getLogger())
+        writer.run()
+        dot = buf.getvalue()
+        assert 'style="dashed"' in dot
+
+    def test_uses_edges_solid(self, graph):
+        buf = io.StringIO()
+        writer = DotWriter(graph, output=buf, logger=logging.getLogger())
+        writer.run()
+        dot = buf.getvalue()
+        assert 'style="solid"' in dot
+
+    def test_subgraphs_when_grouped(self, graph):
+        buf = io.StringIO()
+        writer = DotWriter(graph, output=buf, logger=logging.getLogger())
+        writer.run()
+        dot = buf.getvalue()
+        assert 'subgraph "cluster_' in dot
+
+    def test_rankdir_option(self, graph):
+        buf = io.StringIO()
+        writer = DotWriter(graph, options=["rankdir=LR"], output=buf, logger=logging.getLogger())
+        writer.run()
+        dot = buf.getvalue()
+        assert "rankdir=LR" in dot
+
+    def test_concentrate_option(self, graph):
+        buf = io.StringIO()
+        writer = DotWriter(graph, options=["concentrate=true"], output=buf, logger=logging.getLogger())
+        writer.run()
+        dot = buf.getvalue()
+        assert "concentrate=true" in dot
+
+    def test_tooltip_present(self, graph):
+        """Tooltip attribute should be emitted for all defined nodes."""
+        buf = io.StringIO()
+        writer = DotWriter(graph, output=buf, logger=logging.getLogger())
+        writer.run()
+        dot = buf.getvalue()
+        assert "tooltip=" in dot
+
+    def test_tooltip_contains_filename_and_lineno(self, graph):
+        """Tooltip for non-module nodes should include the source filename and line number."""
+        buf = io.StringIO()
+        writer = DotWriter(graph, output=buf, logger=logging.getLogger())
+        writer.run()
+        dot = buf.getvalue()
+        # Non-module tooltips reference .py files with line numbers (digits after colon)
+        assert re.search(r'tooltip="[^"]*\.py:\d+', dot)
+
+    def test_tooltip_contains_flavor_and_namespace(self, graph):
+        """Tooltip for non-module nodes should include the flavor and namespace."""
+        buf = io.StringIO()
+        writer = DotWriter(graph, output=buf, logger=logging.getLogger())
+        writer.run()
+        dot = buf.getvalue()
+        assert "\\nfunction in " in dot or "\\nmethod in " in dot or "\\nclass in " in dot
+
+    def test_tooltip_module_node(self, graph):
+        """Module-level nodes should have a tooltip with qualified name and filename."""
+        buf = io.StringIO()
+        writer = DotWriter(graph, output=buf, logger=logging.getLogger())
+        writer.run()
+        dot = buf.getvalue()
+        # Module tooltips contain the qualified module name and .py filename
+        assert re.search(r'tooltip="test_code\.[^"]*\\n[^"]*\.py"', dot)
+
+
+# ---------------------------------------------------------------------------
+# TGF
+# ---------------------------------------------------------------------------
+
+class TestTgfWriter:
+    def test_valid_structure(self, graph):
+        buf = io.StringIO()
+        writer = TgfWriter(graph, output=buf, logger=logging.getLogger())
+        writer.run()
+        tgf = buf.getvalue()
+        lines = tgf.strip().split("\n")
+        # TGF has nodes, then a "#" separator, then edges
+        separator_indices = [i for i, line in enumerate(lines) if line.strip() == "#"]
+        assert len(separator_indices) == 1
+
+    def test_nodes_before_separator(self, graph):
+        buf = io.StringIO()
+        writer = TgfWriter(graph, output=buf, logger=logging.getLogger())
+        writer.run()
+        tgf = buf.getvalue()
+        lines = tgf.strip().split("\n")
+        sep_idx = next(i for i, line in enumerate(lines) if line.strip() == "#")
+        # Node lines should have "id label" format
+        for line in lines[:sep_idx]:
+            parts = line.strip().split(None, 1)
+            assert len(parts) == 2
+            assert parts[0].isdigit()
+
+    def test_edges_after_separator(self, graph):
+        buf = io.StringIO()
+        writer = TgfWriter(graph, output=buf, logger=logging.getLogger())
+        writer.run()
+        tgf = buf.getvalue()
+        lines = tgf.strip().split("\n")
+        sep_idx = next(i for i, line in enumerate(lines) if line.strip() == "#")
+        edge_lines = [line for line in lines[sep_idx + 1:] if line.strip()]
+        assert len(edge_lines) > 0
+        # Edge lines: "source_id target_id flavor"
+        for line in edge_lines:
+            parts = line.strip().split()
+            assert len(parts) == 3
+            assert parts[0].isdigit()
+            assert parts[1].isdigit()
+            assert parts[2] in ("U", "D")
+
+
+# ---------------------------------------------------------------------------
+# yEd GraphML
+# ---------------------------------------------------------------------------
+
+class TestYedWriter:
+    def test_valid_xml(self, graph):
+        buf = io.StringIO()
+        writer = YedWriter(graph, output=buf, logger=logging.getLogger())
+        writer.run()
+        xml_str = buf.getvalue()
+        # Should parse as valid XML
+        root = ET.fromstring(xml_str)
+        assert root.tag.endswith("graphml")
+
+    def test_contains_nodes_and_edges(self, graph):
+        buf = io.StringIO()
+        writer = YedWriter(graph, output=buf, logger=logging.getLogger())
+        writer.run()
+        xml_str = buf.getvalue()
+        root = ET.fromstring(xml_str)
+        # Use namespace-agnostic search
+        all_tags = {elem.tag.split("}")[-1] for elem in root.iter()}
+        assert "node" in all_tags
+        assert "edge" in all_tags
+
+    def test_markup_characters_in_labels_are_escaped(self, graph):
+        """A label is text, not markup.
+
+        Grouped output labels a module's own body ``<module>``, which reaches
+        the writer as five characters and must leave it as five characters.
+        """
+        buf = io.StringIO()
+        writer = YedWriter(graph, output=buf, logger=logging.getLogger())
+        writer.run()
+        xml_str = buf.getvalue()
+        assert "&lt;module&gt;" in xml_str
+
+        root = ET.fromstring(xml_str)
+        labels = {elem.text for elem in root.iter() if elem.tag.endswith("NodeLabel")}
+        assert "<module>" in labels
+
+
+# ---------------------------------------------------------------------------
+# SVG (requires graphviz `dot` binary)
+# ---------------------------------------------------------------------------
+
+@pytest.mark.skipif(not has_dot, reason="graphviz dot not installed")
+class TestSVGWriter:
+    def test_valid_svg_xml(self, graph):
+        buf = io.StringIO()
+        writer = SVGWriter(graph, output=buf, logger=logging.getLogger())
+        writer.run()
+        svg = buf.getvalue()
+        root = ET.fromstring(svg)
+        assert root.tag.endswith("svg")
+
+    def test_contains_graph_elements(self, graph):
+        buf = io.StringIO()
+        writer = SVGWriter(graph, output=buf, logger=logging.getLogger())
+        writer.run()
+        svg = buf.getvalue()
+        # SVG from dot contains <g> groups and <text> elements
+        assert "<g" in svg
+        assert "<text" in svg
+
+
+# ---------------------------------------------------------------------------
+# HTML (requires graphviz `dot` binary)
+# ---------------------------------------------------------------------------
+
+@pytest.mark.skipif(not has_dot, reason="graphviz dot not installed")
+class TestHTMLWriter:
+    def test_valid_html_structure(self, graph):
+        buf = io.StringIO()
+        writer = HTMLWriter(graph, output=buf, logger=logging.getLogger())
+        writer.run()
+        html = buf.getvalue()
+        assert "<html" in html.lower()
+        assert "<svg" in html.lower()
+        assert "</html>" in html.lower()
+
+    def test_contains_embedded_svg(self, graph):
+        buf = io.StringIO()
+        writer = HTMLWriter(graph, output=buf, logger=logging.getLogger())
+        writer.run()
+        html = buf.getvalue()
+        # The SVG should contain graph content (not just an empty SVG)
+        assert "<text" in html
+
+
+# ---------------------------------------------------------------------------
+# Plain text
+# ---------------------------------------------------------------------------
+
+class TestTextWriter:
+    def test_contains_nodes_and_edges(self, graph):
+        buf = io.StringIO()
+        writer = TextWriter(graph, output=buf, logger=logging.getLogger())
+        writer.run()
+        text = buf.getvalue()
+        lines = text.strip().split("\n")
+        # Should have non-indented node lines and indented edge lines
+        node_lines = [line for line in lines if not line.startswith("    ")]
+        edge_lines = [line for line in lines if line.startswith("    ")]
+        assert len(node_lines) > 0
+        assert len(edge_lines) > 0
+
+    def test_edge_tags(self, graph):
+        buf = io.StringIO()
+        writer = TextWriter(graph, output=buf, logger=logging.getLogger())
+        writer.run()
+        text = buf.getvalue()
+        # Edges should be tagged [D] or [U]
+        assert "[D]" in text
+        assert "[U]" in text
+
+    def test_sorted_output(self, graph):
+        buf = io.StringIO()
+        writer = TextWriter(graph, output=buf, logger=logging.getLogger())
+        writer.run()
+        text = buf.getvalue()
+        lines = text.strip().split("\n")
+        node_lines = [line for line in lines if not line.startswith("    ")]
+        assert node_lines == sorted(node_lines)

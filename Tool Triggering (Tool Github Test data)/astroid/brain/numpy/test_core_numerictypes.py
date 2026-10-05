@@ -1,0 +1,522 @@
+# Licensed under the LGPL: https://www.gnu.org/licenses/old-licenses/lgpl-2.1.en.html
+# For details: https://github.com/pylint-dev/astroid/blob/main/LICENSE
+# Copyright (c) https://github.com/pylint-dev/astroid/blob/main/CONTRIBUTORS.txt
+
+from __future__ import annotations
+
+import os
+import sys
+import tempfile
+import unittest
+from importlib import metadata
+from typing import ClassVar
+from unittest import mock
+
+try:
+    import numpy  # pylint: disable=unused-import
+
+    HAS_NUMPY = True
+except ImportError:
+    HAS_NUMPY = False
+
+from astroid import Uninferable, builder, nodes
+from astroid.brain.brain_numpy_utils import (
+    NUMPY_VERSION_TYPE_HINTS_SUPPORT,
+    _get_numpy_version,
+    numpy_supports_type_hints,
+    numpy_version_2_or_later,
+)
+from astroid.exceptions import InferenceError
+
+
+@unittest.skipUnless(HAS_NUMPY, "This test requires the numpy library.")
+class NumpyBrainCoreNumericTypesTest(unittest.TestCase):
+    """Test of all the missing types defined in numerictypes module."""
+
+    all_types: ClassVar[list[str]] = [
+        "uint16",
+        "uint32",
+        "uint64",
+        "float16",
+        "float32",
+        "float64",
+        "float96",
+        "float128",
+        "complex64",
+        "complex128",
+        "complex192",
+        "complex256",
+        "timedelta64",
+        "datetime64",
+        "unicode_",
+        "str_",
+        "bool_",
+        "bool8",
+        "byte",
+        "int8",
+        "bytes0",
+        "bytes_",
+        "cdouble",
+        "cfloat",
+        "character",
+        "clongdouble",
+        "clongfloat",
+        "complexfloating",
+        "csingle",
+        "double",
+        "flexible",
+        "floating",
+        "half",
+        "inexact",
+        "int0",
+        "longcomplex",
+        "longdouble",
+        "longfloat",
+        "short",
+        "signedinteger",
+        "single",
+        "singlecomplex",
+        "str0",
+        "ubyte",
+        "uint",
+        "uint0",
+        "uintc",
+        "uintp",
+        "ulonglong",
+        "unsignedinteger",
+        "ushort",
+        "void0",
+    ]
+
+    # Aliases removed in NumPy 2.0.
+    removed_in_numpy_2 = (
+        "bool8",
+        "bytes0",
+        "cfloat",
+        "clongfloat",
+        "int0",
+        "longcomplex",
+        "longfloat",
+        "singlecomplex",
+        "str0",
+        "uint0",
+        "unicode_",
+        "void0",
+    )
+
+    def _inferred_numpy_attribute(self, attrib):
+        node = builder.extract_node(f"""
+        import numpy.core.numerictypes as tested_module
+        missing_type = tested_module.{attrib:s}""")
+        return next(node.value.infer())
+
+    def test_numpy_core_types(self):
+        """Test that all defined types have ClassDef type."""
+        types = self.all_types
+        if numpy_version_2_or_later():
+            types = [t for t in types if t not in self.removed_in_numpy_2]
+        for typ in types:
+            with self.subTest(typ=typ):
+                inferred = self._inferred_numpy_attribute(typ)
+                self.assertIsInstance(inferred, nodes.ClassDef)
+
+    def test_generic_types_have_methods(self):
+        """Test that all generic derived types have specified methods."""
+        generic_methods = [
+            "all",
+            "any",
+            "argmax",
+            "argmin",
+            "argsort",
+            "astype",
+            "base",
+            "byteswap",
+            "choose",
+            "clip",
+            "compress",
+            "conj",
+            "conjugate",
+            "copy",
+            "cumprod",
+            "cumsum",
+            "data",
+            "diagonal",
+            "dtype",
+            "dump",
+            "dumps",
+            "fill",
+            "flags",
+            "flat",
+            "flatten",
+            "getfield",
+            "imag",
+            "item",
+            "itemset",
+            "itemsize",
+            "max",
+            "mean",
+            "min",
+            "nbytes",
+            "ndim",
+            "newbyteorder",
+            "nonzero",
+            "prod",
+            "ptp",
+            "put",
+            "ravel",
+            "real",
+            "repeat",
+            "reshape",
+            "resize",
+            "round",
+            "searchsorted",
+            "setfield",
+            "setflags",
+            "shape",
+            "size",
+            "sort",
+            "squeeze",
+            "std",
+            "strides",
+            "sum",
+            "swapaxes",
+            "take",
+            "tobytes",
+            "tofile",
+            "tolist",
+            "tostring",
+            "trace",
+            "transpose",
+            "var",
+            "view",
+        ]
+
+        for type_ in (
+            "bool_",
+            "bytes_",
+            "character",
+            "complex128",
+            "complex192",
+            "complex256",
+            "complex64",
+            "complexfloating",
+            "datetime64",
+            "flexible",
+            "float16",
+            "float32",
+            "float64",
+            "float96",
+            "float128",
+            "floating",
+            "generic",
+            "inexact",
+            "int16",
+            "int32",
+            "int32",
+            "int64",
+            "int8",
+            "integer",
+            "number",
+            "signedinteger",
+            "str_",
+            "timedelta64",
+            "uint16",
+            "uint32",
+            "uint32",
+            "uint64",
+            "uint8",
+            "unsignedinteger",
+            "void",
+        ):
+            with self.subTest(typ=type_):
+                inferred = self._inferred_numpy_attribute(type_)
+                for meth in generic_methods:
+                    with self.subTest(meth=meth):
+                        self.assertTrue(meth in {m.name for m in inferred.methods()})
+
+    def test_generic_types_have_attributes(self):
+        """Test that all generic derived types have specified attributes."""
+        generic_attr = [
+            "base",
+            "data",
+            "dtype",
+            "flags",
+            "flat",
+            "imag",
+            "itemsize",
+            "nbytes",
+            "ndim",
+            "real",
+            "size",
+            "strides",
+        ]
+
+        for type_ in (
+            "bool_",
+            "bytes_",
+            "character",
+            "complex128",
+            "complex192",
+            "complex256",
+            "complex64",
+            "complexfloating",
+            "datetime64",
+            "flexible",
+            "float16",
+            "float32",
+            "float64",
+            "float96",
+            "float128",
+            "floating",
+            "generic",
+            "inexact",
+            "int16",
+            "int32",
+            "int32",
+            "int64",
+            "int8",
+            "integer",
+            "number",
+            "signedinteger",
+            "str_",
+            "timedelta64",
+            "uint16",
+            "uint32",
+            "uint32",
+            "uint64",
+            "uint8",
+            "unsignedinteger",
+            "void",
+        ):
+            with self.subTest(typ=type_):
+                inferred = self._inferred_numpy_attribute(type_)
+                for attr in generic_attr:
+                    with self.subTest(attr=attr):
+                        self.assertNotEqual(len(inferred.getattr(attr)), 0)
+
+    def test_number_types_have_unary_operators(self):
+        """Test that number types have unary operators."""
+        unary_ops = ("__neg__",)
+
+        for type_ in (
+            "float64",
+            "float96",
+            "float128",
+            "floating",
+            "int16",
+            "int32",
+            "int32",
+            "int64",
+            "int8",
+            "integer",
+            "number",
+            "signedinteger",
+            "uint16",
+            "uint32",
+            "uint32",
+            "uint64",
+            "uint8",
+            "unsignedinteger",
+        ):
+            with self.subTest(typ=type_):
+                inferred = self._inferred_numpy_attribute(type_)
+                for attr in unary_ops:
+                    with self.subTest(attr=attr):
+                        self.assertNotEqual(len(inferred.getattr(attr)), 0)
+
+    def test_array_types_have_unary_operators(self):
+        """Test that array types have unary operators."""
+        unary_ops = ("__neg__", "__invert__")
+
+        for type_ in ("ndarray",):
+            with self.subTest(typ=type_):
+                inferred = self._inferred_numpy_attribute(type_)
+                for attr in unary_ops:
+                    with self.subTest(attr=attr):
+                        self.assertNotEqual(len(inferred.getattr(attr)), 0)
+
+    def test_datetime_astype_return(self):
+        """
+        Test that the return of astype method of the datetime object
+        is inferred as a ndarray.
+
+        pylint-dev/pylint#3332
+        """
+        node = builder.extract_node("""
+        import numpy as np
+        import datetime
+        test_array = np.datetime64(1, 'us')
+        test_array.astype(datetime.datetime)
+        """)
+        licit_array_types = ".ndarray"
+        inferred_values = list(node.infer())
+        self.assertTrue(
+            len(inferred_values) == 1,
+            msg="Too much inferred value for datetime64.astype",
+        )
+        self.assertTrue(
+            inferred_values[-1].pytype() in licit_array_types,
+            msg="Illicit type for {:s} ({})".format(
+                "datetime64.astype", inferred_values[-1].pytype()
+            ),
+        )
+
+    @unittest.skipUnless(
+        HAS_NUMPY and numpy_supports_type_hints(),
+        f"This test requires the numpy library with a version above {NUMPY_VERSION_TYPE_HINTS_SUPPORT}",
+    )
+    def test_generic_types_are_subscriptables(self):
+        """Test that all types deriving from generic are subscriptables."""
+        for type_ in (
+            "bool_",
+            "bytes_",
+            "character",
+            "complex128",
+            "complex192",
+            "complex256",
+            "complex64",
+            "complexfloating",
+            "datetime64",
+            "flexible",
+            "float16",
+            "float32",
+            "float64",
+            "float96",
+            "float128",
+            "floating",
+            "generic",
+            "inexact",
+            "int16",
+            "int32",
+            "int32",
+            "int64",
+            "int8",
+            "integer",
+            "number",
+            "signedinteger",
+            "str_",
+            "timedelta64",
+            "uint16",
+            "uint32",
+            "uint32",
+            "uint64",
+            "uint8",
+            "unsignedinteger",
+            "void",
+        ):
+            with self.subTest(type_=type_):
+                src = f"""
+                import numpy as np
+                np.{type_}[int]
+                """
+                node = builder.extract_node(src)
+                cls_node = node.inferred()[0]
+                self.assertIsInstance(cls_node, nodes.ClassDef)
+                self.assertEqual(cls_node.name, type_)
+
+    @unittest.skipUnless(
+        HAS_NUMPY and numpy_version_2_or_later(),
+        "This test requires the numpy library with version 2 or later.",
+    )
+    def test_numpy_2_ulong_is_subscriptable(self):
+        """Test that the ulong type added in NumPy 2.0 is subscriptable."""
+        node = builder.extract_node("""
+        import numpy as np
+        np.ulong[int]
+        """)
+        cls_node = node.inferred()[0]
+        self.assertIsInstance(cls_node, nodes.ClassDef)
+        self.assertEqual(cls_node.name, "ulong")
+
+    @unittest.skipUnless(
+        HAS_NUMPY and numpy_version_2_or_later(),
+        "This test requires the numpy library with version 2 or later.",
+    )
+    def test_numpy_2_removed_aliases_are_absent(self):
+        """Test that aliases removed in NumPy 2.0 are no longer inferred."""
+        for alias in (
+            "bool8",
+            "bytes0",
+            "cfloat",
+            "clongfloat",
+            "complex_",
+            "float_",
+            "int0",
+            "longcomplex",
+            "longfloat",
+            "object0",
+            "singlecomplex",
+            "str0",
+            "string_",
+            "uint0",
+            "unicode",
+            "unicode_",
+            "void0",
+        ):
+            with self.subTest(alias=alias):
+                node = builder.extract_node(f"""
+                import numpy as np
+                np.{alias:s}
+                """)
+                self.assertRaises(InferenceError, next, node.infer())
+
+
+@unittest.skipIf(
+    HAS_NUMPY, "Those tests check that astroid does not crash if numpy is not available"
+)
+class NumpyBrainUtilsTest(unittest.TestCase):
+    """
+    This class is dedicated to test that astroid does not crash
+    if numpy module is not available.
+    """
+
+    def test_get_numpy_version_do_not_crash(self):
+        """
+        Test that the function _get_numpy_version doesn't crash even if numpy is not
+        installed.
+        """
+        self.assertEqual(_get_numpy_version(), ("0", "0", "0"))
+
+    def test_numpy_object_uninferable(self):
+        """
+        Test that in case numpy is not available, then a numpy object is uninferable
+        but the inference doesn't lead to a crash.
+        """
+        src = """
+        import numpy as np
+        np.number[int]
+        """
+        node = builder.extract_node(src)
+        cls_node = node.inferred()[0]
+        self.assertIs(cls_node, Uninferable)
+
+
+class NumpyVersionTest(unittest.TestCase):
+    def test_get_numpy_version_does_not_import_numpy(self) -> None:
+        """A numpy.py in the analysed project must not be executed."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with open(os.path.join(tmpdir, "numpy.py"), "w", encoding="utf-8") as f:
+                f.write("raise AssertionError('numpy was imported')\n")
+            sys.path.insert(0, tmpdir)
+            _get_numpy_version.cache_clear()
+            try:
+                with mock.patch.dict(sys.modules):
+                    for name in [n for n in sys.modules if n.split(".")[0] == "numpy"]:
+                        del sys.modules[name]
+                    version = _get_numpy_version()
+                    self.assertNotIn("numpy", sys.modules)
+            finally:
+                sys.path.remove(tmpdir)
+                _get_numpy_version.cache_clear()
+        if HAS_NUMPY:
+            self.assertNotEqual(version, ("0", "0", "0"))
+
+    def test_get_numpy_version_without_numpy(self) -> None:
+        _get_numpy_version.cache_clear()
+        try:
+            with mock.patch.object(
+                metadata, "version", side_effect=metadata.PackageNotFoundError
+            ):
+                self.assertEqual(_get_numpy_version(), ("0", "0", "0"))
+        finally:
+            _get_numpy_version.cache_clear()

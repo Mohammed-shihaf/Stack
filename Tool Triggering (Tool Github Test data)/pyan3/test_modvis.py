@@ -1,0 +1,679 @@
+"""Tests for pyan.modvis — module-level import dependency analyzer."""
+
+import logging
+import os
+
+import pytest
+
+from pyan.analyzer import CallGraphVisitor
+from pyan.anutils import infer_root, resolve_import
+from pyan.modvis import (
+    ImportVisitor,
+    create_modulegraph,
+    filename_to_module_name,
+    main,
+    split_module_name,
+)
+from pyan.node import Flavor
+
+# ---------------------------------------------------------------------------
+# Pure functions
+# ---------------------------------------------------------------------------
+
+class TestFilenameToModuleName:
+    def test_simple(self):
+        assert filename_to_module_name("foo.py") == "foo"
+
+    def test_nested(self):
+        assert filename_to_module_name(os.path.join("some", "path", "module.py")) == "some.path.module"
+
+    def test_strip_dot_slash(self):
+        assert filename_to_module_name(os.path.join(".", "pkg", "mod.py")) == "pkg.mod"
+
+    def test_init(self):
+        assert filename_to_module_name(os.path.join("pkg", "__init__.py")) == "pkg.__init__"
+
+    def test_rejects_non_py(self):
+        with pytest.raises(ValueError, match="Expected a .py filename"):
+            filename_to_module_name("module.txt")
+
+    def test_root_strips_prefix(self):
+        # Absolute path + root → correct relative module name
+        abspath = os.path.join("/project", "src", "pkg", "mod.py")
+        assert filename_to_module_name(abspath, root="/project/src") == "pkg.mod"
+
+    def test_root_with_absolute_init(self):
+        abspath = os.path.join("/project", "pkg", "__init__.py")
+        assert filename_to_module_name(abspath, root="/project") == "pkg.__init__"
+
+    def test_root_with_relative_paths(self):
+        # Even when both are relative, root normalizes correctly
+        relpath = os.path.join("src", "pkg", "mod.py")
+        assert filename_to_module_name(relpath, root="src") == "pkg.mod"
+
+
+class TestInferRoot:
+    def test_infers_fixture_dir(self):
+        # Given absolute paths inside the fixture packages,
+        # inference should land on FIXTURE_DIR.
+        files = fixture_files()
+        assert os.path.abspath(infer_root(files)) == os.path.abspath(FIXTURE_DIR)
+
+    def test_single_file_in_package(self):
+        f = os.path.join(FIXTURE_DIR, "pkg_a", "alpha.py")
+        # pkg_a has __init__.py, so root should be its parent (FIXTURE_DIR)
+        assert os.path.abspath(infer_root([f])) == os.path.abspath(FIXTURE_DIR)
+
+    def test_single_top_level_file(self, tmp_path):
+        # A lone .py file with no __init__.py → root is its directory
+        f = tmp_path / "standalone.py"
+        f.write_text("")
+        assert infer_root([str(f)]) == str(tmp_path)
+
+    def test_namespace_package_emits_warning(self, tmp_path, caplog):
+        """When the candidate root has no ``__init__.py`` and no project-root
+        marker (pyproject.toml/setup.py/setup.cfg), the situation is
+        ambiguous: it might be a top-level PEP 420 namespace package whose
+        proper root is the parent directory.  Walking further would be
+        unsafe (it could climb into a directory full of unrelated repos),
+        so infer_root just emits an advisory pointing the user at --root.
+        """
+        # Layout: ns_pkg/sub/__init__.py + ns_pkg/sub/mod.py.
+        # ns_pkg has neither __init__.py nor a project marker.
+        sub = tmp_path / "ns_pkg" / "sub"
+        sub.mkdir(parents=True)
+        (sub / "__init__.py").write_text("")
+        (sub / "mod.py").write_text("")
+        with caplog.at_level(logging.WARNING, logger="pyan.anutils"):
+            infer_root([str(sub / "mod.py")])
+        assert any(
+            "--root" in rec.message and "namespace package" in rec.message
+            for rec in caplog.records
+        ), f"Expected namespace-package advisory; got messages: {caplog.messages}"
+
+    def test_project_marker_suppresses_warning(self, tmp_path, caplog):
+        """A pyproject.toml at the candidate root unambiguously marks it as
+        a project root — definitely not a namespace package.  No warning."""
+        proj = tmp_path / "myproj"
+        pkg = proj / "pkg"
+        pkg.mkdir(parents=True)
+        (pkg / "__init__.py").write_text("")
+        (pkg / "mod.py").write_text("")
+        (proj / "pyproject.toml").write_text("[project]\nname = 'myproj'\n")
+        with caplog.at_level(logging.WARNING, logger="pyan.anutils"):
+            infer_root([str(pkg / "mod.py")])
+        assert not [r for r in caplog.records if r.levelno >= logging.WARNING], (
+            f"Did not expect any warnings; got: {caplog.messages}"
+        )
+
+    def test_namespace_subpackage_input_warns(self, tmp_path, caplog):
+        """When the input files live inside a namespace subpackage
+        (a directory with no ``__init__.py`` whose parent is a regular
+        package), infer_root won't walk up — that would either change
+        module names for existing flat-fixture-style inputs or escalate
+        wrongly in workspace-like layouts.  But it should at least warn,
+        since the resulting module names are bare basenames and any
+        relative imports will fail.  Mirrors the bare-visualizer command
+        ``pyan3 raven/visualizer/*.py`` where ``visualizer/`` has no
+        ``__init__.py`` but ``raven/`` does."""
+        proj = tmp_path / "proj"
+        pkg = proj / "pkg"
+        sub_ns = pkg / "sub_ns"
+        sub_ns.mkdir(parents=True)
+        (proj / "pyproject.toml").write_text("[project]\nname = 'proj'\n")
+        (pkg / "__init__.py").write_text("")
+        # sub_ns has NO __init__.py — namespace subpackage.
+        (sub_ns / "mod.py").write_text("")
+        with caplog.at_level(logging.WARNING, logger="pyan.anutils"):
+            root = infer_root([str(sub_ns / "mod.py")])
+        assert root == str(sub_ns)  # heuristic stops here
+        assert any(
+            "namespace subpackage" in rec.message and "--root" in rec.message
+            for rec in caplog.records
+        ), f"Expected namespace-subpackage advisory; got messages: {caplog.messages}"
+
+    def test_top_level_namespace_with_parent_marker_warns(self, tmp_path, caplog):
+        """Top-level namespace package whose immediate parent has a project
+        marker — infer_root does NOT auto-escalate even though the marker
+        is right there.  The same filesystem shape (a non-marker directory
+        whose parent has a marker) also occurs for benign workspace
+        directories like ``tests/`` or ``examples/`` sitting alongside the
+        package, and silently escalating would land on the wrong root in
+        those cases.  Issue a warning instead and let the user pass
+        ``--root`` explicitly."""
+        proj = tmp_path / "proj"
+        ns_pkg = proj / "ns_pkg"
+        sub = ns_pkg / "sub"
+        sub.mkdir(parents=True)
+        (proj / "pyproject.toml").write_text("[project]\nname = 'proj'\n")
+        # ns_pkg has NO __init__.py — top-level namespace package.
+        (sub / "__init__.py").write_text("")
+        (sub / "mod.py").write_text("")
+        with caplog.at_level(logging.WARNING, logger="pyan.anutils"):
+            root = infer_root([str(sub / "mod.py")])
+        assert root == str(ns_pkg)  # heuristic stops at the namespace package
+        assert any(
+            "--root" in rec.message and "namespace package" in rec.message
+            for rec in caplog.records
+        ), f"Expected namespace-package advisory; got messages: {caplog.messages}"
+
+    def test_genuinely_standalone_does_not_walk(self, tmp_path, caplog):
+        """A file in a directory that's neither a package nor adjacent to
+        one should NOT walk up — we'd risk climbing into a parent that
+        happens to be a workspace full of unrelated repositories.  No
+        walking, no warning."""
+        scripts = tmp_path / "workspace" / "scripts"
+        scripts.mkdir(parents=True)
+        (scripts / "tool.py").write_text("")
+        with caplog.at_level(logging.WARNING, logger="pyan.anutils"):
+            root = infer_root([str(scripts / "tool.py")])
+        assert root == str(scripts)
+        assert not [r for r in caplog.records if r.levelno >= logging.WARNING]
+
+    def test_setup_py_suppresses_warning(self, tmp_path, caplog):
+        """setup.py also counts as a project-root marker."""
+        proj = tmp_path / "myproj"
+        pkg = proj / "pkg"
+        pkg.mkdir(parents=True)
+        (pkg / "__init__.py").write_text("")
+        (pkg / "mod.py").write_text("")
+        (proj / "setup.py").write_text("from setuptools import setup\nsetup()\n")
+        with caplog.at_level(logging.WARNING, logger="pyan.anutils"):
+            infer_root([str(pkg / "mod.py")])
+        assert not [r for r in caplog.records if r.levelno >= logging.WARNING]
+
+    def test_standalone_no_warning(self, tmp_path, caplog):
+        """A standalone .py file means infer_root never walked up at all,
+        so there's no namespace-package ambiguity to flag."""
+        f = tmp_path / "standalone.py"
+        f.write_text("")
+        with caplog.at_level(logging.WARNING, logger="pyan.anutils"):
+            infer_root([str(f)])
+        assert not [r for r in caplog.records if r.levelno >= logging.WARNING]
+
+
+class TestSplitModuleName:
+    def test_dotted(self):
+        assert split_module_name("fully.qualified.name") == ("fully.qualified", "name")
+
+    def test_simple(self):
+        assert split_module_name("name") == ("", "name")
+
+    def test_single_dot(self):
+        assert split_module_name("pkg.mod") == ("pkg", "mod")
+
+
+class TestResolve:
+    def test_absolute(self):
+        assert resolve_import(current="anything", target="os.path", level=0) == "os.path"
+
+    def test_relative_level1(self):
+        assert resolve_import(current="pkg.sub.mod", target="sibling", level=1) == "pkg.sub.sibling"
+
+    def test_relative_level2(self):
+        assert resolve_import(current="pkg.sub.mod", target="other", level=2) == "pkg.other"
+
+    def test_relative_beyond_root(self):
+        # Level 3 on a 3-component name goes above root — CPython would
+        # raise ImportError.  We log an error and return "" so the result
+        # can't accidentally match a real module.
+        assert resolve_import(current="pkg.sub.mod", target="top", level=3) == ""
+
+    def test_negative_level(self):
+        with pytest.raises(ValueError, match="must be >= 0"):
+            resolve_import(current="pkg.mod", target="target", level=-1)
+
+    def test_level_too_large(self):
+        # Beyond root — returns "" (logs error, doesn't raise).
+        assert resolve_import(current="pkg.mod", target="target", level=5) == ""
+
+
+# ---------------------------------------------------------------------------
+# ImportVisitor
+# ---------------------------------------------------------------------------
+
+FIXTURE_DIR = os.path.join(os.path.dirname(__file__), "test_code_modvis")
+
+
+def fixture_files():
+    """Collect all .py files in the fixture directory."""
+    result = []
+    for root, _dirs, files in os.walk(FIXTURE_DIR):
+        for f in files:
+            if f.endswith(".py"):
+                result.append(os.path.join(root, f))
+    return sorted(result)
+
+
+@pytest.fixture
+def visitor():
+    """Create an ImportVisitor over the modvis test fixtures."""
+    logger = logging.getLogger("test_modvis")
+    logger.setLevel(logging.WARNING)
+    return ImportVisitor(fixture_files(), logger, root=FIXTURE_DIR)
+
+
+class TestImportVisitor:
+    def test_root_inference_matches_explicit(self):
+        """ImportVisitor with inferred root produces the same modules as with explicit root."""
+        logger = logging.getLogger("test_modvis")
+        logger.setLevel(logging.WARNING)
+        files = fixture_files()
+        v_explicit = ImportVisitor(files, logger, root=FIXTURE_DIR)
+        v_inferred = ImportVisitor(files, logger)  # root=None → inferred
+        assert set(v_inferred.modules.keys()) == set(v_explicit.modules.keys())
+
+    def test_discovers_all_modules(self, visitor):
+        expected = {
+            "pkg_a.__init__",
+            "pkg_a.alpha",
+            "pkg_a.epsilon",
+            "pkg_b.__init__",
+            "pkg_b.beta",
+            "pkg_b.delta",  # imports nothing; must still be in the analyzed set
+            "pkg_b.gamma",
+        }
+        assert set(visitor.modules.keys()) == expected
+
+    def test_absolute_import(self, visitor):
+        # alpha.py: import pkg_b.beta
+        assert "pkg_b.beta" in visitor.modules["pkg_a.alpha"]
+
+    def test_from_import_module(self, visitor):
+        # alpha.py: from pkg_b import gamma  →  gamma is a submodule,
+        # so both pkg_b and pkg_b.gamma should appear as dependencies
+        deps = visitor.modules["pkg_a.alpha"]
+        assert "pkg_b" in deps
+        assert "pkg_b.gamma" in deps
+
+    def test_from_import_symbol(self, visitor):
+        # alpha.py: from pkg_b.gamma import MY_CONST  →  MY_CONST is a symbol,
+        # not a module. pkg_b.gamma should appear as the base module dep.
+        # The speculative dep "pkg_b.gamma.MY_CONST" will also be in the raw
+        # dep set (that's harmless by design — see test_from_import_symbol_no_graph_edge).
+        deps = visitor.modules["pkg_a.alpha"]
+        assert "pkg_b.gamma" in deps
+
+    def test_from_import_symbol_no_graph_edge(self, visitor):
+        # The speculative dep "pkg_b.gamma.MY_CONST" is added to the raw dep
+        # set (that's fine), but prepare_graph must not create an edge for it
+        # since no module by that name exists in the analyzed set.
+        visitor.prepare_graph()
+        all_edge_targets = set()
+        for targets in visitor.uses_edges.values():
+            for t in targets:
+                all_edge_targets.add(t.get_name())
+        assert "pkg_b.gamma.MY_CONST" not in all_edge_targets
+
+    def test_relative_import(self, visitor):
+        # pkg_b/beta.py: from . import gamma
+        assert "pkg_b.gamma" in visitor.modules["pkg_b.beta"]
+
+    def test_relative_import_in_init(self, visitor):
+        # pkg_a/__init__.py: from . import alpha
+        assert "pkg_a.alpha" in visitor.modules["pkg_a.__init__"]
+
+    def test_implicit_init_dependency(self, visitor):
+        # alpha.py imports pkg_b.beta, so modvis adds pkg_b.__init__ as implicit dep
+        assert "pkg_b.__init__" in visitor.modules["pkg_a.alpha"]
+
+    def test_detect_cycles(self, visitor):
+        cycles = visitor.detect_cycles()
+        assert len(cycles) > 0
+        # There should be a cycle involving alpha and gamma
+        cycle_modules = set()
+        for _prefix, cycle in cycles:
+            cycle_modules.update(cycle)
+        assert "pkg_a.alpha" in cycle_modules
+        assert "pkg_b.gamma" in cycle_modules
+
+    def test_prepare_graph_nodes(self, visitor):
+        visitor.prepare_graph()
+        assert "pkg_a.alpha" in visitor.nodes
+        assert "pkg_b.beta" in visitor.nodes
+        for _name, node_list in visitor.nodes.items():
+            assert len(node_list) == 1
+            assert node_list[0].defined is True
+
+    def test_import_less_module_is_in_analyzed_set(self, visitor):
+        # pkg_b/delta.py imports nothing. It must still be registered as analyzed:
+        # prepare_graph uses the keys of `modules` as the analyzed set, and anything
+        # outside that set is treated as nonexistent.
+        assert "pkg_b.delta" in visitor.modules
+        assert visitor.modules["pkg_b.delta"] == set()
+
+    def test_import_less_module_gets_a_node(self, visitor):
+        # ...and it must appear as a node, not vanish from the graph.
+        visitor.prepare_graph()
+        assert "pkg_b.delta" in visitor.nodes
+
+    def test_edge_into_import_less_module_survives(self, visitor):
+        # The regression: alpha imports pkg_b.delta, which imports nothing. The edge
+        # alpha -> delta must exist. Previously delta had no node, so the edge was
+        # silently dropped and the dependency disappeared from the graph.
+        visitor.prepare_graph()
+        alpha_node = visitor.nodes["pkg_a.alpha"][0]
+        target_names = {n.get_name() for n in visitor.uses_edges[alpha_node]}
+        assert "pkg_b.delta" in target_names
+
+    def test_package_is_a_node_under_its_own_name(self, visitor):
+        # A package's __init__.py is registered as `pkg_b.__init__`, but an import
+        # of the package names it `pkg_b`. Without __init__ modules, the node is
+        # drawn under the package name, so that dependencies on it can land.
+        visitor.prepare_graph()
+        assert "pkg_b" in visitor.nodes
+        assert "pkg_b.__init__" not in visitor.nodes
+
+    def test_edge_onto_a_package_survives(self, visitor):
+        # The regression: epsilon.py imports PKG_B_CONST, which is defined in
+        # pkg_b/__init__.py, so pkg_b is the only module it depends on. That
+        # dependency used to be dropped — the edge pointed at `pkg_b`, and the
+        # only node for that file was called `pkg_b.__init__`.
+        visitor.prepare_graph()
+        epsilon_node = visitor.nodes["pkg_a.epsilon"][0]
+        target_names = {n.get_name() for n in visitor.uses_edges.get(epsilon_node, ())}
+        assert "pkg_b" in target_names
+
+    def test_edge_out_of_a_package_survives(self, visitor):
+        # The same loss in the other direction: pkg_b/__init__.py imports beta,
+        # and that edge went with the node it started from.
+        visitor.prepare_graph()
+        pkg_b_node = visitor.nodes["pkg_b"][0]
+        target_names = {n.get_name() for n in visitor.uses_edges.get(pkg_b_node, ())}
+        assert "pkg_b.beta" in target_names
+
+    def test_package_does_not_depend_on_itself(self, visitor):
+        # pkg_b/__init__.py says `from pkg_b import beta`, naming its own package.
+        # That dependency resolves to the node the import is written in, and a
+        # module does not depend on itself.
+        visitor.prepare_graph()
+        assert "pkg_b" in visitor.modules["pkg_b.__init__"]
+        pkg_b_node = visitor.nodes["pkg_b"][0]
+        assert pkg_b_node not in visitor.uses_edges.get(pkg_b_node, ())
+
+    def test_implicit_init_dependency_draws_no_edge(self, visitor):
+        # Every import under a package adds a speculative dep on that package's
+        # __init__ — which is the clutter the default exists to remove. Folding the
+        # package's node under `pkg_b` must not turn those deps into edges.
+        #
+        # beta.py says only `from . import gamma`, so `pkg_b.__init__` is in its raw
+        # dep set while `pkg_b` is not; gamma.py says only `import pkg_a.alpha`, so
+        # the same holds for it and `pkg_a`.
+        visitor.prepare_graph()
+        assert "pkg_b.__init__" in visitor.modules["pkg_b.beta"]
+        beta_targets = {n.get_name() for n in visitor.uses_edges.get(visitor.nodes["pkg_b.beta"][0], ())}
+        assert "pkg_b" not in beta_targets
+        gamma_targets = {n.get_name() for n in visitor.uses_edges.get(visitor.nodes["pkg_b.gamma"][0], ())}
+        assert "pkg_a" not in gamma_targets
+
+    def test_explicitly_named_package_draws_an_edge(self, visitor):
+        # The other side of it: alpha.py says `from pkg_b import gamma`, naming the
+        # package outright, so that one is a dependency and not speculation.
+        visitor.prepare_graph()
+        alpha_targets = {n.get_name() for n in visitor.uses_edges.get(visitor.nodes["pkg_a.alpha"][0], ())}
+        assert "pkg_b" in alpha_targets
+
+    def test_with_init_keeps_the_package_addressable(self, visitor):
+        # Under --init the __init__ module is drawn separately, and an import of
+        # the package still has to find it.
+        visitor.prepare_graph(with_init=True)
+        assert "pkg_b.__init__" in visitor.nodes
+        epsilon_node = visitor.nodes["pkg_a.epsilon"][0]
+        target_names = {n.get_name() for n in visitor.uses_edges.get(epsilon_node, ())}
+        assert "pkg_b.__init__" in target_names
+
+    def test_module_names_agree_with_the_call_graph_analyzer(self, visitor):
+        # The two analyzers derive module names by different routes — modvis keeps
+        # the `.__init__` suffix, which relative-import resolution needs, and folds
+        # it away when preparing the graph, while the call-graph analyzer folds it
+        # at the source. Nothing forces the results to match, so pin that they do:
+        # a package is `pkg` in both, and the two graphs are comparable node for node.
+        visitor.prepare_graph()
+        logger = logging.getLogger("test_modvis")
+        logger.setLevel(logging.WARNING)
+        cg = CallGraphVisitor(fixture_files(), root=FIXTURE_DIR, logger=logger)
+        cg_modules = {n.get_name() for items in cg.nodes.values() for n in items
+                      if n.flavor == Flavor.MODULE and n.defined}
+        assert set(visitor.nodes) == cg_modules
+
+    def test_prepare_graph_edges(self, visitor):
+        visitor.prepare_graph()
+        # Find the alpha node and check it has outgoing edges
+        alpha_node = visitor.nodes["pkg_a.alpha"][0]
+        assert alpha_node in visitor.uses_edges
+        target_names = {n.get_name() for n in visitor.uses_edges[alpha_node]}
+        assert "pkg_b.beta" in target_names or "pkg_b.gamma" in target_names
+
+
+# ---------------------------------------------------------------------------
+# CLI (smoke tests)
+# ---------------------------------------------------------------------------
+
+class TestCLI:
+    def test_help(self, capsys):
+        with pytest.raises(SystemExit) as exc_info:
+            main(["--help"])
+        assert exc_info.value.code == 0
+        captured = capsys.readouterr()
+        assert "approximate module" in captured.out
+
+    def test_no_args_errors(self):
+        with pytest.raises(SystemExit) as exc_info:
+            main([])
+        assert exc_info.value.code != 0
+
+    def test_misspelled_option_errors(self, capsys):
+        # `--with-init` is not the flag; `--init` is. Accepting it as a glob left
+        # the run looking successful while doing the opposite of what was asked.
+        with pytest.raises(SystemExit) as exc_info:
+            main(fixture_files() + ["--text", "--root", FIXTURE_DIR, "--with-init"])
+        assert exc_info.value.code != 0
+        assert "--with-init" in capsys.readouterr().err
+
+    def test_glob_matching_nothing_errors(self):
+        with pytest.raises(SystemExit) as exc_info:
+            main([os.path.join(FIXTURE_DIR, "no_such_dir", "*.py"), "--text"])
+        assert exc_info.value.code != 0
+
+    def test_dot_output(self, capsys):
+        main(fixture_files() + ["--dot", "--root", FIXTURE_DIR])
+        captured = capsys.readouterr()
+        assert "digraph G" in captured.out
+
+    def test_cycles_output(self, capsys):
+        main(fixture_files() + ["--cycles", "--root", FIXTURE_DIR])
+        captured = capsys.readouterr()
+        assert "import cycles" in captured.out.lower() or "cycle" in captured.out.lower()
+
+    def test_text_output(self, capsys):
+        main(fixture_files() + ["--text", "--root", FIXTURE_DIR])
+        captured = capsys.readouterr()
+        assert "[U]" in captured.out
+        # Should not contain spurious deps (prepare_graph filters them)
+        assert "MY_CONST" not in captured.out
+
+    def test_text_output_names_modules_by_their_dotted_path(self, capsys):
+        # Ungrouped output carries no cluster title, so a bare `alpha` would not say
+        # which package it belongs to — and in a large project several packages have
+        # a module of the same name, which would then print identically. The
+        # call-graph analyzer prints the dotted path, and this matches it.
+        main(fixture_files() + ["--text", "--root", FIXTURE_DIR])
+        lines = [line.strip() for line in capsys.readouterr().out.splitlines() if line.strip()]
+        assert "pkg_a.alpha" in lines
+        assert "[U] pkg_b.gamma" in lines
+        assert not [line for line in lines if line in ("alpha", "gamma", "[U] alpha", "[U] gamma")]
+
+
+# ---------------------------------------------------------------------------
+# CLI integration (--module-level dispatch through pyan.main)
+# ---------------------------------------------------------------------------
+
+class TestCLIIntegration:
+    def test_module_level_help(self, capsys):
+        """pyan3 --module-level --help dispatches to modvis help."""
+        from pyan.main import main as pyan_main
+        with pytest.raises(SystemExit) as exc_info:
+            pyan_main(["--module-level", "--help"])
+        assert exc_info.value.code == 0
+        captured = capsys.readouterr()
+        assert "approximate module" in captured.out
+
+    def test_module_level_dot(self, capsys):
+        """pyan3 --module-level produces dot output."""
+        from pyan.main import main as pyan_main
+        pyan_main(["--module-level"] + fixture_files() + ["--dot", "--root", FIXTURE_DIR])
+        captured = capsys.readouterr()
+        assert "digraph G" in captured.out
+
+
+# ---------------------------------------------------------------------------
+# Library API
+# ---------------------------------------------------------------------------
+
+class TestCreateModulegraph:
+    def test_dot_format(self):
+        result = create_modulegraph(fixture_files(), root=FIXTURE_DIR, format="dot")
+        assert "digraph G" in result
+
+    def test_tgf_format(self):
+        result = create_modulegraph(fixture_files(), root=FIXTURE_DIR, format="tgf")
+        assert "#" in result  # TGF separator
+
+    def test_yed_format(self):
+        result = create_modulegraph(fixture_files(), root=FIXTURE_DIR, format="yed")
+        assert "graphml" in result.lower()
+
+    def test_unknown_format_raises(self):
+        with pytest.raises(ValueError, match="unknown"):
+            create_modulegraph(["nonexistent.py"], format="bogus")
+
+    def test_importable_from_pyan(self):
+        """create_modulegraph is re-exported from the pyan package."""
+        from pyan import create_modulegraph as cg
+        assert callable(cg)
+
+
+# ---------------------------------------------------------------------------
+# Omit __init__ (#20)
+# ---------------------------------------------------------------------------
+
+class TestOmitInit:
+    def test_cli_default_excludes_init(self, capsys):
+        """By default, __init__ modules are excluded from output."""
+        main(fixture_files() + ["--dot", "--root", FIXTURE_DIR])
+        captured = capsys.readouterr()
+        assert "__init__" not in captured.out
+        assert "alpha" in captured.out
+
+    def test_cli_init_flag_includes_init(self, capsys):
+        """--init explicitly includes __init__ modules."""
+        main(fixture_files() + ["--dot", "--init", "--root", FIXTURE_DIR])
+        captured = capsys.readouterr()
+        assert "__init__" in captured.out
+
+    def test_api_default_excludes_init(self):
+        """create_modulegraph() excludes __init__ modules by default."""
+        result = create_modulegraph(fixture_files(), root=FIXTURE_DIR, format="text")
+        assert "__init__" not in result
+
+    def test_api_with_init(self):
+        """create_modulegraph(with_init=True) includes __init__ modules."""
+        result = create_modulegraph(fixture_files(), root=FIXTURE_DIR, format="text", with_init=True)
+        assert "__init__" in result
+
+
+# ---------------------------------------------------------------------------
+# Directory input (#66)
+# ---------------------------------------------------------------------------
+
+class TestDirectoryInput:
+    def test_modvis_cli_directory_arg(self, capsys):
+        """Passing a directory to modvis CLI should auto-glob *.py files."""
+        main([FIXTURE_DIR, "--dot", "--root", FIXTURE_DIR])
+        captured = capsys.readouterr()
+        assert "digraph G" in captured.out
+        assert "alpha" in captured.out
+
+    def test_callgraph_cli_directory_arg(self, capsys):
+        """Passing a directory to pyan3 CLI should auto-glob *.py files."""
+        from pyan.main import main as pyan_main
+        pyan_main([FIXTURE_DIR, "--dot"])
+        captured = capsys.readouterr()
+        assert "digraph G" in captured.out
+
+    def test_create_callgraph_directory_arg(self):
+        """create_callgraph() should accept a directory path."""
+        from pyan import create_callgraph
+        result = create_callgraph(FIXTURE_DIR, format="dot")
+        assert "digraph G" in result
+
+    def test_create_modulegraph_directory_arg(self):
+        """create_modulegraph() should accept a directory path."""
+        result = create_modulegraph(FIXTURE_DIR, root=FIXTURE_DIR, format="dot")
+        assert "digraph G" in result
+        assert "alpha" in result
+
+
+# ---------------------------------------------------------------------------
+# Bidirectional edges (#21)
+# ---------------------------------------------------------------------------
+
+class TestConcentrate:
+    def test_cli_concentrate(self, capsys):
+        """--concentrate adds concentrate=true to DOT output."""
+        main(fixture_files() + ["--dot", "--concentrate", "--root", FIXTURE_DIR])
+        captured = capsys.readouterr()
+        assert "concentrate=true" in captured.out
+
+    def test_api_concentrate(self):
+        """create_modulegraph(concentrate=True) adds concentrate=true."""
+        result = create_modulegraph(fixture_files(), root=FIXTURE_DIR, format="dot", concentrate=True)
+        assert "concentrate=true" in result
+
+
+# ---------------------------------------------------------------------------
+# Multi-project coloring (#111)
+# ---------------------------------------------------------------------------
+
+class TestMultiProjectColoring:
+    def test_distinct_packages_get_distinct_color_keys(self):
+        """Modules in pkg_a and pkg_b should get different color keys (filename attr)."""
+        logger = logging.getLogger("test_modvis")
+        logger.setLevel(logging.WARNING)
+        v = ImportVisitor(fixture_files(), logger, root=FIXTURE_DIR)
+        v.prepare_graph()
+        color_keys = {}
+        for m, node_list in v.nodes.items():
+            n = node_list[0]
+            top_pkg = m.split(".")[0]
+            color_keys.setdefault(top_pkg, set()).add(n.filename)
+        # Each top-level package should map to exactly one color key
+        for pkg, keys in color_keys.items():
+            assert len(keys) == 1, f"{pkg} has multiple color keys: {keys}"
+        # And the two packages should have *different* keys
+        all_keys = [next(iter(keys)) for keys in color_keys.values()]
+        assert len(set(all_keys)) == len(all_keys), f"Packages share color keys: {color_keys}"
+
+    def test_color_key_is_top_level_dir(self):
+        """The color key should be the top-level directory name relative to root."""
+        logger = logging.getLogger("test_modvis")
+        logger.setLevel(logging.WARNING)
+        v = ImportVisitor(fixture_files(), logger, root=FIXTURE_DIR)
+        v.prepare_graph()
+        for m, node_list in v.nodes.items():
+            n = node_list[0]
+            expected = m.split(".")[0]
+            assert n.filename == expected, f"Module {m}: expected color key {expected!r}, got {n.filename!r}"
+
+    def test_callgraph_cli_concentrate(self, capsys):
+        """pyan3 --concentrate adds concentrate=true to DOT output."""
+        from pyan.main import main as pyan_main
+        pyan_main([FIXTURE_DIR, "--dot", "--concentrate"])
+        captured = capsys.readouterr()
+        assert "concentrate=true" in captured.out
+
+    def test_callgraph_api_concentrate(self):
+        """create_callgraph(concentrate=True) adds concentrate=true."""
+        from pyan import create_callgraph
+        result = create_callgraph(FIXTURE_DIR, format="dot", concentrate=True)
+        assert "concentrate=true" in result

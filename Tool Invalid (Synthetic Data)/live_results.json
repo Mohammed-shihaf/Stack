@@ -1,0 +1,57 @@
+{
+  "corpus": "Python-Tools-Invalid",
+  "sibling": "Python-Tools-Clean",
+  "versions": ["3.6", "3.7", "3.11", "3.13", "3.14"],
+  "versioning_note": "25 of 28 tools exploded per-version under py3.X/; dulwich, pydriller, diff-cover are single-version (git-history tools, Python version does not affect their measured property), matching Clean's own convention.",
+  "verification_standard": {
+    "3.6": "CODE-ONLY: ast.parse(feature_version=(3,6)) + downgraded pytest suite passes under an available interpreter. Never run against the real tool.",
+    "3.7": "CODE-ONLY: ast.parse(feature_version=(3,7)) + downgraded pytest suite passes under an available interpreter. Never run against the real tool.",
+    "3.11": "LIVE: real tool invoked via /root/pytools_work/venv311",
+    "3.13": "LIVE: real tool invoked via /root/pytools_work/venv313",
+    "3.14": "LIVE: real tool invoked via /root/pytools_work/venv314 (interpreter 3.14.0rc2)"
+  },
+  "tools": [
+    {"name": "Radon", "split_by_version": true, "status": "MEASURED_WRONG", "metric": "blocks ranked C or worse", "ratio": "3/4", "percent": 75.0, "command": "radon cc src/ -s", "tool_version": "6.0.1"},
+    {"name": "Lizard", "split_by_version": true, "status": "MEASURED_WRONG", "metric": "functions exceeding CCN 5", "ratio": "3/4", "percent": 75.0, "command": "lizard src/ -C 5 -L 40 -a 3 -w", "tool_version": "1.24.0"},
+    {"name": "complexipy", "split_by_version": true, "status": "MEASURED_WRONG", "metric": "functions exceeding complexity 8", "ratio": "3/4", "percent": 75.0, "command": "complexipy src/ --max-complexity-allowed 8", "tool_version": "8.0.1"},
+    {"name": "cognitive-ast", "split_by_version": true, "status": "MEASURED_WRONG", "metric": "functions exceeding cognitive threshold 15", "ratio": "2/3", "percent": 66.7, "command": "python -m driver", "tool_version": "stdlib driver (no PyPI package)"},
+    {"name": "Ruff", "split_by_version": true, "status": "MEASURED_WRONG", "metric": "functions with >=1 real lint diagnostic", "ratio": "5/6", "percent": 83.3, "command": "ruff check src/ tests/", "tool_version": "0.16.10 (3.11) / 0.16.9 (3.13, 3.14)"},
+    {"name": "pylint", "split_by_version": true, "status": "MEASURED_WRONG", "metric": "pylint score (0-10)", "value": 4.86, "target": "below 5.00", "command": "pylint src/deskqueue --fail-under=10", "tool_version": "4.1.1"},
+    {"name": "Coverage.py", "split_by_version": true, "status": "MEASURED_WRONG", "metric": "branch+line coverage", "percent": 45.0, "command": "coverage run --branch -m pytest -q && coverage report -m --fail-under=100", "tool_version": "7.16.2"},
+    {"name": "SlipCover", "split_by_version": true, "status": "MEASURED_WRONG", "metric": "coverage", "percent": 42.0, "command": "slipcover --source src -m pytest -q", "tool_version": "1.1.0"},
+    {"name": "sys.settrace driver (stdlib)", "split_by_version": true, "status": "MEASURED_WRONG", "metric": "statements traced", "ratio": "22/57", "percent": 38.0, "command": "python driver.py", "tool_version": "stdlib (sys.settrace)"},
+    {"name": "testmon", "split_by_version": true, "status": "MEASURED_WRONG", "metric": "falsely-green reruns across 3 planted dynamic-dependency gaps", "ratio": "4/5", "percent": 80.0, "command": "pytest --testmon -q (x2, after edits)", "tool_version": "pytest-testmon 2.2.0"},
+    {"name": "mutmut", "split_by_version": true, "status": "MEASURED_WRONG", "metric": "mutants killed", "ratio": "11/36", "percent_killed": 30.6, "percent_not_killed": 69.4, "command": "mutmut run && mutmut results", "tool_version": "3.8.0"},
+    {"name": "cosmic-ray", "split_by_version": true, "status": "MEASURED_WRONG", "metric": "mutants survived", "detail": "py3.11/3.13: 140/165 (84.85%); py3.14: 141/166 (84.94%)", "command": "cosmic-ray init/exec && cr-report", "tool_version": "8.7.0"},
+    {"name": "astroid", "split_by_version": true, "status": "MEASURED_WRONG", "metric": "examined names that failed to resolve", "ratio": "4/6", "percent": 66.7, "command": "python -m driver", "tool_version": "4.3.3"},
+    {"name": "Beniget", "split_by_version": true, "status": "MEASURED_WRONG", "metric": "examined identifier uses unbound", "ratio": "5/9", "percent": 55.6, "command": "python -m driver", "tool_version": "0.5.0 (+ gast 0.7.0)"},
+    {"name": "pyan3", "split_by_version": true, "status": "MEASURED_WRONG", "metric": "definitions with zero incoming call-graph edges", "ratio": "4/5", "percent": 80.0, "command": "pyan3 ... --dot --file graph.dot", "tool_version": "2.8.1"},
+    {"name": "Pymcdc", "split_by_version": true, "status": "MEASURED_WRONG", "metric": "MC/DC", "percent": 33.0, "command": "python -m driver", "tool_version": "stdlib driver (no PyPI package)"},
+    {"name": "CrossHair", "split_by_version": true, "status": "MEASURED_WRONG", "metric": "contract-annotated functions with a real counterexample", "ratio": "3/4", "percent": 75.0, "command": "crosshair check src/parcelmath --per_condition_timeout=15", "tool_version": "0.0.111"},
+    {"name": "Bandit", "split_by_version": true, "status": "MEASURED_WRONG", "metric": "functions triggering a real finding", "ratio": "4/6", "percent": 66.7, "findings": 7, "command": "bandit -r src/ -f screen", "tool_version": "1.9.4"},
+    {"name": "Semgrep", "split_by_version": true, "status": "MEASURED_WRONG", "metric": "planted rule IDs that fire", "ratio": "10/10", "percent": 100.0, "command": "semgrep --config=semgrep-rules.yml --error --quiet src/", "tool_version": "1.178.0"},
+    {"name": "Opengrep", "split_by_version": true, "status": "NOT_INSTALLED", "reason": "standalone binary, egress-blocked (identical to Clean)", "stand_in": "Semgrep, same ruleset: 10/10 rules fire"},
+    {"name": "pip-audit", "split_by_version": true, "status": "MEASURED_WRONG", "metric": "pinned packages with >=1 real advisory", "ratio": "5/5", "percent": 100.0, "advisories_found": 74, "command": "pip-audit --requirement requirements.txt --strict", "tool_version": "2.10.1"},
+    {"name": "Trivy", "split_by_version": true, "status": "NOT_INSTALLED", "reason": "standalone binary, egress-blocked (identical to Clean)", "stand_in": "pip-audit, same requirements.txt pattern: 3/4 pins flagged (75%), 51 advisories found"},
+    {"name": "jscpd", "split_by_version": true, "status": "MEASURED_WRONG", "metric": "duplicated lines", "percent": 63.46, "command": "jscpd src/ --min-lines 5 --min-tokens 30 --threshold 0 --reporters console", "tool_version": "5.3.3"},
+    {"name": "symilar", "split_by_version": true, "status": "MEASURED_WRONG", "metric": "scanned lines inside a reported duplicate group", "ratio": "44/70", "percent": 62.86, "command": "symilar --duplicates=4 --ignore-comments --ignore-docstrings src/climateguard/*.py", "tool_version": "pylint 4.1.1"},
+    {"name": "vulture", "split_by_version": true, "status": "MEASURED_WRONG", "metric": "definitions flagged dead at confidence>=60", "ratio": "6/10", "percent": 60.0, "command": "vulture src/ tests/ --min-confidence 60 --ignore-names test_*", "tool_version": "2.16"},
+    {"name": "dulwich", "split_by_version": false, "status": "MEASURED_WRONG", "metric": "commits WITHOUT a well-formed, roster-matched Co-authored-by trailer", "ratio": "5/8", "percent": 62.5, "command": "python -m driver", "tool_version": "1.2.15"},
+    {"name": "pydriller", "split_by_version": false, "status": "MEASURED_WRONG", "metric": "commits whose [area:X] tag is NOT corroborated by touched files", "ratio": "5/8", "percent": 62.5, "command": "python -m driver", "tool_version": "2.12"},
+    {"name": "diff-cover", "split_by_version": false, "status": "MEASURED_WRONG", "metric": "diff coverage", "percent": 43.0, "command": "coverage run --branch -m pytest -q && coverage xml && diff-cover coverage.xml --compare-branch=main --fail-under=100", "tool_version": "10.6.0"}
+  ],
+  "tally": {
+    "total_tools": 28,
+    "split_by_version": 25,
+    "single_version_git_history": 3,
+    "live_measured_wrong_at_3.11_3.13_3.14": 23,
+    "not_installed_at_3.11_3.13_3.14": 2,
+    "code_only_at_3.6_3.7": 25,
+    "git_history_measured_wrong": 3
+  },
+  "qa_spot_recheck": {
+    "performed_independently_of_build": true,
+    "tools_rechecked": ["Radon", "Bandit", "jscpd", "Beniget", "mutmut"],
+    "result": "all 5 reproduced exactly; mutmut README wording corrected (survived vs not-killed ambiguity), no numeric defects found"
+  }
+}
