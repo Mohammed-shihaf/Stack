@@ -10,7 +10,7 @@ const REPO_ROOT = path.resolve(__dirname, "..", "..");
 
 esbuild
   .build({
-    entryPoints: [path.join(REPO_ROOT, "packages/domain/src", "index.ts")],
+    entryPoints: [path.join(REPO_ROOT, "src", "index.ts")],
     outfile: path.join(REPO_ROOT, "build", "bundle.cjs"),
     bundle: true,
     platform: "node",

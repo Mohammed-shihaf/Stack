@@ -1,17 +1,15 @@
 {
-  "name": "typescript-n12-ts-002",
+  "name": "typescript-n12-ts-001",
   "version": "1.0.0",
   "private": true,
-  "description": "Node 12 / esbuild / npm / Microservices tool-evaluation repository (branch TS-002).",
+  "description": "Node 12 / esbuild / npm / Monolith tool-evaluation repository (branch TS-001).",
   "license": "MIT",
   "engines": {
     "node": ">=12.20 <13"
   },
   "packageManager": "npm@8.19.4",
-  "workspaces": [
-    "packages/*",
-    "services/*"
-  ],
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
   "scripts": {
     "build": "bash tools/typescript/run_tsc.sh",
     "bundle": "bash tools/esbuild/run_esbuild.sh",
