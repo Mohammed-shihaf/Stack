@@ -1,6 +1,6 @@
 #!/usr/bin/env ts-node
 /**
- * Tool integration entry point -- branch TS-044.
+ * Tool integration entry point -- branch TS-043.
  *
  * The direct analogue of the Python family's tools/tool_integration.py, which
  * is itself the ToolIntegration.targets analogue from the C# reference repo.
@@ -27,7 +27,7 @@ export const NODE_TARGET = "14";
 export const TYPESCRIPT_VERSION = "5.1.6";
 export const BUNDLER_NAME = "rollup";
 export const PACKAGE_MANAGER = "yarn (Berry)";
-export const ARCHITECTURE = "Microservices";
+export const ARCHITECTURE = "Monolith";
 
 interface Wiring {
   readonly dir: string;
@@ -78,7 +78,7 @@ function runnerFor(dir: string): string | null {
 
 function banner(): number {
   console.log(
-    `=== Tool integration -- branch TS-044 ` +
+    `=== Tool integration -- branch TS-043 ` +
       `(Node ${NODE_TARGET} / TypeScript ${TYPESCRIPT_VERSION} / ` +
       `${BUNDLER_NAME} / ${PACKAGE_MANAGER} / ${ARCHITECTURE}) ===`,
   );
