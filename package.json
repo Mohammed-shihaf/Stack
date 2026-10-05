@@ -1,17 +1,15 @@
 {
-  "name": "typescript-n12-ts-058",
+  "name": "typescript-n12-ts-057",
   "version": "1.0.0",
   "private": true,
-  "description": "Node 16 / vite / npm / Microservices tool-evaluation repository (branch TS-058).",
+  "description": "Node 16 / vite / npm / Monolith tool-evaluation repository (branch TS-057).",
   "license": "MIT",
   "engines": {
     "node": ">=16.17 <17"
   },
   "packageManager": "npm@9.9.4",
-  "workspaces": [
-    "packages/*",
-    "services/*"
-  ],
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
   "scripts": {
     "build": "bash tools/typescript/run_tsc.sh",
     "bundle": "bash tools/esbuild/run_esbuild.sh",

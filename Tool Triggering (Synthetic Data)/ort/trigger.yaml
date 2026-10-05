@@ -3,13 +3,13 @@ label: "OSS Review Toolkit (cdxgen license proxy)"
 language: typescript
 node_version: "16"
 typescript_version: "5.5.4"
-branch: "TS-058"
-scenario: "2 - Microservices"
-architecture: "Microservices"
-module: "workspace"
+branch: "TS-057"
+scenario: "1 - Monolithic"
+architecture: "Monolith"
+module: "flat"
 package_manager: "npm"
 bundler: "vite"
-project: packages/domain/package.json
+project: package.json
 tests: tests/
 tools_project: tools/
 pinned-version: null  # not an npm package -- see the runner
