@@ -1,15 +1,15 @@
-# CI for branch TS-011.
+# CI for branch TS-032.
 #
 # The point of this file: it INVOKES EVERY WIRED TOOL and uploads what they
 # produce. FlintAtlas and WillowBrook ran only `npm install` and `npm test`, so
 # not one of their declared tools was ever executed in CI. Gate G6.
-name: TS-011
+name: TS-032
 
 on:
   push:
-    branches: ["TS-011"]
+    branches: ["TS-032"]
   pull_request:
-    branches: ["TS-011"]
+    branches: ["TS-032"]
   workflow_dispatch:
 
 jobs:
@@ -22,13 +22,13 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "12.22.12"
+          node-version: "14.21.3"
 
       - name: Package manager
-        run: corepack enable && corepack prepare yarn@3.8.7 --activate
+        run: # bun is a standalone binary, not an npm package -- see tools/npm-audit/run_npm_audit.sh
 
       - name: Install (frozen -- gate G4)
-        run: yarn install --immutable
+        run: bun install --frozen-lockfile
 
       - name: Verify every tool is wired
         run: node_modules/.bin/ts-node tools/tool_integration.ts --verify
@@ -40,7 +40,7 @@ jobs:
         run: bash tools/typescript/run_tsc.sh
 
       - name: Bundle and run the bundle
-        run: bash tools/vite/run_vite.sh
+        run: bash tools/esbuild/run_esbuild.sh
 
       - name: Tests
         run: bash tools/mocha/run_mocha.sh
@@ -51,8 +51,14 @@ jobs:
       - name: Coverage -- nyc + ts-node (cross-check)
         run: bash tools/nyc/run_nyc.sh
 
+      - name: Tests (vitest -- independent second runner)
+        run: bash tools/vitest/run_vitest.sh
+
       - name: Lint
         run: bash tools/eslint/run_eslint.sh
+
+      - name: Lint (biome -- own parser, never loads tsc)
+        run: bash tools/biome/run_biome.sh
 
       - name: Cognitive complexity
         run: bash tools/sonarjs/run_sonarjs.sh
@@ -115,7 +121,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: tool-reports-TS-011
+          name: tool-reports-TS-032
           path: |
             reports/
             coverage/

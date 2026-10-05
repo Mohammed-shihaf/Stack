@@ -19,13 +19,13 @@ module.exports = {
   root: true,
   parser: "@typescript-eslint/parser",
   parserOptions: {
-    ecmaVersion: 2019,
+    ecmaVersion: 2020,
     sourceType: "module",
     project: "./tsconfig.json",
     tsconfigRootDir: __dirname,
   },
   plugins: ["@typescript-eslint", "sonarjs", "security"],
-  env: { node: true, es2019: true },
+  env: { node: true, es2020: true },
   extends: [
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",

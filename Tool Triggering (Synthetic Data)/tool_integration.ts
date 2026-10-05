@@ -1,6 +1,6 @@
 #!/usr/bin/env ts-node
 /**
- * Tool integration entry point -- branch TS-011.
+ * Tool integration entry point -- branch TS-032.
  *
  * The direct analogue of the Python family's tools/tool_integration.py, which
  * is itself the ToolIntegration.targets analogue from the C# reference repo.
@@ -23,11 +23,11 @@ import * as path from "path";
 const REPO_ROOT = path.resolve(__dirname, "..");
 const TOOLS_DIR = path.join(REPO_ROOT, "tools");
 
-export const NODE_TARGET = "12";
-export const TYPESCRIPT_VERSION = "5.0.4";
-export const BUNDLER_NAME = "vite";
-export const PACKAGE_MANAGER = "yarn (Berry)";
-export const ARCHITECTURE = "Monolith";
+export const NODE_TARGET = "14";
+export const TYPESCRIPT_VERSION = "5.1.6";
+export const BUNDLER_NAME = "esbuild";
+export const PACKAGE_MANAGER = "bun";
+export const ARCHITECTURE = "Microservices";
 
 interface Wiring {
   readonly dir: string;
@@ -37,8 +37,10 @@ interface Wiring {
 
 export const TOOL_WIRING: readonly Wiring[] = [
   { dir: "typescript", label: "TypeScript compiler (tsc)", wiring: "pinned 5.0.4 -> type diagnostics (must be empty)" },
-  { dir: "vite", label: "Vite (esbuild-backed)", wiring: "pinned 2.9.18 -> build/bundle.cjs -- emitted by Vite (Rollup + its own esbuild transform), and the bundle is executed" },
-  { dir: "mocha", label: "mocha", wiring: "pinned 9.2.2 -> test results (all must pass)" },
+  { dir: "esbuild", label: "esbuild", wiring: "pinned 0.21.5 -> build/bundle.cjs + build/bundle.cjs.map, and the bundle is executed" },
+  { dir: "mocha", label: "mocha", wiring: "pinned 10.8.2 -> test results (all must pass)" },
+  { dir: "vitest", label: "vitest + @vitest/coverage-v8", wiring: "pinned 0.34.6 -> coverage-vitest/coverage-summary.json -- a THIRD independent coverage number, alongside c8 and nyc" },
+  { dir: "biome", label: "biome", wiring: "pinned 2.5.11 -> planted findings expected" },
   { dir: "c8", label: "c8 (V8 coverage, primary)", wiring: "pinned 8.0.1 -> coverage/coverage-summary.json -- MUST be non-zero (gate G2)" },
   { dir: "nyc", label: "nyc + ts-node (coverage cross-check)", wiring: "pinned 15.1.0 -> coverage-nyc/coverage-summary.json -- instruments .ts directly, never via source-map remap" },
   { dir: "eslint", label: "eslint", wiring: "pinned 8.57.1 -> planted findings expected" },
@@ -76,7 +78,7 @@ function runnerFor(dir: string): string | null {
 
 function banner(): number {
   console.log(
-    `=== Tool integration -- branch TS-011 ` +
+    `=== Tool integration -- branch TS-032 ` +
       `(Node ${NODE_TARGET} / TypeScript ${TYPESCRIPT_VERSION} / ` +
       `${BUNDLER_NAME} / ${PACKAGE_MANAGER} / ${ARCHITECTURE}) ===`,
   );

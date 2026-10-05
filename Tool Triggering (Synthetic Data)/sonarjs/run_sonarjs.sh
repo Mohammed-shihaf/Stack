@@ -1,13 +1,23 @@
 #!/usr/bin/env bash
-# eslint-plugin-sonarjs runner -- branch TS-011 (Node 12, yarn (Berry), Monolith).
+# eslint-plugin-sonarjs runner -- branch TS-032 (Node 14, bun, Microservices).
 set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
 mkdir -p reports
 
-echo "[sonarjs] eslint-plugin-sonarjs $(node -p "require('eslint-plugin-sonarjs/package.json').version")"
+# Read a dependency's version WITHOUT require()-ing its package.json.
+# Modern packages declare an "exports" map that does not list "./package.json",
+# so require('<pkg>/package.json') throws ERR_PACKAGE_PATH_NOT_EXPORTED --
+# @rollup/plugin-typescript 12.x is one. Reading the file directly works under
+# every package manager, because these are all DIRECT dependencies and npm,
+# yarn, pnpm and bun each place (or symlink) those at node_modules/<pkg>.
+pkgver() {
+  node -e "try{console.log(JSON.parse(require('fs').readFileSync('node_modules/'+process.argv[1]+'/package.json','utf8')).version)}catch(e){console.log('unresolved')}" "$1"
+}
+
+echo "[sonarjs] eslint-plugin-sonarjs $(pkgver eslint-plugin-sonarjs)"
 echo "[sonarjs] cognitive complexity limit is 15 (.eslintrc.cjs)"
-node_modules/.bin/eslint src/analysis/complexity-sample.ts --no-inline-config --format json > reports/sonarjs.json || true
+node_modules/.bin/eslint packages/domain/src/analysis/complexity-sample.ts --no-inline-config --format json > reports/sonarjs.json || true
 node -e "
   const m = (require('./reports/sonarjs.json')[0]||{}).messages||[];
   const cc = m.filter(x=>x.ruleId==='sonarjs/cognitive-complexity');

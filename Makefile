@@ -6,21 +6,21 @@ TSNODE := node_modules/.bin/ts-node
 .PHONY: help install build test coverage lint tools verify audit check clean
 
 help:
-	@echo "install   -- yarn install --immutable (frozen -- gate G4)"
-	@echo "build     -- tsc --noEmit, tsc emit, vite bundle + run it"
+	@echo "install   -- bun install --frozen-lockfile (frozen -- gate G4)"
+	@echo "build     -- tsc --noEmit, tsc emit, esbuild bundle + run it"
 	@echo "test      -- mocha over tests/"
-	@echo "coverage  -- c8 (primary) and nyc+ts-node (cross-check); both must be non-zero"
-	@echo "lint      -- eslint, sonarjs, security"
+	@echo "coverage  -- c8, nyc+ts-node and vitest: three independent numbers, all non-zero"
+	@echo "lint      -- eslint, sonarjs, security, biome"
 	@echo "tools     -- run EVERY wired tool runner"
 	@echo "verify    -- tool_integration --verify"
 	@echo "check     -- full_check.ts cross-file consistency audit"
 
 install:
-	yarn install --immutable
+	bun install --frozen-lockfile
 
 build:
 	bash tools/typescript/run_tsc.sh
-	bash tools/vite/run_vite.sh
+	bash tools/esbuild/run_esbuild.sh
 
 test:
 	bash tools/mocha/run_mocha.sh
@@ -28,11 +28,13 @@ test:
 coverage:
 	bash tools/c8/run_c8.sh
 	bash tools/nyc/run_nyc.sh
+	bash tools/vitest/run_vitest.sh
 
 lint:
 	bash tools/eslint/run_eslint.sh
 	bash tools/sonarjs/run_sonarjs.sh
 	bash tools/security/run_security.sh
+	bash tools/biome/run_biome.sh
 
 verify:
 	$(TSNODE) tools/tool_integration.ts --verify

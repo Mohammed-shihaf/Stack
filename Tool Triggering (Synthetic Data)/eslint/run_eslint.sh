@@ -1,26 +1,36 @@
 #!/usr/bin/env bash
-# eslint runner -- branch TS-011 (Node 12, yarn (Berry), Monolith).
+# eslint runner -- branch TS-032 (Node 14, bun, Microservices).
 set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
 mkdir -p reports
 
+# Read a dependency's version WITHOUT require()-ing its package.json.
+# Modern packages declare an "exports" map that does not list "./package.json",
+# so require('<pkg>/package.json') throws ERR_PACKAGE_PATH_NOT_EXPORTED --
+# @rollup/plugin-typescript 12.x is one. Reading the file directly works under
+# every package manager, because these are all DIRECT dependencies and npm,
+# yarn, pnpm and bun each place (or symlink) those at node_modules/<pkg>.
+pkgver() {
+  node -e "try{console.log(JSON.parse(require('fs').readFileSync('node_modules/'+process.argv[1]+'/package.json','utf8')).version)}catch(e){console.log('unresolved')}" "$1"
+}
+
 echo "[eslint] version:"; node_modules/.bin/eslint --version
 echo
 echo "[eslint] 0/3 the config must LOAD (gate G3)"
-node_modules/.bin/eslint --print-config src/services/order-service.ts > /dev/null
+node_modules/.bin/eslint --print-config packages/domain/src/services/order-service.ts > /dev/null
 echo "[eslint] config loads OK"
 echo
 echo "[eslint] 1/3 real source, fixtures excluded -- expect clean"
-node_modules/.bin/eslint 'src/models/**/*.ts' 'src/services/**/*.ts' src/index.ts --format unix
+node_modules/.bin/eslint 'packages/domain/src/models/**/*.ts' 'packages/domain/src/services/**/*.ts' packages/domain/src/index.ts --format unix
 echo "[eslint] real source clean"
 echo
 echo "[eslint] 2/3 planted lint fixture -- expect findings"
 # --no-inline-config defeats the file-level /* eslint-disable */ the fixture carries.
-node_modules/.bin/eslint src/analysis/lint-violations.ts --no-inline-config --format unix || true
+node_modules/.bin/eslint packages/domain/src/analysis/lint-violations.ts --no-inline-config --format unix || true
 echo
 echo "[eslint] 3/3 full tree summary"
-node_modules/.bin/eslint 'src/**/*.ts' --no-inline-config --format json > reports/eslint.json || true
+node_modules/.bin/eslint 'packages/domain/src/**/*.ts' --no-inline-config --format json > reports/eslint.json || true
 node -e "
   const r = require('./reports/eslint.json');
   const n = r.reduce((a,f)=>a+f.messages.length,0);

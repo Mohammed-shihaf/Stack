@@ -1,19 +1,19 @@
 tool: lizard
 label: "Lizard"
 language: typescript
-node_version: "12"
-typescript_version: "5.0.4"
-branch: "TS-011"
-scenario: "1 - Monolithic"
-architecture: "Monolith"
-module: "flat"
-package_manager: "yarn (Berry)"
-bundler: "vite"
-project: package.json
+node_version: "14"
+typescript_version: "5.1.6"
+branch: "TS-032"
+scenario: "2 - Microservices"
+architecture: "Microservices"
+module: "workspace"
+package_manager: "bun"
+bundler: "esbuild"
+project: packages/domain/package.json
 tests: tests/
 tools_project: tools/
 pinned-version: null  # not an npm package -- see the runner
 config: null
-target_files: [src]
-command: "lizard -l typescript src --csv"
+target_files: [packages/domain/src]
+command: "lizard -l typescript packages/domain/src --csv"
 produces: "reports/lizard.csv -- CCN and token counts. See the caveat in the README"

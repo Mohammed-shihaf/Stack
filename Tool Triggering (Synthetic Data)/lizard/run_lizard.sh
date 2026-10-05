@@ -1,9 +1,19 @@
 #!/usr/bin/env bash
-# Lizard runner -- branch TS-011 (Node 12, yarn (Berry), Monolith).
+# Lizard runner -- branch TS-032 (Node 14, bun, Microservices).
 set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
 mkdir -p reports
+
+# Read a dependency's version WITHOUT require()-ing its package.json.
+# Modern packages declare an "exports" map that does not list "./package.json",
+# so require('<pkg>/package.json') throws ERR_PACKAGE_PATH_NOT_EXPORTED --
+# @rollup/plugin-typescript 12.x is one. Reading the file directly works under
+# every package manager, because these are all DIRECT dependencies and npm,
+# yarn, pnpm and bun each place (or symlink) those at node_modules/<pkg>.
+pkgver() {
+  node -e "try{console.log(JSON.parse(require('fs').readFileSync('node_modules/'+process.argv[1]+'/package.json','utf8')).version)}catch(e){console.log('unresolved')}" "$1"
+}
 
 # Lizard is a Python tool:  pip install lizard
 # CAVEAT (carried into the metric sheet): Lizard is a tokeniser, not a type
@@ -15,7 +25,7 @@ if ! command -v lizard >/dev/null 2>&1; then
   echo "[lizard] SKIP -- lizard not installed (pip install lizard)"; exit 0
 fi
 echo "[lizard] version: $(lizard --version 2>&1 | head -1)"
-lizard -l typescript src --csv > reports/lizard.csv || true
+lizard -l typescript packages/domain/src --csv > reports/lizard.csv || true
 python3 - <<'PY'
 import csv, io, os
 rows = list(csv.reader(open("reports/lizard.csv", encoding="utf-8"))) if os.path.exists("reports/lizard.csv") else []

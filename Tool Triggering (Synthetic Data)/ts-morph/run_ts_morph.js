@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* ts-morph runner -- branch TS-011.
+/* ts-morph runner -- branch TS-032.
  * Type-aware inventory: one row per function with parameter count, statement
  * count and maximum block depth. This is the primary structural source; Lizard
  * is the tokeniser cross-check, and the two are expected to disagree on
@@ -11,7 +11,8 @@ const path = require("path");
 const { Project, SyntaxKind } = require("ts-morph");
 
 const REPO_ROOT = path.resolve(__dirname, "..", "..");
-console.log("[ts-morph] version:", require("ts-morph/package.json").version,
+const pkgver = (n) => { try { return JSON.parse(fs.readFileSync(path.join(REPO_ROOT, "node_modules", n, "package.json"), "utf8")).version; } catch (e) { return "unresolved"; } };
+console.log("[ts-morph] version:", pkgver("ts-morph"),
             "| bundled TypeScript:", require("ts-morph").ts.version);
 
 const project = new Project({ tsConfigFilePath: path.join(REPO_ROOT, "tsconfig.json") });

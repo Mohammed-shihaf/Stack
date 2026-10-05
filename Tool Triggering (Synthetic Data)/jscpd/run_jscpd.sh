@@ -1,9 +1,19 @@
 #!/usr/bin/env bash
-# jscpd runner -- branch TS-011 (Node 12, yarn (Berry), Monolith).
+# jscpd runner -- branch TS-032 (Node 14, bun, Microservices).
 set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
 mkdir -p reports
+
+# Read a dependency's version WITHOUT require()-ing its package.json.
+# Modern packages declare an "exports" map that does not list "./package.json",
+# so require('<pkg>/package.json') throws ERR_PACKAGE_PATH_NOT_EXPORTED --
+# @rollup/plugin-typescript 12.x is one. Reading the file directly works under
+# every package manager, because these are all DIRECT dependencies and npm,
+# yarn, pnpm and bun each place (or symlink) those at node_modules/<pkg>.
+pkgver() {
+  node -e "try{console.log(JSON.parse(require('fs').readFileSync('node_modules/'+process.argv[1]+'/package.json','utf8')).version)}catch(e){console.log('unresolved')}" "$1"
+}
 
 echo "[jscpd] version:"; node_modules/.bin/jscpd --version
 # Gate G8: the planted duplicate pair must be found with the COMMITTED config,
@@ -16,7 +26,7 @@ echo "[jscpd] version:"; node_modules/.bin/jscpd --version
 # scans nothing, reports nothing, and STILL EXITS 0. The `path` key inside the
 # config file is ignored entirely; only the CLI argument is honoured.
 # Hence: config at the repo root, path passed explicitly.
-node_modules/.bin/jscpd --config .jscpd.json src
+node_modules/.bin/jscpd --config .jscpd.json packages/domain/src
 node -e "
   const r = require('./reports/jscpd/jscpd-report.json');
   const n = (r.statistics && r.statistics.total && r.statistics.total.clones) || 0;

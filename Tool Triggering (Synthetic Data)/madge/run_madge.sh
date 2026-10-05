@@ -1,20 +1,30 @@
 #!/usr/bin/env bash
-# madge runner -- branch TS-011 (Node 12, yarn (Berry), Monolith).
+# madge runner -- branch TS-032 (Node 14, bun, Microservices).
 set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
 mkdir -p reports
+
+# Read a dependency's version WITHOUT require()-ing its package.json.
+# Modern packages declare an "exports" map that does not list "./package.json",
+# so require('<pkg>/package.json') throws ERR_PACKAGE_PATH_NOT_EXPORTED --
+# @rollup/plugin-typescript 12.x is one. Reading the file directly works under
+# every package manager, because these are all DIRECT dependencies and npm,
+# yarn, pnpm and bun each place (or symlink) those at node_modules/<pkg>.
+pkgver() {
+  node -e "try{console.log(JSON.parse(require('fs').readFileSync('node_modules/'+process.argv[1]+'/package.json','utf8')).version)}catch(e){console.log('unresolved')}" "$1"
+}
 
 echo "[madge] version:"; node_modules/.bin/madge --version
 # TRAP: madge 5.0.2 has NO --config flag (it was added later). It auto-discovers
 # .madgerc from the working directory, so the config lives at the repo root.
 # Passing --config makes madge exit with "unknown option", which a runner that
 # swallowed stderr would report as an empty graph rather than a failure.
-node_modules/.bin/madge --ts-config tsconfig.json --json src > reports/madge-graph.json
+node_modules/.bin/madge --ts-config tsconfig.json --json packages/domain/src > reports/madge-graph.json
 echo "[madge] circular dependency check:"
-node_modules/.bin/madge --ts-config tsconfig.json --circular src || true
+node_modules/.bin/madge --ts-config tsconfig.json --circular packages/domain/src || true
 echo "[madge] orphan modules:"
-node_modules/.bin/madge --ts-config tsconfig.json --orphans src || true
+node_modules/.bin/madge --ts-config tsconfig.json --orphans packages/domain/src || true
 node -e "
   const g = require('./reports/madge-graph.json');
   const files = Object.keys(g);
