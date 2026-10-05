@@ -1000,45 +1000,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@orderkit/contracts@1.0.0, @orderkit/contracts@workspace:packages/contracts":
-  version: 0.0.0-use.local
-  resolution: "@orderkit/contracts@workspace:packages/contracts"
-  languageName: unknown
-  linkType: soft
-
-"@orderkit/domain@1.0.0, @orderkit/domain@workspace:packages/domain":
-  version: 0.0.0-use.local
-  resolution: "@orderkit/domain@workspace:packages/domain"
-  languageName: unknown
-  linkType: soft
-
-"@orderkit/gateway-service@workspace:services/gateway-service":
-  version: 0.0.0-use.local
-  resolution: "@orderkit/gateway-service@workspace:services/gateway-service"
-  dependencies:
-    "@orderkit/contracts": 1.0.0
-    "@orderkit/domain": 1.0.0
-  languageName: unknown
-  linkType: soft
-
-"@orderkit/order-service@workspace:services/order-service":
-  version: 0.0.0-use.local
-  resolution: "@orderkit/order-service@workspace:services/order-service"
-  dependencies:
-    "@orderkit/contracts": 1.0.0
-    "@orderkit/domain": 1.0.0
-  languageName: unknown
-  linkType: soft
-
-"@orderkit/pricing-service@workspace:services/pricing-service":
-  version: 0.0.0-use.local
-  resolution: "@orderkit/pricing-service@workspace:services/pricing-service"
-  dependencies:
-    "@orderkit/contracts": 1.0.0
-    "@orderkit/domain": 1.0.0
-  languageName: unknown
-  linkType: soft
-
 "@sindresorhus/is@npm:^0.14.0":
   version: 0.14.0
   resolution: "@sindresorhus/is@npm:0.14.0"
@@ -9798,9 +9759,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript-n12-ts-012@workspace:.":
+"typescript-n12-ts-011@workspace:.":
   version: 0.0.0-use.local
-  resolution: "typescript-n12-ts-012@workspace:."
+  resolution: "typescript-n12-ts-011@workspace:."
   dependencies:
     "@cyclonedx/cdxgen": 8.6.3
     "@opentelemetry/api": 1.1.0
