@@ -1,15 +1,17 @@
 {
-  "name": "typescript-n12-ts-069",
+  "name": "typescript-n12-ts-068",
   "version": "1.0.0",
   "private": true,
-  "description": "Node 16 / rollup / pnpm / Monolith tool-evaluation repository (branch TS-069).",
+  "description": "Node 16 / rollup / yarn (Berry) / Microservices tool-evaluation repository (branch TS-068).",
   "license": "MIT",
   "engines": {
     "node": ">=16.17 <17"
   },
-  "packageManager": "pnpm@8.15.9",
-  "main": "dist/src/index.js",
-  "types": "dist/src/index.d.ts",
+  "packageManager": "yarn@3.8.7",
+  "workspaces": [
+    "packages/*",
+    "services/*"
+  ],
   "scripts": {
     "build": "bash tools/typescript/run_tsc.sh",
     "bundle": "bash tools/esbuild/run_esbuild.sh",
