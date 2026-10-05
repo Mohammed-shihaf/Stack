@@ -1,9 +1,9 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
+    "target": "ES2023",
     "module": "CommonJS",
     "moduleResolution": "node",
-    "lib": ["ES2022"],
+    "lib": ["ES2023"],
     "rootDir": ".",
     "outDir": "dist",
     "strict": true,
@@ -19,6 +19,6 @@
     "resolveJsonModule": true,
     "types": ["node", "mocha", "chai"]
   },
-  "include": ["src/**/*.ts", "tests/**/*.ts", "tools/**/*.ts"],
+  "include": ["packages/domain/src/**/*.ts", "tests/**/*.ts", "tools/**/*.ts"],
   "exclude": ["node_modules", "dist", "build", "reports"]
 }

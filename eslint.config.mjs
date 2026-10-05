@@ -42,7 +42,7 @@ export default tseslint.config(
   security.configs.recommended,
   {
     languageOptions: {
-      ecmaVersion: 2022,
+      ecmaVersion: 2023,
       sourceType: "module",
       globals: { ...globals.node },
       parserOptions: {
