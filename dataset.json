@@ -1,5 +1,5 @@
 {
-  "branchId": "TS-017",
+  "branchId": "TS-022",
   "repository": "typescript-n12-001-005",
   "language": "TypeScript",
   "typescriptVersion": "5.0.4",
@@ -7,30 +7,35 @@
   "nodeVersionVerified": "12.22.12",
   "bundler": "rollup",
   "bundlerVersion": "2.80.0",
-  "packageManager": "npm",
-  "packageManagerVersion": "8.19.4",
-  "architecture": "Monolith",
-  "scenario": "1 - Monolithic",
-  "module": "flat",
-  "sourceRoot": "src",
+  "packageManager": "pnpm",
+  "packageManagerVersion": "6.35.1",
+  "architecture": "Microservices",
+  "scenario": "2 - Microservices",
+  "module": "workspace",
+  "sourceRoot": "packages/domain/src",
   "deployableUnits": [
-    "typescript-n12-ts-017"
+    "gateway-service",
+    "order-service",
+    "pricing-service"
   ],
-  "workspaces": [],
+  "workspaces": [
+    "packages/*",
+    "services/*"
+  ],
   "toolsWired": 26,
   "bundlerNote": "rollup 2.80.0 -- newest supporting Node 12 (3.x needs >=14.18). Transform: tsc 5.0.4 via @rollup/plugin-typescript 8.5.0. Linker: Rollup.",
   "coveragePrimary": "c8",
   "coverageCrossCheck": "nyc + ts-node",
   "plantedFixtures": {
     "duplication": [
-      "src/services/retail-order-processor.ts",
-      "src/services/wholesale-order-processor.ts"
+      "packages/domain/src/services/retail-order-processor.ts",
+      "packages/domain/src/services/wholesale-order-processor.ts"
     ],
-    "complexity": "src/analysis/complexity-sample.ts",
-    "sast": "src/analysis/sast-fixture.ts",
-    "taint": "src/analysis/taint-fixture.ts",
-    "deadCode": "src/analysis/dead-code.ts",
-    "callGraph": "src/analysis/call-graph-sample.ts",
+    "complexity": "packages/domain/src/analysis/complexity-sample.ts",
+    "sast": "packages/domain/src/analysis/sast-fixture.ts",
+    "taint": "packages/domain/src/analysis/taint-fixture.ts",
+    "deadCode": "packages/domain/src/analysis/dead-code.ts",
+    "callGraph": "packages/domain/src/analysis/call-graph-sample.ts",
     "vulnerablePins": [
       "lodash@4.17.15",
       "minimist@1.2.5",

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# fast-check runner -- branch TS-017 (Node 12, npm, Monolith).
+# fast-check runner -- branch TS-022 (Node 12, pnpm, Microservices).
 set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
