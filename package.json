@@ -1,17 +1,15 @@
 {
-  "name": "typescript-n12-ts-060",
+  "name": "typescript-n12-ts-059",
   "version": "1.0.0",
   "private": true,
-  "description": "Node 16 / vite / yarn (Berry) / Microservices tool-evaluation repository (branch TS-060).",
+  "description": "Node 16 / vite / yarn (Berry) / Monolith tool-evaluation repository (branch TS-059).",
   "license": "MIT",
   "engines": {
     "node": ">=16.17 <17"
   },
   "packageManager": "yarn@3.8.7",
-  "workspaces": [
-    "packages/*",
-    "services/*"
-  ],
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
   "scripts": {
     "build": "bash tools/typescript/run_tsc.sh",
     "bundle": "bash tools/esbuild/run_esbuild.sh",
