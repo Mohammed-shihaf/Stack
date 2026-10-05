@@ -3,13 +3,13 @@ label: "Grype"
 language: typescript
 node_version: "16"
 typescript_version: "5.5.4"
-branch: "TS-063"
-scenario: "1 - Monolithic"
-architecture: "Monolith"
-module: "flat"
-package_manager: "bun"
+branch: "TS-058"
+scenario: "2 - Microservices"
+architecture: "Microservices"
+module: "workspace"
+package_manager: "npm"
 bundler: "vite"
-project: package.json
+project: packages/domain/package.json
 tests: tests/
 tools_project: tools/
 pinned-version: null  # not an npm package -- see the runner
