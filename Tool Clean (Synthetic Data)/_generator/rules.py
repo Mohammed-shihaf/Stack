@@ -1,0 +1,106 @@
+"""The sink ruleset shipped into the Semgrep and Opengrep folders.
+
+Committed rather than fetched. ``--config=auto`` resolves from semgrep.dev,
+which is refused at this environment's egress proxy, and a corpus whose clean
+result depends on a network fetch is not reproducible. These are the sinks the
+two folders claim not to reach, written out so the claim is checkable.
+"""
+
+SINK_RULES = '''rules:
+  - id: no-eval-or-exec
+    languages: [python]
+    severity: ERROR
+    message: eval/exec executes arbitrary code.
+    patterns:
+      - pattern-either:
+          - pattern: eval(...)
+          - pattern: exec(...)
+          - pattern: compile(...)
+
+  - id: no-os-command
+    languages: [python]
+    severity: ERROR
+    message: Shelling out reaches a command interpreter.
+    patterns:
+      - pattern-either:
+          - pattern: os.system(...)
+          - pattern: os.popen(...)
+          - pattern: os.execv(...)
+          - pattern: subprocess.$F(...)
+          - pattern: commands.getoutput(...)
+
+  - id: no-unsafe-deserialisation
+    languages: [python]
+    severity: ERROR
+    message: Deserialising untrusted bytes can construct arbitrary objects.
+    patterns:
+      - pattern-either:
+          - pattern: pickle.load(...)
+          - pattern: pickle.loads(...)
+          - pattern: marshal.loads(...)
+          - pattern: shelve.open(...)
+          - pattern: yaml.load($X)
+
+  - id: no-weak-hash
+    languages: [python]
+    severity: ERROR
+    message: MD5 and SHA1 are not collision resistant.
+    patterns:
+      - pattern-either:
+          - pattern: hashlib.md5(...)
+          - pattern: hashlib.sha1(...)
+
+  - id: no-insecure-temp-file
+    languages: [python]
+    severity: ERROR
+    message: mktemp is a race; use mkstemp or NamedTemporaryFile.
+    patterns:
+      - pattern: tempfile.mktemp(...)
+
+  - id: no-format-string-template-injection
+    languages: [python]
+    severity: ERROR
+    message: str.format on a caller-supplied template can reach attributes.
+    patterns:
+      - pattern-either:
+          - pattern: $TEMPLATE.format(**$VALUES)
+          - pattern: string.Template(...).substitute(**$VALUES)
+
+  - id: no-string-built-sql
+    languages: [python]
+    severity: ERROR
+    message: SQL assembled by concatenation or interpolation.
+    patterns:
+      - pattern-either:
+          - pattern: $CUR.execute("..." % ...)
+          - pattern: $CUR.execute("..." + ...)
+          - pattern: $CUR.execute(f"...")
+
+  - id: no-request-without-timeout
+    languages: [python]
+    severity: ERROR
+    message: An HTTP call with no timeout can hang forever.
+    patterns:
+      - pattern-either:
+          - pattern: requests.get($U)
+          - pattern: requests.post($U)
+          - pattern: urllib.request.urlopen($U)
+
+  - id: no-assert-in-source
+    languages: [python]
+    severity: ERROR
+    message: assert is stripped under -O; raise instead.
+    patterns:
+      - pattern: assert $X
+
+  - id: no-hardcoded-secret
+    languages: [python]
+    severity: ERROR
+    message: A credential literal assigned to a secret-looking name.
+    patterns:
+      - pattern-either:
+          - pattern: $NAME = "..."
+      - metavariable-regex:
+          metavariable: $NAME
+          regex: (?i).*(password|passwd|secret|token|api_?key|private_?key).*
+'''

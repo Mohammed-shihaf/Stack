@@ -1,4 +1,4 @@
-# orderlab -- PY_V311_SETUPTOOLS_PIP_MICRO
+﻿# orderlab -- PY_V311_SETUPTOOLS_PIP_MICRO
 
 Order-pricing domain used as a white-box tool-evaluation fixture. One branch of
 the Python 3.11 family: 24 branches across 3 build backends, 4 package managers
@@ -94,7 +94,7 @@ that claim is simply no longer load-bearing this far up.
   converged at 3.10 and has stopped.
 - **Nothing in the infrastructure moved either.** setuptools, poetry-core,
   uv_build, wheel, pip, poetry and pytest are all at latest on both families.
-- **`tomllib` is stdlib from here (PEP 680).** `tools/full_check.py` has
+- **`tomllib` is stdlib from here (PEP 680).** `Tool Triggering (Synthetic Data)/full_check.py` has
   carried a hand-written line scanner since 3.6 for the interpreters with no
   TOML parser; on this family the real parser runs, and the checker prints
   which of the two paths it took.
@@ -130,7 +130,7 @@ python -c "from pricing_service import quote; print(quote('gold', 600, 'retail',
 
 ```
 make test         # pytest 9.1.1
-make check        # tools/full_check.py -- cross-file consistency audit
+make check        # Tool Triggering (Synthetic Data)/full_check.py -- cross-file consistency audit
 ```
 
 pytest is pinned at 9.1.1, which is its current latest
@@ -147,7 +147,7 @@ python-corpus/  (PY_V311_SETUPTOOLS_PIP_MICRO)
 |-- packages/  (23 files)
 |-- services/  (6 files)
 |-- tests/  (7 files)
-|-- tools/  (76 files)
+|-- Tool Triggering (Synthetic Data)/  (76 files)
 |-- .editorconfig
 |-- .gitignore
 |-- .python-version
@@ -176,6 +176,41 @@ through argv and environment. A tool that scores the two architectures
 differently is telling you about its source model, not about the code.
 
 
+
+## Tool test-data folders
+
+Three sibling folders sit at the repo root, alongside this branch's own
+`Tool Triggering (Synthetic Data)/` (above).
+
+### `Tool Triggering (Tool Github Test data)/`
+Each of the 28 tool subfolders is that tool's own real upstream test suite,
+pulled as-is from its actual GitHub project -- not generated. `Radon/` is
+radon's own pytest suite; `pydriller/` is pydriller's own test suite;
+`Opengrep/` is the real opengrep/semgrep test corpus (1,000+ files of rules,
+parsing fixtures and snapshots). A correct run finds whatever that upstream
+project's own tests genuinely contain.
+
+### `Tool Clean (Synthetic Data)/`
+25 of the 28 tools each carry 5 generated fixture packages, one per Python
+interpreter (3.6, 3.7, 3.11, 3.13, 3.14), each a self-contained package
+(`pyproject.toml`, `src/<module>/`, `tests/`) under its own invented domain
+name -- engineered to be clean, so the tool should report zero findings:
+the **Tool Clean (100% pass)** condition. The remaining 3 tools
+(`diff-cover`, `dulwich`, `pydriller`) operate on git history rather than
+interpreter syntax, so each carries one real git repository's worth of
+history instead of 5 per-version copies -- restored from `_git-bundles/`
+via `restore-invalid-git.ps1` rather than kept as a live `.git` folder, so a
+plain file copy never silently drops their content. `_generator/` holds the
+scripts that built every fixture.
+
+### `Tool Invalid (Synthetic Data)/`
+Same shape as Clean -- 25 tools x 5 Python-version fixtures, plus the same
+3 git-history tools -- but every fixture is engineered to make the tool
+flag or fail rather than pass: the **Tool Invalid** condition. `_git-bundles/`
+backs up each git-history tool's real history, with `restore-invalid-git.ps1`
+to rebuild it; `live_results.json` and this folder's own README/archive
+travel with it.
+
 ## Tool entry points
 
 Every tool directory carries a `trigger.yaml` recording its pin, its declared
@@ -183,9 +218,9 @@ floor, its measured status on this interpreter and what a working run should
 find. Run one tool directly, or all of them:
 
 ```
-bash tools/radon/run_radon.sh
-python tools/tool_integration.py --run
-python tools/tool_integration.py --verify
+bash "Tool Triggering (Synthetic Data)/radon/run_radon.sh"
+python "Tool Triggering (Synthetic Data)/tool_integration.py" --run
+python "Tool Triggering (Synthetic Data)/tool_integration.py" --verify
 ```
 
 `--run` distinguishes three outcomes: a tool that ran, a tool that skipped for
