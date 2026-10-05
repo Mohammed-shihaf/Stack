@@ -14,22 +14,27 @@
  *    whereupon eslint throws "Converting circular structure to JSON" while
  *    FORMATTING that validation error, so the output is a stack trace that
  *    never names the real cause.
+ *
+ * 3. The same trap, a second time: eslint-plugin-sonarjs from 1.0 onward ALSO
+ *    ships both `recommended` (flat) and `recommended-legacy` (eslintrc). On
+ *    sonarjs 0.x `recommended` was eslintrc-shaped and correct; from 1.0 it is
+ *    not. The generator emits the right name for the pinned version.
  */
 module.exports = {
   root: true,
   parser: "@typescript-eslint/parser",
   parserOptions: {
-    ecmaVersion: 2020,
+    ecmaVersion: 2021,
     sourceType: "module",
     project: "./tsconfig.json",
     tsconfigRootDir: __dirname,
   },
   plugins: ["@typescript-eslint", "sonarjs", "security"],
-  env: { node: true, es2020: true },
+  env: { node: true, es2021: true },
   extends: [
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
-    "plugin:sonarjs/recommended",
+    "plugin:sonarjs/recommended-legacy",
     "plugin:security/recommended-legacy",
   ],
   rules: {

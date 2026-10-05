@@ -1,16 +1,15 @@
 #!/usr/bin/env bash
-# dependency-cruiser runner -- branch TS-035 (Node 14, yarn (Berry), Monolith).
+# dependency-cruiser runner -- branch TS-056 (Node 16, bun, Microservices).
 set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
 mkdir -p reports
 
 # Read a dependency's version WITHOUT require()-ing its package.json.
-# Modern packages declare an "exports" map that does not list "./package.json",
-# so require('<pkg>/package.json') throws ERR_PACKAGE_PATH_NOT_EXPORTED --
+# Modern packages declare an "exports" map that omits "./package.json", so
+# require('<pkg>/package.json') throws ERR_PACKAGE_PATH_NOT_EXPORTED --
 # @rollup/plugin-typescript 12.x is one. Reading the file directly works under
-# every package manager, because these are all DIRECT dependencies and npm,
-# yarn, pnpm and bun each place (or symlink) those at node_modules/<pkg>.
+# every package manager, because these are all DIRECT dependencies.
 pkgver() {
   node -e "try{console.log(JSON.parse(require('fs').readFileSync('node_modules/'+process.argv[1]+'/package.json','utf8')).version)}catch(e){console.log('unresolved')}" "$1"
 }
@@ -22,9 +21,9 @@ echo "[depcruise] version:"; node_modules/.bin/depcruise --version
 # exit code 0. A glob is required. `options.extensions` is not a valid v11
 # option and makes the whole config fail schema validation.
 node_modules/.bin/depcruise --config tools/dependency-cruiser/.dependency-cruiser.cjs \
-  --output-type json 'src/**/*.ts' > reports/depcruise.json || true
+  --output-type json 'packages/domain/src/**/*.ts' > reports/depcruise.json || true
 node_modules/.bin/depcruise --config tools/dependency-cruiser/.dependency-cruiser.cjs \
-  --output-type err 'src/**/*.ts' || true
+  --output-type err 'packages/domain/src/**/*.ts' || true
 node -e "
   const r = require('./reports/depcruise.json');
   const s = r.summary || {};

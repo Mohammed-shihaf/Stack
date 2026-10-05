@@ -1,16 +1,15 @@
 #!/usr/bin/env bash
-# npm audit / npm ls runner -- branch TS-035 (Node 14, yarn (Berry), Monolith).
+# npm audit / npm ls runner -- branch TS-056 (Node 16, bun, Microservices).
 set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
 mkdir -p reports
 
 # Read a dependency's version WITHOUT require()-ing its package.json.
-# Modern packages declare an "exports" map that does not list "./package.json",
-# so require('<pkg>/package.json') throws ERR_PACKAGE_PATH_NOT_EXPORTED --
+# Modern packages declare an "exports" map that omits "./package.json", so
+# require('<pkg>/package.json') throws ERR_PACKAGE_PATH_NOT_EXPORTED --
 # @rollup/plugin-typescript 12.x is one. Reading the file directly works under
-# every package manager, because these are all DIRECT dependencies and npm,
-# yarn, pnpm and bun each place (or symlink) those at node_modules/<pkg>.
+# every package manager, because these are all DIRECT dependencies.
 pkgver() {
   node -e "try{console.log(JSON.parse(require('fs').readFileSync('node_modules/'+process.argv[1]+'/package.json','utf8')).version)}catch(e){console.log('unresolved')}" "$1"
 }
@@ -24,13 +23,13 @@ pkgver() {
 # It resolves npm packages exactly like the others; the project still RUNS on
 # Node 12. bun does not enforce engines.node at install time.
 echo "[audit] proving the committed lockfile installs frozen"
-yarn install --immutable
+bun install --frozen-lockfile
 echo
 echo "[audit] dependency tree:"
-yarn info --name-only || true
+bun pm ls || true
 echo
 echo "[audit] vulnerabilities against the committed graph:"
-yarn npm audit --json --recursive || true > reports/audit.json 2>/dev/null || true
+bun audit --json || true > reports/audit.json 2>/dev/null || true
 node -e "
   let a; try { a = require('./reports/audit.json'); } catch (e) { console.log('[audit] no JSON report'); process.exit(0); }
   const m = (a.metadata && a.metadata.vulnerabilities) || {};

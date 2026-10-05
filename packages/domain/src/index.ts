@@ -1,6 +1,7 @@
 import { OrderService } from "./services/order-service";
 import { RetailOrderProcessor } from "./services/retail-order-processor";
 import { WholesaleOrderProcessor } from "./services/wholesale-order-processor";
+import { snapshot } from "./platform/integrations";
 import type { OrderRecord, PricedOrder } from "./models/order-record";
 
 export { OrderService } from "./services/order-service";
@@ -8,6 +9,7 @@ export { RetailOrderProcessor } from "./services/retail-order-processor";
 export { WholesaleOrderProcessor } from "./services/wholesale-order-processor";
 export { discountRate, volumeBonus, effectiveRate } from "./services/pricing-rules";
 export { taxRateFor, applyTax, round2 } from "./models/tax-table";
+export { parseOptions, snapshot, describeExportStack } from "./platform/integrations";
 export * from "./models/order-record";
 
 /** Deterministic sample book -- the same input every run, so tool output is comparable. */
@@ -33,7 +35,11 @@ export interface RunSummary {
 }
 
 export function run(): RunSummary {
-  const orders = sampleOrders();
+  // Defensive copy via lodash -- this is what makes the planted dependency
+  // pins genuinely reachable rather than merely declared. knip reports
+  // declared-but-unreachable dependencies, so an unused pin would contradict
+  // tools/grype/PLANTED-CVES.md.
+  const orders = snapshot(sampleOrders());
   const service = new OrderService();
   const retail = new RetailOrderProcessor(service);
   const wholesale = new WholesaleOrderProcessor(service);
