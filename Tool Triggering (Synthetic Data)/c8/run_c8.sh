@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# c8 (V8 coverage, primary) runner -- branch TS-067 (Node 16, yarn (Berry), Monolith).
+# c8 (V8 coverage, primary) runner -- branch TS-064 (Node 16, bun, Microservices).
 set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
