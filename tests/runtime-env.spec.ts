@@ -1,18 +1,18 @@
 import { expect } from "chai";
 
 /**
- * Runtime lock. Every branch here targets Node 16, so this suite asserts
+ * Runtime lock. Every branch here targets Node 18, so this suite asserts
  * the interpreter and the language level the branch is actually built for.
  * In this corpus the Node version is held constant and the packaging varies,
  * so this is the analogue of the Python family's version-feature test.
  */
 describe("runtime environment", () => {
-  it("runs on Node 16", () => {
+  it("runs on Node 18", () => {
     const major = Number(process.versions.node.split(".")[0]);
-    expect(major, `expected Node 16, got ${process.version}`).to.equal(16);
+    expect(major, `expected Node 18, got ${process.version}`).to.equal(18);
   });
 
-  it("supports the ES2021 features this branch compiles to", () => {
+  it("supports the ES2022 features this branch compiles to", () => {
     // Optional chaining and nullish coalescing: V8 8.0 / Node 14.
     const box: { inner?: { value?: number } } = { inner: {} };
     expect(box.inner?.value ?? 41).to.equal(41);
@@ -24,6 +24,13 @@ describe("runtime environment", () => {
     counter ??= 7;
     expect(counter).to.equal(7);
     expect(1_000_000).to.equal(1000000);
+
+    // ES2022, i.e. Node 16.6+/18: Object.hasOwn, Array.prototype.at,
+    // Error cause. These are what lock this branch above Node 14.
+    expect(Object.hasOwn({ a: 1 }, "a")).to.equal(true);
+    expect([10, 20, 30].at(-1)).to.equal(30);
+    const wrapped = new Error("outer", { cause: new Error("inner") });
+    expect((wrapped.cause as Error).message).to.equal("inner");
   });
 
   it("supports Promise.any, added in ES2021", async () => {
@@ -43,6 +50,6 @@ describe("runtime environment", () => {
   });
 
   it("runs on a V8 new enough for the target", () => {
-    expect(Number(process.versions.v8.split(".")[0])).to.be.at.least(9);
+    expect(Number(process.versions.v8.split(".")[0])).to.be.at.least(10);
   });
 });

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# eslint-plugin-security runner -- branch TS-059 (Node 16, yarn (Berry), Monolith).
+# eslint-plugin-security runner -- branch TS-080 (Node 18, bun, Microservices).
 set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
@@ -15,13 +15,12 @@ pkgver() {
 }
 
 echo "[security] eslint-plugin-security $(pkgver eslint-plugin-security)"
-# The plugin exports BOTH `recommended` (flat-config shape) and
-# `recommended-legacy` (eslintrc shape). Extending the flat one under eslint 8
-# fails schema validation, and eslint then throws
-# "Converting circular structure to JSON" while FORMATTING that error -- so the
-# output is a stack trace that never names the cause. .eslintrc.cjs extends
-# `plugin:security/recommended-legacy`. See TOOL-ROSTER.md.
-node_modules/.bin/eslint src/analysis/sast-fixture.ts src/analysis/taint-fixture.ts \
+# eslint 9 uses FLAT CONFIG, so `security.configs.recommended` is the correct
+# export here. On the Node 12/14/16 repos the opposite held: those use eslintrc
+# and must extend `recommended-legacy`, because the flat-shaped `recommended`
+# fails eslintrc schema validation -- and eslint crashes while FORMATTING that
+# error, hiding the cause. Same plugin, same export name, opposite answer.
+node_modules/.bin/eslint packages/domain/src/analysis/sast-fixture.ts packages/domain/src/analysis/taint-fixture.ts \
   --no-inline-config --format json > reports/security.json || true
 node -e "
   const files = require('./reports/security.json');
