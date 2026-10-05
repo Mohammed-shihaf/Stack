@@ -1,6 +1,6 @@
 #!/usr/bin/env ts-node
 /**
- * Tool integration entry point -- branch TS-019.
+ * Tool integration entry point -- branch TS-016.
  *
  * The direct analogue of the Python family's tools/tool_integration.py, which
  * is itself the ToolIntegration.targets analogue from the C# reference repo.
@@ -25,9 +25,9 @@ const TOOLS_DIR = path.join(REPO_ROOT, "tools");
 
 export const NODE_TARGET = "12";
 export const TYPESCRIPT_VERSION = "5.0.4";
-export const BUNDLER_NAME = "rollup";
-export const PACKAGE_MANAGER = "yarn (Berry)";
-export const ARCHITECTURE = "Monolith";
+export const BUNDLER_NAME = "vite";
+export const PACKAGE_MANAGER = "bun";
+export const ARCHITECTURE = "Microservices";
 
 interface Wiring {
   readonly dir: string;
@@ -37,7 +37,7 @@ interface Wiring {
 
 export const TOOL_WIRING: readonly Wiring[] = [
   { dir: "typescript", label: "TypeScript compiler (tsc)", wiring: "pinned 5.0.4 -> type diagnostics (must be empty)" },
-  { dir: "rollup", label: "Rollup (tsc-backed)", wiring: "pinned 2.80.0 -> build/bundle.cjs -- linked by Rollup, transformed by tsc via @rollup/plugin-typescript, and the bundle is exec" },
+  { dir: "vite", label: "Vite (esbuild-backed)", wiring: "pinned 2.9.18 -> build/bundle.cjs -- emitted by Vite (Rollup + its own esbuild transform), and the bundle is executed" },
   { dir: "mocha", label: "mocha", wiring: "pinned 9.2.2 -> test results (all must pass)" },
   { dir: "c8", label: "c8 (V8 coverage, primary)", wiring: "pinned 8.0.1 -> coverage/coverage-summary.json -- MUST be non-zero (gate G2)" },
   { dir: "nyc", label: "nyc + ts-node (coverage cross-check)", wiring: "pinned 15.1.0 -> coverage-nyc/coverage-summary.json -- instruments .ts directly, never via source-map remap" },
@@ -76,7 +76,7 @@ function runnerFor(dir: string): string | null {
 
 function banner(): number {
   console.log(
-    `=== Tool integration -- branch TS-019 ` +
+    `=== Tool integration -- branch TS-016 ` +
       `(Node ${NODE_TARGET} / TypeScript ${TYPESCRIPT_VERSION} / ` +
       `${BUNDLER_NAME} / ${PACKAGE_MANAGER} / ${ARCHITECTURE}) ===`,
   );
