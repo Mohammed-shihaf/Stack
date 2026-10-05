@@ -1,5 +1,5 @@
 {
-  "branchId": "TS-037",
+  "branchId": "TS-036",
   "repository": "typescript-n12-001-005",
   "language": "TypeScript",
   "typescriptVersion": "5.1.6",
@@ -7,30 +7,35 @@
   "nodeVersionVerified": "14.21.3",
   "bundler": "vite",
   "bundlerVersion": "4.5.14",
-  "packageManager": "pnpm",
-  "packageManagerVersion": "7.33.7",
-  "architecture": "Monolith",
-  "scenario": "1 - Monolithic",
-  "module": "flat",
-  "sourceRoot": "src",
+  "packageManager": "yarn (Berry)",
+  "packageManagerVersion": "3.8.7",
+  "architecture": "Microservices",
+  "scenario": "2 - Microservices",
+  "module": "workspace",
+  "sourceRoot": "packages/domain/src",
   "deployableUnits": [
-    "typescript-n12-ts-037"
+    "gateway-service",
+    "order-service",
+    "pricing-service"
   ],
-  "workspaces": [],
+  "workspaces": [
+    "packages/*",
+    "services/*"
+  ],
   "toolsWired": 28,
   "bundlerNote": "vite 4.5.14 -- newest supporting Node 14 (5+ needs ^18||>=20). Transform: its own bundled esbuild 0.18.x. Linker: Rollup.",
   "coveragePrimary": "c8",
   "coverageCrossCheck": "nyc + ts-node",
   "plantedFixtures": {
     "duplication": [
-      "src/services/retail-order-processor.ts",
-      "src/services/wholesale-order-processor.ts"
+      "packages/domain/src/services/retail-order-processor.ts",
+      "packages/domain/src/services/wholesale-order-processor.ts"
     ],
-    "complexity": "src/analysis/complexity-sample.ts",
-    "sast": "src/analysis/sast-fixture.ts",
-    "taint": "src/analysis/taint-fixture.ts",
-    "deadCode": "src/analysis/dead-code.ts",
-    "callGraph": "src/analysis/call-graph-sample.ts",
+    "complexity": "packages/domain/src/analysis/complexity-sample.ts",
+    "sast": "packages/domain/src/analysis/sast-fixture.ts",
+    "taint": "packages/domain/src/analysis/taint-fixture.ts",
+    "deadCode": "packages/domain/src/analysis/dead-code.ts",
+    "callGraph": "packages/domain/src/analysis/call-graph-sample.ts",
     "vulnerablePins": [
       "lodash@4.17.15",
       "minimist@1.2.5",
