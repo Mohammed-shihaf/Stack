@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# npm audit / npm ls runner -- branch TS-005 (Node 12, pnpm, Monolith).
+# npm audit / npm ls runner -- branch TS-004 (Node 12, yarn (Berry), Microservices).
 set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
@@ -10,13 +10,13 @@ mkdir -p reports
 # failed and audit ran against a freshly resolved graph instead of the
 # committed one.
 echo "[audit] proving the committed lockfile installs frozen"
-pnpm install --frozen-lockfile
+yarn install --immutable
 echo
 echo "[audit] dependency tree:"
-pnpm list --depth 1 || true
+yarn info --name-only || true
 echo
 echo "[audit] vulnerabilities against the committed graph:"
-pnpm audit --json || true > reports/audit.json 2>/dev/null || true
+yarn npm audit --json --recursive || true > reports/audit.json 2>/dev/null || true
 node -e "
   let a; try { a = require('./reports/audit.json'); } catch (e) { console.log('[audit] no JSON report'); process.exit(0); }
   const m = (a.metadata && a.metadata.vulnerabilities) || {};
