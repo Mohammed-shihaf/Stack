@@ -1,15 +1,15 @@
-# CI for branch TS-039.
+# CI for branch TS-034.
 #
 # The point of this file: it INVOKES EVERY WIRED TOOL and uploads what they
 # produce. FlintAtlas and WillowBrook ran only `npm install` and `npm test`, so
 # not one of their declared tools was ever executed in CI. Gate G6.
-name: TS-039
+name: TS-034
 
 on:
   push:
-    branches: ["TS-039"]
+    branches: ["TS-034"]
   pull_request:
-    branches: ["TS-039"]
+    branches: ["TS-034"]
   workflow_dispatch:
 
 jobs:
@@ -25,10 +25,10 @@ jobs:
           node-version: "14.21.3"
 
       - name: Package manager
-        run: # bun is a standalone binary, not an npm package -- see tools/npm-audit/run_npm_audit.sh
+        run: npm i -g npm@8.19.4
 
       - name: Install (frozen -- gate G4)
-        run: bun install --frozen-lockfile
+        run: npm ci
 
       - name: Verify every tool is wired
         run: node_modules/.bin/ts-node tools/tool_integration.ts --verify
@@ -121,7 +121,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: tool-reports-TS-039
+          name: tool-reports-TS-034
           path: |
             reports/
             coverage/
