@@ -1,10 +1,10 @@
-# JS_V12_PARCEL_PNPM_MICRO -- Node 12.22.12 / pnpm
+# JS_V12_PARCEL_PNPM_MONO -- Node 12.22.12 / pnpm
 NODE ?= node
 
 .PHONY: help setup install lock test check tools verify audit clean
 
 help:
-	@echo "JS_V12_PARCEL_PNPM_MICRO  (Node 12.22.12 / pnpm)"
+	@echo "JS_V12_PARCEL_PNPM_MONO  (Node 12.22.12 / pnpm)"
 	@echo ""
 	@echo "  make setup     install the package manager this branch is pinned to"
 	@echo "  make install   install the project and its tool pins"
