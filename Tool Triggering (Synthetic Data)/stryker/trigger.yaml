@@ -3,17 +3,17 @@ tool: StrykerJS + Mocha
 dir: stryker
 role: primary
 block: Mutation Score
-branch: JS_V14_WEBPACK_YARN_MONO
-node_family: "14"
-node_version: "14.21.3"
-pin: @stryker-mutator/core@6.4.2
-status: skipped
+branch: JS_V16_ESBUILD_BUN_MICRO
+node_family: "16"
+node_version: "16.20.2"
+pin: @stryker-mutator/core@7.3.0
+status: active
 measured: true
 entrypoint: tools/stryker/run_stryker.sh
 outputs: reports/mutation.json
 expects: >-
   mutants in policy.js/service.js's decision branches to be killed by the existing mocha suite
 note: >-
-  the inquirer `??` crash is gone on 14, but `@stryker-mutator/mocha-runner` still resolves to an old release (6.4.2, Node 14's engines ceiling) whose internal file-collection bridge (`lib-wrapper.js`) is incompatible with the mocha release that resolves alongside it (`TypeError: testFileNames.forEach is not a function`) -- confirmed by direct comparison against the working 16/18 pairing, not assumed.
+  clean once `stryker.conf.json` was given an explicit `mochaOptions.spec` glob and an explicit `plugins` declaration for pnpm (Stryker's own glob-based plugin auto-discovery doesn't see pnpm's symlinked node_modules entries) -- both fixes verified corpus-wide, not just where first found.
 skip_exit_code: 3          # cannot run on this Node family
 missing_exit_code: 4       # binary/toolchain absent from this host

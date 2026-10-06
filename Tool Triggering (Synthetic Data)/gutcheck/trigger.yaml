@@ -3,9 +3,9 @@ tool: gutcheck
 dir: gutcheck
 role: alternative
 block: Mutation Score
-branch: JS_V14_WEBPACK_YARN_MONO
-node_family: "14"
-node_version: "14.21.3"
+branch: JS_V16_ESBUILD_BUN_MICRO
+node_family: "16"
+node_version: "16.20.2"
 pin: null
 status: skipped
 measured: false
@@ -14,6 +14,6 @@ outputs: reports/gutcheck.json
 expects: >-
   a second, independent mutation-score reading to cross-check Stryker's
 note: >-
-  gutcheck has no release compatible with Node 14 (npm registry engines.node range, prereleases excluded).
+  gutcheck has no release compatible with Node 16 (npm registry engines.node range, prereleases excluded).
 skip_exit_code: 3          # cannot run on this Node family
 missing_exit_code: 4       # binary/toolchain absent from this host

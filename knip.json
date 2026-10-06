@@ -1,0 +1,9 @@
+{
+  "entry": [
+    "packages/*/src/index.js"
+  ],
+  "project": [
+    "src/**/*.js",
+    "packages/**/*.js"
+  ]
+}

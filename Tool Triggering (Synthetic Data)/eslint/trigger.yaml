@@ -3,17 +3,17 @@ tool: eslint
 dir: eslint
 role: primary
 block: Lint / Rule Violations
-branch: JS_V14_WEBPACK_YARN_MONO
-node_family: "14"
-node_version: "14.21.3"
+branch: JS_V16_ESBUILD_BUN_MICRO
+node_family: "16"
+node_version: "16.20.2"
 pin: eslint@8.57.1
-status: skipped
+status: active
 measured: true
 entrypoint: tools/eslint/run_eslint.sh
 outputs: reports/eslint.json
 expects: >-
   the unused-variable / rule warnings the eslint config already enables
 note: >-
-  eslint itself now runs (12's `?.` wall is gone on 14), but `ERR_UNKNOWN_BUILTIN_MODULE: node:path/posix` inside eslint-plugin-sonarjs blocks it -- a specific unresolvable `node:`-prefixed submodule path at this Node 14 patch, distinct from the N12 syntax crash.
+  clean -- neither the N12 syntax wall nor the N14 node:-submodule gap reproduces here.
 skip_exit_code: 3          # cannot run on this Node family
 missing_exit_code: 4       # binary/toolchain absent from this host

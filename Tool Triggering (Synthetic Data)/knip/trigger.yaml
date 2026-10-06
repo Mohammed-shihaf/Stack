@@ -3,17 +3,17 @@ tool: knip
 dir: knip
 role: alternative
 block: All Definition Coverage / All Uses Coverage
-branch: JS_V14_WEBPACK_YARN_MONO
-node_family: "14"
-node_version: "14.21.3"
-pin: null
-status: skipped
+branch: JS_V16_ESBUILD_BUN_MICRO
+node_family: "16"
+node_version: "16.20.2"
+pin: knip@2.43.0
+status: active
 measured: false
 entrypoint: tools/knip/run_knip.sh
 outputs: reports/knip.json
 expects: >-
   the same unused-export/unreached-definition signal as eslint-scope, from an independent dependency-graph tool
 note: >-
-  knip has no release compatible with Node 14 (npm registry engines.node range, prereleases excluded).
+  knip 2.43.0 declares Node 16 compatibility (npm registry engines.node range).
 skip_exit_code: 3          # cannot run on this Node family
 missing_exit_code: 4       # binary/toolchain absent from this host
