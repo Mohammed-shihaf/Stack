@@ -1,0 +1,39 @@
+{
+  "name": "granite-mill",
+  "version": "1.0.0",
+  "description": "GraniteMill -- Community garden plots (JS_V12_ESBUILD_BUN_MICRO)",
+  "private": true,
+  "main": "packages/api/src/index.js",
+  "engines": {
+    "node": ">=12.22.12"
+  },
+  "scripts": {
+    "build": "node esbuild.config.cjs",
+    "test": "mocha packages/shared/tests/**/*.test.js",
+    "lint": "eslint .",
+    "lint:oxlint": "oxlint .",
+    "coverage": "nyc npm test",
+    "duplication": "jscpd .",
+    "mutation": "stryker run",
+    "dataflow": "node scripts/dataflow-scope.js packages",
+    "audit": "npm audit --json"
+  },
+  "devDependencies": {
+    "@dodona/dolos": "^1.6.0",
+    "@stryker-mutator/core": "^5.6.1",
+    "@stryker-mutator/mocha-runner": "^5.6.1",
+    "cognitive-complexity-ts": "^0.8.2",
+    "esbuild": "^0.19.0",
+    "eslint": "^8.57.1",
+    "eslint-plugin-security": "^2.1.1",
+    "eslint-plugin-sonarjs": "^4.2.1",
+    "eslint-scope": "^7.2.2",
+    "espree": "^9.6.1",
+    "jscpd": "^4.3.0",
+    "mocha": "^9.2.2",
+    "monocart-coverage-reports": "^2.13.0",
+    "nyc": "^15.1.0",
+    "oxlint": "^1.16.0"
+  },
+  "packageManager": "bun@1.1.34"
+}
