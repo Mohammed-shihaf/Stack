@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 'use strict';
 /**
- * Tool integration entry point for branch JS_V18_PARCEL_YARN_MONO (Node 18).
+ * Tool integration entry point for branch JS_V18_ROLLUP_BUN_MICRO (Node 18).
  *
  *   node tools/tool_integration.js            banner
  *   node tools/tool_integration.js --verify   check every tool is wired
@@ -52,7 +52,7 @@ function loadDataset() {
 function banner() {
   const data = loadDataset();
   console.log('='.repeat(78));
-  console.log(`  JS_V18_PARCEL_YARN_MONO  --  Node 18 (18.20.8)`);
+  console.log(`  JS_V18_ROLLUP_BUN_MICRO  --  Node 18 (18.20.8)`);
   console.log('='.repeat(78));
   console.log(`  bundler        : ${data.bundler}`);
   console.log(`  package manager: ${data.packageManager}`);
