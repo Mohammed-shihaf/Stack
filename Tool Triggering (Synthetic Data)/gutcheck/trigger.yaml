@@ -3,7 +3,7 @@ tool: gutcheck
 dir: gutcheck
 role: alternative
 block: Mutation Score
-branch: JS_V14_ESBUILD_NPM_MICRO
+branch: JS_V14_ESBUILD_NPM_MONO
 node_family: "14"
 node_version: "14.21.3"
 pin: null
