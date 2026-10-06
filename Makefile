@@ -1,10 +1,10 @@
-# JS_V16_ESBUILD_NPM_MICRO -- Node 16.20.2 / npm
+# JS_V16_ESBUILD_NPM_MONO -- Node 16.20.2 / npm
 NODE ?= node
 
 .PHONY: help setup install lock test check tools verify audit clean
 
 help:
-	@echo "JS_V16_ESBUILD_NPM_MICRO  (Node 16.20.2 / npm)"
+	@echo "JS_V16_ESBUILD_NPM_MONO  (Node 16.20.2 / npm)"
 	@echo ""
 	@echo "  make setup     install the package manager this branch is pinned to"
 	@echo "  make install   install the project and its tool pins"
