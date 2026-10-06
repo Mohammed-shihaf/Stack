@@ -1,10 +1,10 @@
-# JS_V18_VITE_BUN_MICRO -- Node 18.20.8 / bun
+# JS_V18_VITE_BUN_MONO -- Node 18.20.8 / bun
 NODE ?= node
 
 .PHONY: help setup install lock test check tools verify audit clean
 
 help:
-	@echo "JS_V18_VITE_BUN_MICRO  (Node 18.20.8 / bun)"
+	@echo "JS_V18_VITE_BUN_MONO  (Node 18.20.8 / bun)"
 	@echo ""
 	@echo "  make setup     install the package manager this branch is pinned to"
 	@echo "  make install   install the project and its tool pins"
