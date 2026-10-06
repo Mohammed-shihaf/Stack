@@ -1,10 +1,10 @@
-# JS_V16_ROLLUP_PNPM_MICRO -- Node 16.20.2 / pnpm
+# JS_V16_ROLLUP_PNPM_MONO -- Node 16.20.2 / pnpm
 NODE ?= node
 
 .PHONY: help setup install lock test check tools verify audit clean
 
 help:
-	@echo "JS_V16_ROLLUP_PNPM_MICRO  (Node 16.20.2 / pnpm)"
+	@echo "JS_V16_ROLLUP_PNPM_MONO  (Node 16.20.2 / pnpm)"
 	@echo ""
 	@echo "  make setup     install the package manager this branch is pinned to"
 	@echo "  make install   install the project and its tool pins"

@@ -3,7 +3,7 @@ tool: Git-Spark
 dir: git-spark
 role: alternative
 block: Code Churn
-branch: JS_V16_ROLLUP_PNPM_MICRO
+branch: JS_V16_ROLLUP_PNPM_MONO
 node_family: "16"
 node_version: "16.20.2"
 pin: null
