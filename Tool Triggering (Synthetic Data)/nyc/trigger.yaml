@@ -3,7 +3,7 @@ tool: nyc + mocha
 dir: nyc
 role: primary
 block: Statement Coverage / Branch Coverage / Path Coverage (proxy)
-branch: JS_V18_ESBUILD_YARN_MICRO
+branch: JS_V18_ESBUILD_YARN_MONO
 node_family: "18"
 node_version: "18.20.8"
 pin: nyc@17.1.0
