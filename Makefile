@@ -1,10 +1,10 @@
-# JS_V14_RSPACK_NPM_MICRO -- Node 14.21.3 / npm
+# JS_V14_RSPACK_NPM_MONO -- Node 14.21.3 / npm
 NODE ?= node
 
 .PHONY: help setup install lock test check tools verify audit clean
 
 help:
-	@echo "JS_V14_RSPACK_NPM_MICRO  (Node 14.21.3 / npm)"
+	@echo "JS_V14_RSPACK_NPM_MONO  (Node 14.21.3 / npm)"
 	@echo ""
 	@echo "  make setup     install the package manager this branch is pinned to"
 	@echo "  make install   install the project and its tool pins"
