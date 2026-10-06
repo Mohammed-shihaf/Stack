@@ -3,7 +3,7 @@ tool: eslint-plugin-security
 dir: security
 role: primary
 block: Static Vulnerabilities (SAST)
-branch: JS_V16_TURBOPACK_NPM_MICRO
+branch: JS_V16_TURBOPACK_NPM_MONO
 node_family: "16"
 node_version: "16.20.2"
 pin: eslint-plugin-security@2.1.1
