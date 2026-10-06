@@ -3,7 +3,7 @@ tool: gutcheck
 dir: gutcheck
 role: alternative
 block: Mutation Score
-branch: JS_V18_TURBOPACK_YARN_MICRO
+branch: JS_V18_TURBOPACK_YARN_MONO
 node_family: "18"
 node_version: "18.20.8"
 pin: null
