@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 'use strict';
 /**
- * Tool integration entry point for branch JS_V14_RSPACK_YARN_MICRO (Node 14).
+ * Tool integration entry point for branch JS_V14_RSPACK_YARN_MONO (Node 14).
  *
  *   node tools/tool_integration.js            banner
  *   node tools/tool_integration.js --verify   check every tool is wired
@@ -52,7 +52,7 @@ function loadDataset() {
 function banner() {
   const data = loadDataset();
   console.log('='.repeat(78));
-  console.log(`  JS_V14_RSPACK_YARN_MICRO  --  Node 14 (14.21.3)`);
+  console.log(`  JS_V14_RSPACK_YARN_MONO  --  Node 14 (14.21.3)`);
   console.log('='.repeat(78));
   console.log(`  bundler        : ${data.bundler}`);
   console.log(`  package manager: ${data.packageManager}`);
