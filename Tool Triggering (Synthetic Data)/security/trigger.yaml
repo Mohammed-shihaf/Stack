@@ -3,7 +3,7 @@ tool: eslint-plugin-security
 dir: security
 role: primary
 block: Static Vulnerabilities (SAST)
-branch: JS_V14_PARCEL_YARN_MONO
+branch: JS_V14_ROLLUP_BUN_MICRO
 node_family: "14"
 node_version: "14.21.3"
 pin: eslint-plugin-security@2.1.1
