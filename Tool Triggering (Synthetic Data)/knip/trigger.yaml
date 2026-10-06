@@ -3,7 +3,7 @@ tool: knip
 dir: knip
 role: alternative
 block: All Definition Coverage / All Uses Coverage
-branch: JS_V16_TURBOPACK_BUN_MICRO
+branch: JS_V16_TURBOPACK_BUN_MONO
 node_family: "16"
 node_version: "16.20.2"
 pin: knip@2.43.0
