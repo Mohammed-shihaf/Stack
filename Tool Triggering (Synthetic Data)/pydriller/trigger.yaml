@@ -3,7 +3,7 @@ tool: PyDriller
 dir: pydriller
 role: primary
 block: Code Churn
-branch: JS_V16_PARCEL_YARN_MICRO
+branch: JS_V16_PARCEL_YARN_MONO
 node_family: "16"
 node_version: "16.20.2"
 pin: pydriller (pip, latest)
