@@ -3,7 +3,7 @@ tool: diff-cover
 dir: diff-cover
 role: primary
 block: Coverage Delta
-branch: JS_V18_WEBPACK_BUN_MONO
+branch: JS_V18_WEBPACK_NPM_MICRO
 node_family: "18"
 node_version: "18.20.8"
 pin: diff-cover (pip, latest)
