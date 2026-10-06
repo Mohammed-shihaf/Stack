@@ -3,7 +3,7 @@ tool: knip
 dir: knip
 role: alternative
 block: All Definition Coverage / All Uses Coverage
-branch: JS_V18_VITE_YARN_MONO
+branch: JS_V18_WEBPACK_BUN_MICRO
 node_family: "18"
 node_version: "18.20.8"
 pin: knip@5.88.1
