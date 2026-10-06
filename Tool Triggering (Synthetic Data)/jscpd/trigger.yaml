@@ -3,7 +3,7 @@ tool: jscpd
 dir: jscpd
 role: primary
 block: Code Duplication
-branch: JS_V16_VITE_YARN_MICRO
+branch: JS_V16_VITE_YARN_MONO
 node_family: "16"
 node_version: "16.20.2"
 pin: jscpd@4.3.0
