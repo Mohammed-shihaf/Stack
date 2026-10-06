@@ -3,10 +3,10 @@ tool: oxlint
 dir: oxlint
 role: alternative
 block: Lint / Rule Violations
-branch: JS_V18_WEBPACK_YARN_MONO
-node_family: "18"
-node_version: "18.20.8"
-pin: oxlint@1.16.0
+branch: JS_V20_ESBUILD_BUN_MICRO
+node_family: "20"
+node_version: "20.20.2"
+pin: oxlint@1.83.0
 status: skipped
 measured: true
 entrypoint: tools/oxlint/run_oxlint.sh
@@ -14,6 +14,6 @@ outputs: reports/oxlint.json
 expects: >-
   the same lint findings as eslint, from an independent (Rust-based) linter
 note: >-
-  oxlint's own declared range `^1.16.0` resolves to 1.16.0 under npm but 1.83.0 under yarn/pnpm/bun on the same run -- 1.83.0 rejects this branch's `.oxlintrc.json` category-style rules (`Rule 'correctness' not found in plugin 'eslint'`), a real config-schema break introduced between oxlint 1.16.0 and 1.17.0, not a Node-18 issue.
+  same oxlint 1.16.0-vs-1.83.0 range-drift break as N18; 1.83.0 resolves here even more often since N20 favours newer optional native bindings.
 skip_exit_code: 3          # cannot run on this Node family
 missing_exit_code: 4       # binary/toolchain absent from this host
