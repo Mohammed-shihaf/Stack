@@ -3,17 +3,17 @@ tool: Git-Spark
 dir: git-spark
 role: alternative
 block: Code Churn
-branch: JS_V16_WEBPACK_YARN_MONO
-node_family: "16"
-node_version: "16.20.2"
-pin: null
-status: skipped
+branch: JS_V18_ESBUILD_BUN_MICRO
+node_family: "18"
+node_version: "18.20.8"
+pin: git-spark@1.0.265
+status: active
 measured: false
 entrypoint: tools/git-spark/run_git_spark.sh
 outputs: reports/git-spark.json
 expects: >-
   the same churn signal as PyDriller, from an independent git-log miner
 note: >-
-  Git-Spark has no release compatible with Node 16 (npm registry engines.node range, prereleases excluded).
+  Git-Spark 1.0.265 declares Node 18 compatibility (npm registry engines.node range).
 skip_exit_code: 3          # cannot run on this Node family
 missing_exit_code: 4       # binary/toolchain absent from this host

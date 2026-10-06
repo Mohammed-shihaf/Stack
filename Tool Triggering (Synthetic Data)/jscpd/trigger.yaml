@@ -3,17 +3,17 @@ tool: jscpd
 dir: jscpd
 role: primary
 block: Code Duplication
-branch: JS_V16_WEBPACK_YARN_MONO
-node_family: "16"
-node_version: "16.20.2"
-pin: jscpd@4.3.0
+branch: JS_V18_ESBUILD_BUN_MICRO
+node_family: "18"
+node_version: "18.20.8"
+pin: jscpd@5.2.1
 status: active
-measured: false
+measured: true
 entrypoint: tools/jscpd/run_jscpd.sh
 outputs: reports/jscpd-report.json
 expects: >-
   the planted http-errors.js / http-errors-legacy.js near-duplicate pair
 note: >-
-  jscpd 4.3.0 declares Node 16 compatibility (npm registry engines.node range).
+  fixed this family: jscpd's own ignore list didn't originally cover lockfiles, so it scored `package-lock.json`/`pnpm-lock.yaml` as "duplicated JSON" -- a real jscpd finding, not a Node issue. Lockfiles added to `.jscpd.json`'s ignore list; confirmed clean afterward.
 skip_exit_code: 3          # cannot run on this Node family
 missing_exit_code: 4       # binary/toolchain absent from this host

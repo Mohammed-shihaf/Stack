@@ -3,17 +3,17 @@ tool: eslint
 dir: eslint
 role: primary
 block: Lint / Rule Violations
-branch: JS_V16_WEBPACK_YARN_MONO
-node_family: "16"
-node_version: "16.20.2"
-pin: eslint@8.57.1
+branch: JS_V18_ESBUILD_BUN_MICRO
+node_family: "18"
+node_version: "18.20.8"
+pin: eslint@9.39.5
 status: active
-measured: true
+measured: false
 entrypoint: tools/eslint/run_eslint.sh
 outputs: reports/eslint.json
 expects: >-
   the unused-variable / rule warnings the eslint config already enables
 note: >-
-  clean -- neither the N12 syntax wall nor the N14 node:-submodule gap reproduces here.
+  eslint 9.39.5 declares Node 18 compatibility (npm registry engines.node range).
 skip_exit_code: 3          # cannot run on this Node family
 missing_exit_code: 4       # binary/toolchain absent from this host

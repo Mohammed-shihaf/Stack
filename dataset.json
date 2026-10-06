@@ -1,25 +1,25 @@
 {
-  "branchId": "JS_V16_WEBPACK_YARN_MONO",
+  "branchId": "JS_V18_ESBUILD_BUN_MICRO",
   "repository": "javascript-combos",
   "productName": "GraniteMill",
   "packageName": "granite-mill",
   "domain": "Community garden plots",
   "language": "JavaScript",
-  "node": "16.20.2",
-  "nodeFamily": 16,
-  "bundler": "Webpack",
-  "packageManager": "yarn (Berry)",
-  "bundledNpm": "8.19.4",
-  "architecture": "Monolith",
-  "sourceRoot": "src",
+  "node": "18.20.8",
+  "nodeFamily": 18,
+  "bundler": "esbuild",
+  "packageManager": "bun",
+  "bundledNpm": "9.8.1",
+  "architecture": "Microservices",
+  "sourceRoot": "packages",
   "package": "granite-mill",
-  "testRunner": "mocha@10.8.2",
+  "testRunner": "mocha@11.8.0",
   "branchFunctional": true,
   "toolRosterVersion": "js-roster-v2-2026-09-17",
   "uniqueMetrics": 103,
   "toolsWired": 21,
-  "toolsActive": 15,
-  "toolsDark": 6,
+  "toolsActive": 16,
+  "toolsDark": 5,
   "toolsActiveDetail": [
     {
       "tool": "Lizard",
@@ -36,10 +36,10 @@
       "dir": "cyclomatic-complexity",
       "role": "alternative",
       "block": "Cyclomatic Complexity",
-      "pin": "cyclomatic-complexity==1.2.4",
+      "pin": "cyclomatic-complexity==1.2.5",
       "status": "active",
       "measured": false,
-      "note": "cyclomatic-complexity 1.2.4 declares Node 16 compatibility (npm registry engines.node range)."
+      "note": "cyclomatic-complexity 1.2.5 declares Node 18 compatibility (npm registry engines.node range)."
     },
     {
       "tool": "eslint-plugin-sonarjs",
@@ -48,8 +48,8 @@
       "block": "Cognitive Complexity",
       "pin": "eslint-plugin-sonarjs==4.2.1",
       "status": "active",
-      "measured": true,
-      "note": "Runs through eslint itself, whose own status on Node 16 governs this plugin: clean -- neither the N12 syntax wall nor the N14 node:-submodule gap reproduces here."
+      "measured": false,
+      "note": "eslint-plugin-sonarjs 4.2.1 declares Node 18 compatibility; runs through eslint itself."
     },
     {
       "tool": "cognitive-complexity-ts",
@@ -59,24 +59,24 @@
       "pin": "cognitive-complexity-ts==0.8.2",
       "status": "active",
       "measured": false,
-      "note": "cognitive-complexity-ts 0.8.2 declares Node 16 compatibility (npm registry engines.node range)."
+      "note": "cognitive-complexity-ts 0.8.2 declares Node 18 compatibility (npm registry engines.node range)."
     },
     {
       "tool": "jscpd",
       "dir": "jscpd",
       "role": "primary",
       "block": "Code Duplication",
-      "pin": "jscpd==4.3.0",
+      "pin": "jscpd==5.2.1",
       "status": "active",
-      "measured": false,
-      "note": "jscpd 4.3.0 declares Node 16 compatibility (npm registry engines.node range)."
+      "measured": true,
+      "note": "fixed this family: jscpd's own ignore list didn't originally cover lockfiles, so it scored `package-lock.json`/`pnpm-lock.yaml` as \"duplicated JSON\" -- a real jscpd finding, not a Node issue. Lockfiles added to `.jscpd.json`'s ignore list; confirmed clean afterward."
     },
     {
       "tool": "Dolos",
       "dir": "dolos",
       "role": "alternative",
       "block": "Code Duplication",
-      "pin": "@dodona/dolos==2.5.1",
+      "pin": "@dodona/dolos==2.9.3",
       "status": "not_installed",
       "measured": false,
       "note": "dolos's native tree-sitter step needs a C++ toolchain -- already documented as absent on this host by the C#/Python sibling corpora's own precedent; installs with --ignore-scripts, which skips the native build"
@@ -86,10 +86,10 @@
       "dir": "eslint",
       "role": "primary",
       "block": "Lint / Rule Violations",
-      "pin": "eslint==8.57.1",
+      "pin": "eslint==9.39.5",
       "status": "active",
-      "measured": true,
-      "note": "clean -- neither the N12 syntax wall nor the N14 node:-submodule gap reproduces here."
+      "measured": false,
+      "note": "eslint 9.39.5 declares Node 18 compatibility (npm registry engines.node range)."
     },
     {
       "tool": "oxlint",
@@ -99,17 +99,17 @@
       "pin": "oxlint==1.16.0",
       "status": "skipped",
       "measured": true,
-      "note": "same ERR_UNKNOWN_FILE_EXTENSION as N12/N14."
+      "note": "oxlint's own declared range `^1.16.0` resolves to 1.16.0 under npm but 1.83.0 under yarn/pnpm/bun on the same run -- 1.83.0 rejects this branch's `.oxlintrc.json` category-style rules (`Rule 'correctness' not found in plugin 'eslint'`), a real config-schema break introduced between oxlint 1.16.0 and 1.17.0, not a Node-18 issue."
     },
     {
       "tool": "eslint-plugin-security",
       "dir": "security",
       "role": "primary",
       "block": "Static Vulnerabilities (SAST)",
-      "pin": "eslint-plugin-security==2.1.1",
+      "pin": "eslint-plugin-security==4.0.1",
       "status": "active",
-      "measured": true,
-      "note": "Runs through eslint itself, whose own status on Node 16 governs this plugin: clean -- neither the N12 syntax wall nor the N14 node:-submodule gap reproduces here."
+      "measured": false,
+      "note": "eslint-plugin-security 4.0.1 declares Node 18 compatibility; runs through eslint itself."
     },
     {
       "tool": "OpenGrep",
@@ -146,7 +146,7 @@
       "dir": "nyc",
       "role": "primary",
       "block": "Statement Coverage / Branch Coverage / Path Coverage (proxy)",
-      "pin": "nyc==15.1.0",
+      "pin": "nyc==17.1.0",
       "status": "active",
       "measured": true,
       "note": "clean on every family once the architecture-aware test glob (bug #1) and the Microservices require() path (bug #4) were both fixed."
@@ -159,17 +159,17 @@
       "pin": "monocart-coverage-reports==2.13.0",
       "status": "active",
       "measured": false,
-      "note": "monocart-coverage-reports 2.13.0 declares Node 16 compatibility (npm registry engines.node range)."
+      "note": "monocart-coverage-reports 2.13.0 declares Node 18 compatibility (npm registry engines.node range)."
     },
     {
       "tool": "StrykerJS + Mocha",
       "dir": "stryker",
       "role": "primary",
       "block": "Mutation Score",
-      "pin": "@stryker-mutator/core==7.3.0",
+      "pin": "@stryker-mutator/core==8.7.1",
       "status": "active",
       "measured": true,
-      "note": "clean once `stryker.conf.json` was given an explicit `mochaOptions.spec` glob and an explicit `plugins` declaration for pnpm (Stryker's own glob-based plugin auto-discovery doesn't see pnpm's symlinked node_modules entries) -- both fixes verified corpus-wide, not just where first found."
+      "note": "same two fixes as N16, confirmed clean on all package managers including pnpm."
     },
     {
       "tool": "gutcheck",
@@ -179,7 +179,7 @@
       "pin": null,
       "status": "skipped",
       "measured": false,
-      "note": "gutcheck has no release compatible with Node 16 (npm registry engines.node range, prereleases excluded)."
+      "note": "gutcheck has no release compatible with Node 18 (npm registry engines.node range, prereleases excluded)."
     },
     {
       "tool": "diff-cover",
@@ -196,7 +196,7 @@
       "dir": "eslint-scope",
       "role": "primary",
       "block": "All Definition Coverage / All Uses Coverage",
-      "pin": "eslint-scope==7.2.2",
+      "pin": "eslint-scope==8.4.0",
       "status": "active",
       "measured": true,
       "note": "clean on every family tested (12 through 26) -- the dataflow script is hand-written without `?.`/`??` specifically so it never depends on the same syntax features that break other tools on the oldest families."
@@ -206,10 +206,10 @@
       "dir": "knip",
       "role": "alternative",
       "block": "All Definition Coverage / All Uses Coverage",
-      "pin": "knip==2.43.0",
+      "pin": "knip==5.88.1",
       "status": "active",
       "measured": false,
-      "note": "knip 2.43.0 declares Node 16 compatibility (npm registry engines.node range)."
+      "note": "knip 5.88.1 declares Node 18 compatibility (npm registry engines.node range)."
     },
     {
       "tool": "PyDriller",
@@ -226,10 +226,10 @@
       "dir": "git-spark",
       "role": "alternative",
       "block": "Code Churn",
-      "pin": null,
-      "status": "skipped",
+      "pin": "git-spark==1.0.265",
+      "status": "active",
       "measured": false,
-      "note": "Git-Spark has no release compatible with Node 16 (npm registry engines.node range, prereleases excluded)."
+      "note": "Git-Spark 1.0.265 declares Node 18 compatibility (npm registry engines.node range)."
     }
   ],
   "toolsInactive": [
@@ -238,7 +238,7 @@
       "dir": "dolos",
       "role": "alternative",
       "block": "Code Duplication",
-      "pin": "@dodona/dolos==2.5.1",
+      "pin": "@dodona/dolos==2.9.3",
       "status": "not_installed",
       "measured": false,
       "note": "dolos's native tree-sitter step needs a C++ toolchain -- already documented as absent on this host by the C#/Python sibling corpora's own precedent; installs with --ignore-scripts, which skips the native build"
@@ -251,7 +251,7 @@
       "pin": "oxlint==1.16.0",
       "status": "skipped",
       "measured": true,
-      "note": "same ERR_UNKNOWN_FILE_EXTENSION as N12/N14."
+      "note": "oxlint's own declared range `^1.16.0` resolves to 1.16.0 under npm but 1.83.0 under yarn/pnpm/bun on the same run -- 1.83.0 rejects this branch's `.oxlintrc.json` category-style rules (`Rule 'correctness' not found in plugin 'eslint'`), a real config-schema break introduced between oxlint 1.16.0 and 1.17.0, not a Node-18 issue."
     },
     {
       "tool": "OpenGrep",
@@ -281,23 +281,13 @@
       "pin": null,
       "status": "skipped",
       "measured": false,
-      "note": "gutcheck has no release compatible with Node 16 (npm registry engines.node range, prereleases excluded)."
-    },
-    {
-      "tool": "Git-Spark",
-      "dir": "git-spark",
-      "role": "alternative",
-      "block": "Code Churn",
-      "pin": null,
-      "status": "skipped",
-      "measured": false,
-      "note": "Git-Spark has no release compatible with Node 16 (npm registry engines.node range, prereleases excluded)."
+      "note": "gutcheck has no release compatible with Node 18 (npm registry engines.node range, prereleases excluded)."
     }
   ],
   "plantedFixtures": {
     "duplication": [
-      "src/http-errors.js",
-      "src/http-errors-legacy.js"
+      "packages/shared/src/http-errors.js",
+      "packages/shared/src/http-errors-legacy.js"
     ]
   },
   "metrics": [
@@ -307,7 +297,7 @@
       "primaryTool": "Lizard",
       "primaryVersion": null,
       "alternativeTool": "cyclomatic-complexity",
-      "alternativeVersion": "1.2.4",
+      "alternativeVersion": "1.2.5",
       "compatNotes": []
     },
     {
@@ -323,16 +313,16 @@
       "block": "Code Duplication",
       "metricCount": 7,
       "primaryTool": "jscpd",
-      "primaryVersion": "4.3.0",
+      "primaryVersion": "5.2.1",
       "alternativeTool": "Dolos",
-      "alternativeVersion": "2.5.1",
+      "alternativeVersion": "2.9.3",
       "compatNotes": []
     },
     {
       "block": "Lint / Rule Violations",
       "metricCount": 12,
       "primaryTool": "eslint",
-      "primaryVersion": "8.57.1",
+      "primaryVersion": "9.39.5",
       "alternativeTool": "oxlint",
       "alternativeVersion": "1.16.0",
       "compatNotes": []
@@ -341,7 +331,7 @@
       "block": "Static Vulnerabilities (SAST)",
       "metricCount": 7,
       "primaryTool": "eslint-plugin-security",
-      "primaryVersion": "2.1.1",
+      "primaryVersion": "4.0.1",
       "alternativeTool": "OpenGrep",
       "alternativeVersion": null,
       "compatNotes": []
@@ -359,7 +349,7 @@
       "block": "Statement Coverage",
       "metricCount": 5,
       "primaryTool": "nyc + mocha",
-      "primaryVersion": "15.1.0",
+      "primaryVersion": "17.1.0",
       "alternativeTool": "monocart-coverage-reports",
       "alternativeVersion": "2.13.0",
       "compatNotes": []
@@ -368,7 +358,7 @@
       "block": "Branch Coverage",
       "metricCount": 7,
       "primaryTool": "nyc + mocha",
-      "primaryVersion": "15.1.0",
+      "primaryVersion": "17.1.0",
       "alternativeTool": "monocart-coverage-reports",
       "alternativeVersion": "2.13.0",
       "compatNotes": []
@@ -377,7 +367,7 @@
       "block": "Path Coverage",
       "metricCount": 10,
       "primaryTool": "nyc + mocha (branch-coverage proxy)",
-      "primaryVersion": "15.1.0",
+      "primaryVersion": "17.1.0",
       "alternativeTool": "monocart-coverage-reports",
       "alternativeVersion": "2.13.0",
       "compatNotes": [
@@ -388,11 +378,11 @@
       "block": "Mutation Score",
       "metricCount": 7,
       "primaryTool": "StrykerJS + Mocha",
-      "primaryVersion": "7.3.0",
+      "primaryVersion": "8.7.1",
       "alternativeTool": "gutcheck",
       "alternativeVersion": null,
       "compatNotes": [
-        "gutcheck not available on Node 16 (engines.node excludes this family)"
+        "gutcheck not available on Node 18 (engines.node excludes this family)"
       ]
     },
     {
@@ -408,18 +398,18 @@
       "block": "All Definition Coverage",
       "metricCount": 6,
       "primaryTool": "ESLint (eslint-scope)",
-      "primaryVersion": "7.2.2",
+      "primaryVersion": "8.4.0",
       "alternativeTool": "knip",
-      "alternativeVersion": "2.43.0",
+      "alternativeVersion": "5.88.1",
       "compatNotes": []
     },
     {
       "block": "All Uses Coverage",
       "metricCount": 10,
       "primaryTool": "ESLint (eslint-scope)",
-      "primaryVersion": "7.2.2",
+      "primaryVersion": "8.4.0",
       "alternativeTool": "knip",
-      "alternativeVersion": "2.43.0",
+      "alternativeVersion": "5.88.1",
       "compatNotes": []
     },
     {
@@ -428,10 +418,8 @@
       "primaryTool": "pydriller",
       "primaryVersion": null,
       "alternativeTool": "Git-Spark",
-      "alternativeVersion": null,
-      "compatNotes": [
-        "Git-Spark not available on Node 16 (engines.node excludes this family)"
-      ]
+      "alternativeVersion": "1.0.265",
+      "compatNotes": []
     }
   ],
   "status": "generated"

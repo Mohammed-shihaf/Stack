@@ -3,9 +3,9 @@ tool: npm audit + npm ls
 dir: npm-audit
 role: primary
 block: Dependency Risk (SCA)
-branch: JS_V16_WEBPACK_YARN_MONO
-node_family: "16"
-node_version: "16.20.2"
+branch: JS_V18_ESBUILD_BUN_MICRO
+node_family: "18"
+node_version: "18.20.8"
 pin: null
 status: active
 measured: false
