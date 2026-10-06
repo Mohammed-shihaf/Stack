@@ -3,7 +3,7 @@ tool: StrykerJS + Mocha
 dir: stryker
 role: primary
 block: Mutation Score
-branch: JS_V18_PARCEL_BUN_MONO
+branch: JS_V18_PARCEL_NPM_MICRO
 node_family: "18"
 node_version: "18.20.8"
 pin: @stryker-mutator/core@8.7.1
