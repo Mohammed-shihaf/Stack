@@ -3,7 +3,7 @@ tool: PyDriller
 dir: pydriller
 role: primary
 block: Code Churn
-branch: JS_V14_WEBPACK_PNPM_MICRO
+branch: JS_V14_WEBPACK_PNPM_MONO
 node_family: "14"
 node_version: "14.21.3"
 pin: pydriller (pip, latest)
