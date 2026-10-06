@@ -3,7 +3,7 @@ tool: Git-Spark
 dir: git-spark
 role: alternative
 block: Code Churn
-branch: JS_V14_ESBUILD_YARN_MONO
+branch: JS_V14_PARCEL_BUN_MICRO
 node_family: "14"
 node_version: "14.21.3"
 pin: null
