@@ -1,10 +1,10 @@
-# JS_V12_SWC_YARN_MICRO -- Node 12.22.12 / yarn
+# JS_V12_SWC_YARN_MONO -- Node 12.22.12 / yarn
 NODE ?= node
 
 .PHONY: help setup install lock test check tools verify audit clean
 
 help:
-	@echo "JS_V12_SWC_YARN_MICRO  (Node 12.22.12 / yarn)"
+	@echo "JS_V12_SWC_YARN_MONO  (Node 12.22.12 / yarn)"
 	@echo ""
 	@echo "  make setup     install the package manager this branch is pinned to"
 	@echo "  make install   install the project and its tool pins"
