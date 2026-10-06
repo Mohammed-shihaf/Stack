@@ -3,9 +3,9 @@ tool: eslint-plugin-security
 dir: security
 role: primary
 block: Static Vulnerabilities (SAST)
-branch: JS_V12_WEBPACK_YARN_MONO
-node_family: "12"
-node_version: "12.22.12"
+branch: JS_V14_ESBUILD_BUN_MICRO
+node_family: "14"
+node_version: "14.21.3"
 pin: eslint-plugin-security@2.1.1
 status: skipped
 measured: true
@@ -14,6 +14,6 @@ outputs: reports/security.json
 expects: >-
   the object-injection / non-literal-fs-filename warnings the eslint config already enables
 note: >-
-  Runs through eslint itself, whose own status on Node 12 governs this plugin: eslint-plugin-sonarjs's own dependency code uses `?.`, which Node 12's V8 (7.8) cannot parse at all -- confirmed by direct invocation, not just the declared engines range.
+  Runs through eslint itself, whose own status on Node 14 governs this plugin: eslint itself now runs (12's `?.` wall is gone on 14), but `ERR_UNKNOWN_BUILTIN_MODULE: node:path/posix` inside eslint-plugin-sonarjs blocks it -- a specific unresolvable `node:`-prefixed submodule path at this Node 14 patch, distinct from the N12 syntax crash.
 skip_exit_code: 3          # cannot run on this Node family
 missing_exit_code: 4       # binary/toolchain absent from this host

@@ -3,9 +3,9 @@ tool: oxlint
 dir: oxlint
 role: alternative
 block: Lint / Rule Violations
-branch: JS_V12_WEBPACK_YARN_MONO
-node_family: "12"
-node_version: "12.22.12"
+branch: JS_V14_ESBUILD_BUN_MICRO
+node_family: "14"
+node_version: "14.21.3"
 pin: oxlint@1.16.0
 status: skipped
 measured: true
@@ -14,6 +14,6 @@ outputs: reports/oxlint.json
 expects: >-
   the same lint findings as eslint, from an independent (Rust-based) linter
 note: >-
-  ERR_UNKNOWN_FILE_EXTENSION loading oxlint's own native binary -- Node-version-independent for this pin (1.16.0); reproduces identically on 12 and 14.
+  same ERR_UNKNOWN_FILE_EXTENSION as N12 -- confirmed not Node-version-specific.
 skip_exit_code: 3          # cannot run on this Node family
 missing_exit_code: 4       # binary/toolchain absent from this host

@@ -1,25 +1,25 @@
 {
-  "branchId": "JS_V12_WEBPACK_YARN_MONO",
+  "branchId": "JS_V14_ESBUILD_BUN_MICRO",
   "repository": "javascript-combos",
   "productName": "GraniteMill",
   "packageName": "granite-mill",
   "domain": "Community garden plots",
   "language": "JavaScript",
-  "node": "12.22.12",
-  "nodeFamily": 12,
-  "bundler": "Webpack",
-  "packageManager": "yarn (Berry)",
+  "node": "14.21.3",
+  "nodeFamily": 14,
+  "bundler": "esbuild",
+  "packageManager": "bun",
   "bundledNpm": "6.14.18",
-  "architecture": "Monolith",
-  "sourceRoot": "src",
+  "architecture": "Microservices",
+  "sourceRoot": "packages",
   "package": "granite-mill",
-  "testRunner": "mocha@9.2.2",
+  "testRunner": "mocha@10.8.2",
   "branchFunctional": true,
   "toolRosterVersion": "js-roster-v2-2026-09-17",
   "uniqueMetrics": 103,
   "toolsWired": 21,
-  "toolsActive": 8,
-  "toolsDark": 13,
+  "toolsActive": 10,
+  "toolsDark": 11,
   "toolsActiveDetail": [
     {
       "tool": "Lizard",
@@ -36,10 +36,10 @@
       "dir": "cyclomatic-complexity",
       "role": "alternative",
       "block": "Cyclomatic Complexity",
-      "pin": null,
-      "status": "skipped",
+      "pin": "cyclomatic-complexity==1.0.0",
+      "status": "active",
       "measured": false,
-      "note": "cyclomatic-complexity has no release compatible with Node 12 (npm registry engines.node range, prereleases excluded)."
+      "note": "cyclomatic-complexity 1.0.0 declares Node 14 compatibility (npm registry engines.node range)."
     },
     {
       "tool": "eslint-plugin-sonarjs",
@@ -49,7 +49,7 @@
       "pin": "eslint-plugin-sonarjs==4.2.1",
       "status": "skipped",
       "measured": true,
-      "note": "Runs through eslint itself, whose own status on Node 12 governs this plugin: eslint-plugin-sonarjs's own dependency code uses `?.`, which Node 12's V8 (7.8) cannot parse at all -- confirmed by direct invocation, not just the declared engines range."
+      "note": "Runs through eslint itself, whose own status on Node 14 governs this plugin: eslint itself now runs (12's `?.` wall is gone on 14), but `ERR_UNKNOWN_BUILTIN_MODULE: node:path/posix` inside eslint-plugin-sonarjs blocks it -- a specific unresolvable `node:`-prefixed submodule path at this Node 14 patch, distinct from the N12 syntax crash."
     },
     {
       "tool": "cognitive-complexity-ts",
@@ -59,7 +59,7 @@
       "pin": "cognitive-complexity-ts==0.8.2",
       "status": "active",
       "measured": false,
-      "note": "cognitive-complexity-ts 0.8.2 declares Node 12 compatibility (npm registry engines.node range)."
+      "note": "cognitive-complexity-ts 0.8.2 declares Node 14 compatibility (npm registry engines.node range)."
     },
     {
       "tool": "jscpd",
@@ -67,16 +67,16 @@
       "role": "primary",
       "block": "Code Duplication",
       "pin": "jscpd==4.3.0",
-      "status": "skipped",
+      "status": "active",
       "measured": true,
-      "note": "jscpd's dependency fs-extra uses `??`, which crashes outright on Node 12's V8 (7.8)."
+      "note": "installs and runs (12's `??` wall is gone), but see the ignore-list fix below."
     },
     {
       "tool": "Dolos",
       "dir": "dolos",
       "role": "alternative",
       "block": "Code Duplication",
-      "pin": "@dodona/dolos==1.6.0",
+      "pin": "@dodona/dolos==2.3.0",
       "status": "not_installed",
       "measured": false,
       "note": "dolos's native tree-sitter step needs a C++ toolchain -- already documented as absent on this host by the C#/Python sibling corpora's own precedent; installs with --ignore-scripts, which skips the native build"
@@ -89,7 +89,7 @@
       "pin": "eslint==8.57.1",
       "status": "skipped",
       "measured": true,
-      "note": "eslint-plugin-sonarjs's own dependency code uses `?.`, which Node 12's V8 (7.8) cannot parse at all -- confirmed by direct invocation, not just the declared engines range."
+      "note": "eslint itself now runs (12's `?.` wall is gone on 14), but `ERR_UNKNOWN_BUILTIN_MODULE: node:path/posix` inside eslint-plugin-sonarjs blocks it -- a specific unresolvable `node:`-prefixed submodule path at this Node 14 patch, distinct from the N12 syntax crash."
     },
     {
       "tool": "oxlint",
@@ -99,7 +99,7 @@
       "pin": "oxlint==1.16.0",
       "status": "skipped",
       "measured": true,
-      "note": "ERR_UNKNOWN_FILE_EXTENSION loading oxlint's own native binary -- Node-version-independent for this pin (1.16.0); reproduces identically on 12 and 14."
+      "note": "same ERR_UNKNOWN_FILE_EXTENSION as N12 -- confirmed not Node-version-specific."
     },
     {
       "tool": "eslint-plugin-security",
@@ -109,7 +109,7 @@
       "pin": "eslint-plugin-security==2.1.1",
       "status": "skipped",
       "measured": true,
-      "note": "Runs through eslint itself, whose own status on Node 12 governs this plugin: eslint-plugin-sonarjs's own dependency code uses `?.`, which Node 12's V8 (7.8) cannot parse at all -- confirmed by direct invocation, not just the declared engines range."
+      "note": "Runs through eslint itself, whose own status on Node 14 governs this plugin: eslint itself now runs (12's `?.` wall is gone on 14), but `ERR_UNKNOWN_BUILTIN_MODULE: node:path/posix` inside eslint-plugin-sonarjs blocks it -- a specific unresolvable `node:`-prefixed submodule path at this Node 14 patch, distinct from the N12 syntax crash."
     },
     {
       "tool": "OpenGrep",
@@ -159,17 +159,17 @@
       "pin": "monocart-coverage-reports==2.13.0",
       "status": "active",
       "measured": false,
-      "note": "monocart-coverage-reports 2.13.0 declares Node 12 compatibility (npm registry engines.node range)."
+      "note": "monocart-coverage-reports 2.13.0 declares Node 14 compatibility (npm registry engines.node range)."
     },
     {
       "tool": "StrykerJS + Mocha",
       "dir": "stryker",
       "role": "primary",
       "block": "Mutation Score",
-      "pin": "@stryker-mutator/core==5.6.1",
+      "pin": "@stryker-mutator/core==6.4.2",
       "status": "skipped",
       "measured": true,
-      "note": "stryker's dependency chain (inquirer) uses `??`, which crashes on Node 12's V8. Separately, this family's resolved `@stryker-mutator/mocha-runner` (5.6.1, the newest release Node 12's `engines` floor allows) predates a mocha-runner internal bridge compatible with the mocha release that also resolves here -- two independent, compounding reasons this tool cannot run."
+      "note": "the inquirer `??` crash is gone on 14, but `@stryker-mutator/mocha-runner` still resolves to an old release (6.4.2, Node 14's engines ceiling) whose internal file-collection bridge (`lib-wrapper.js`) is incompatible with the mocha release that resolves alongside it (`TypeError: testFileNames.forEach is not a function`) -- confirmed by direct comparison against the working 16/18 pairing, not assumed."
     },
     {
       "tool": "gutcheck",
@@ -179,7 +179,7 @@
       "pin": null,
       "status": "skipped",
       "measured": false,
-      "note": "gutcheck has no release compatible with Node 12 (npm registry engines.node range, prereleases excluded)."
+      "note": "gutcheck has no release compatible with Node 14 (npm registry engines.node range, prereleases excluded)."
     },
     {
       "tool": "diff-cover",
@@ -209,7 +209,7 @@
       "pin": null,
       "status": "skipped",
       "measured": false,
-      "note": "knip has no release compatible with Node 12 (npm registry engines.node range, prereleases excluded)."
+      "note": "knip has no release compatible with Node 14 (npm registry engines.node range, prereleases excluded)."
     },
     {
       "tool": "PyDriller",
@@ -229,20 +229,10 @@
       "pin": null,
       "status": "skipped",
       "measured": false,
-      "note": "Git-Spark has no release compatible with Node 12 (npm registry engines.node range, prereleases excluded)."
+      "note": "Git-Spark has no release compatible with Node 14 (npm registry engines.node range, prereleases excluded)."
     }
   ],
   "toolsInactive": [
-    {
-      "tool": "cyclomatic-complexity",
-      "dir": "cyclomatic-complexity",
-      "role": "alternative",
-      "block": "Cyclomatic Complexity",
-      "pin": null,
-      "status": "skipped",
-      "measured": false,
-      "note": "cyclomatic-complexity has no release compatible with Node 12 (npm registry engines.node range, prereleases excluded)."
-    },
     {
       "tool": "eslint-plugin-sonarjs",
       "dir": "sonarjs",
@@ -251,24 +241,14 @@
       "pin": "eslint-plugin-sonarjs==4.2.1",
       "status": "skipped",
       "measured": true,
-      "note": "Runs through eslint itself, whose own status on Node 12 governs this plugin: eslint-plugin-sonarjs's own dependency code uses `?.`, which Node 12's V8 (7.8) cannot parse at all -- confirmed by direct invocation, not just the declared engines range."
-    },
-    {
-      "tool": "jscpd",
-      "dir": "jscpd",
-      "role": "primary",
-      "block": "Code Duplication",
-      "pin": "jscpd==4.3.0",
-      "status": "skipped",
-      "measured": true,
-      "note": "jscpd's dependency fs-extra uses `??`, which crashes outright on Node 12's V8 (7.8)."
+      "note": "Runs through eslint itself, whose own status on Node 14 governs this plugin: eslint itself now runs (12's `?.` wall is gone on 14), but `ERR_UNKNOWN_BUILTIN_MODULE: node:path/posix` inside eslint-plugin-sonarjs blocks it -- a specific unresolvable `node:`-prefixed submodule path at this Node 14 patch, distinct from the N12 syntax crash."
     },
     {
       "tool": "Dolos",
       "dir": "dolos",
       "role": "alternative",
       "block": "Code Duplication",
-      "pin": "@dodona/dolos==1.6.0",
+      "pin": "@dodona/dolos==2.3.0",
       "status": "not_installed",
       "measured": false,
       "note": "dolos's native tree-sitter step needs a C++ toolchain -- already documented as absent on this host by the C#/Python sibling corpora's own precedent; installs with --ignore-scripts, which skips the native build"
@@ -281,7 +261,7 @@
       "pin": "eslint==8.57.1",
       "status": "skipped",
       "measured": true,
-      "note": "eslint-plugin-sonarjs's own dependency code uses `?.`, which Node 12's V8 (7.8) cannot parse at all -- confirmed by direct invocation, not just the declared engines range."
+      "note": "eslint itself now runs (12's `?.` wall is gone on 14), but `ERR_UNKNOWN_BUILTIN_MODULE: node:path/posix` inside eslint-plugin-sonarjs blocks it -- a specific unresolvable `node:`-prefixed submodule path at this Node 14 patch, distinct from the N12 syntax crash."
     },
     {
       "tool": "oxlint",
@@ -291,7 +271,7 @@
       "pin": "oxlint==1.16.0",
       "status": "skipped",
       "measured": true,
-      "note": "ERR_UNKNOWN_FILE_EXTENSION loading oxlint's own native binary -- Node-version-independent for this pin (1.16.0); reproduces identically on 12 and 14."
+      "note": "same ERR_UNKNOWN_FILE_EXTENSION as N12 -- confirmed not Node-version-specific."
     },
     {
       "tool": "eslint-plugin-security",
@@ -301,7 +281,7 @@
       "pin": "eslint-plugin-security==2.1.1",
       "status": "skipped",
       "measured": true,
-      "note": "Runs through eslint itself, whose own status on Node 12 governs this plugin: eslint-plugin-sonarjs's own dependency code uses `?.`, which Node 12's V8 (7.8) cannot parse at all -- confirmed by direct invocation, not just the declared engines range."
+      "note": "Runs through eslint itself, whose own status on Node 14 governs this plugin: eslint itself now runs (12's `?.` wall is gone on 14), but `ERR_UNKNOWN_BUILTIN_MODULE: node:path/posix` inside eslint-plugin-sonarjs blocks it -- a specific unresolvable `node:`-prefixed submodule path at this Node 14 patch, distinct from the N12 syntax crash."
     },
     {
       "tool": "OpenGrep",
@@ -328,10 +308,10 @@
       "dir": "stryker",
       "role": "primary",
       "block": "Mutation Score",
-      "pin": "@stryker-mutator/core==5.6.1",
+      "pin": "@stryker-mutator/core==6.4.2",
       "status": "skipped",
       "measured": true,
-      "note": "stryker's dependency chain (inquirer) uses `??`, which crashes on Node 12's V8. Separately, this family's resolved `@stryker-mutator/mocha-runner` (5.6.1, the newest release Node 12's `engines` floor allows) predates a mocha-runner internal bridge compatible with the mocha release that also resolves here -- two independent, compounding reasons this tool cannot run."
+      "note": "the inquirer `??` crash is gone on 14, but `@stryker-mutator/mocha-runner` still resolves to an old release (6.4.2, Node 14's engines ceiling) whose internal file-collection bridge (`lib-wrapper.js`) is incompatible with the mocha release that resolves alongside it (`TypeError: testFileNames.forEach is not a function`) -- confirmed by direct comparison against the working 16/18 pairing, not assumed."
     },
     {
       "tool": "gutcheck",
@@ -341,7 +321,7 @@
       "pin": null,
       "status": "skipped",
       "measured": false,
-      "note": "gutcheck has no release compatible with Node 12 (npm registry engines.node range, prereleases excluded)."
+      "note": "gutcheck has no release compatible with Node 14 (npm registry engines.node range, prereleases excluded)."
     },
     {
       "tool": "knip",
@@ -351,7 +331,7 @@
       "pin": null,
       "status": "skipped",
       "measured": false,
-      "note": "knip has no release compatible with Node 12 (npm registry engines.node range, prereleases excluded)."
+      "note": "knip has no release compatible with Node 14 (npm registry engines.node range, prereleases excluded)."
     },
     {
       "tool": "Git-Spark",
@@ -361,13 +341,13 @@
       "pin": null,
       "status": "skipped",
       "measured": false,
-      "note": "Git-Spark has no release compatible with Node 12 (npm registry engines.node range, prereleases excluded)."
+      "note": "Git-Spark has no release compatible with Node 14 (npm registry engines.node range, prereleases excluded)."
     }
   ],
   "plantedFixtures": {
     "duplication": [
-      "src/http-errors.js",
-      "src/http-errors-legacy.js"
+      "packages/shared/src/http-errors.js",
+      "packages/shared/src/http-errors-legacy.js"
     ]
   },
   "metrics": [
@@ -377,10 +357,8 @@
       "primaryTool": "Lizard",
       "primaryVersion": null,
       "alternativeTool": "cyclomatic-complexity",
-      "alternativeVersion": null,
-      "compatNotes": [
-        "cyclomatic-complexity not available on Node 12 (engines.node excludes this family)"
-      ]
+      "alternativeVersion": "1.0.0",
+      "compatNotes": []
     },
     {
       "block": "Cognitive Complexity",
@@ -397,7 +375,7 @@
       "primaryTool": "jscpd",
       "primaryVersion": "4.3.0",
       "alternativeTool": "Dolos",
-      "alternativeVersion": "1.6.0",
+      "alternativeVersion": "2.3.0",
       "compatNotes": []
     },
     {
@@ -460,11 +438,11 @@
       "block": "Mutation Score",
       "metricCount": 7,
       "primaryTool": "StrykerJS + Mocha",
-      "primaryVersion": "5.6.1",
+      "primaryVersion": "6.4.2",
       "alternativeTool": "gutcheck",
       "alternativeVersion": null,
       "compatNotes": [
-        "gutcheck not available on Node 12 (engines.node excludes this family)"
+        "gutcheck not available on Node 14 (engines.node excludes this family)"
       ]
     },
     {
@@ -484,7 +462,7 @@
       "alternativeTool": "knip",
       "alternativeVersion": null,
       "compatNotes": [
-        "knip not available on Node 12 (engines.node excludes this family)"
+        "knip not available on Node 14 (engines.node excludes this family)"
       ]
     },
     {
@@ -495,7 +473,7 @@
       "alternativeTool": "knip",
       "alternativeVersion": null,
       "compatNotes": [
-        "knip not available on Node 12 (engines.node excludes this family)"
+        "knip not available on Node 14 (engines.node excludes this family)"
       ]
     },
     {
@@ -506,7 +484,7 @@
       "alternativeTool": "Git-Spark",
       "alternativeVersion": null,
       "compatNotes": [
-        "Git-Spark not available on Node 12 (engines.node excludes this family)"
+        "Git-Spark not available on Node 14 (engines.node excludes this family)"
       ]
     }
   ],
