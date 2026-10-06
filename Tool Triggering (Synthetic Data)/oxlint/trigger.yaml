@@ -3,7 +3,7 @@ tool: oxlint
 dir: oxlint
 role: alternative
 block: Lint / Rule Violations
-branch: JS_V18_SWC_BUN_MONO
+branch: JS_V18_SWC_NPM_MICRO
 node_family: "18"
 node_version: "18.20.8"
 pin: oxlint@1.16.0

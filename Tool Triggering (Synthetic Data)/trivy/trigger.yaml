@@ -3,7 +3,7 @@ tool: Trivy
 dir: trivy
 role: alternative
 block: Dependency Risk (SCA)
-branch: JS_V18_SWC_BUN_MONO
+branch: JS_V18_SWC_NPM_MICRO
 node_family: "18"
 node_version: "18.20.8"
 pin: null
