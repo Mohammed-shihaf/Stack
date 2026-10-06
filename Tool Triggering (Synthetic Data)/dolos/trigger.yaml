@@ -3,7 +3,7 @@ tool: Dolos
 dir: dolos
 role: alternative
 block: Code Duplication
-branch: JS_V16_ESBUILD_YARN_MICRO
+branch: JS_V16_ESBUILD_YARN_MONO
 node_family: "16"
 node_version: "16.20.2"
 pin: @dodona/dolos@2.5.1
