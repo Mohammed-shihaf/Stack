@@ -1,4 +1,4 @@
-﻿# JS_V12_PARCEL_BUN_MICRO
+﻿# JS_V12_PARCEL_NPM_MICRO
 
 Part of the `javascript-combos` white-box test-repo corpus (GraniteMill /
 `granite-mill`, domain: Community garden plots).
@@ -7,10 +7,10 @@ Part of the `javascript-combos` white-box test-repo corpus (GraniteMill /
 
 | Variable | This branch |
 | --- | --- |
-| Branch | `JS_V12_PARCEL_BUN_MICRO` |
+| Branch | `JS_V12_PARCEL_NPM_MICRO` |
 | Node.js | 12.22.12 (family V12) |
 | Bundler | Parcel |
-| Package manager | bun |
+| Package manager | npm |
 | Bundled npm | 6.14.18 |
 | Architecture | Microservices |
 | Source root | `packages/shared/src` |
@@ -141,7 +141,7 @@ reason it does not. Only the third is a finding.
 ## Workspace layout
 
 ```
-javascript-combos/  (JS_V12_PARCEL_BUN_MICRO)
+javascript-combos/  (JS_V12_PARCEL_NPM_MICRO)
 |-- .github/
 |-- packages/
 |-- tests/  (or packages/shared/tests/ for Microservices)
