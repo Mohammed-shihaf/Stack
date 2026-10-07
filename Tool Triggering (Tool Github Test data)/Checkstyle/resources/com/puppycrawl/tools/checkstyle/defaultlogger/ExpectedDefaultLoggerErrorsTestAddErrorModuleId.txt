@@ -1,1 +1,0 @@
-[ERROR] src/test/resources/com/puppycrawl/tools/checkstyle/defaultlogger/InputDefaultLoggerTestAddErrorModuleId.java:13:8: Unused import - java.util.List. [moduleId]

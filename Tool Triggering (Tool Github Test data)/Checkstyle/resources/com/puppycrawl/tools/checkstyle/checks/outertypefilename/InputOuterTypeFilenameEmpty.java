@@ -1,7 +1,0 @@
-/*
-OuterTypeFilename
-
-
-*/
-
-/* Comment only */
