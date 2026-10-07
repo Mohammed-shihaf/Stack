@@ -1,9 +1,0 @@
-/*
-RegexpOnFilename
-match = (default)true
-fileNamePattern = \\.
-folderPattern = (default)null
-ignoreFileNameExtensions = true
-fileExtensions = (default)(null)
-
-*/

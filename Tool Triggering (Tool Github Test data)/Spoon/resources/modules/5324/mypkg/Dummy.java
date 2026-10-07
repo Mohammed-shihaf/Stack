@@ -1,4 +1,0 @@
-package mypkg;
-
-class Dummy {
-}

@@ -1,9 +1,0 @@
-/*
-JavadocPackage
-allowLegacy = (default)false
-fileExtensions = (default).java
-
-
-*/
-
-test, no violation
