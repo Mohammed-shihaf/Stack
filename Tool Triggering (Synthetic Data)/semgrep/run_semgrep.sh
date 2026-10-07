@@ -5,7 +5,7 @@ set -uo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(cd "$HERE/../.." && pwd)"
 # shellcheck source=/dev/null
-. "$ROOT/tools/_skip.sh"
+. "$ROOT/Tool Triggering (Synthetic Data)/_skip.sh"
 
 SRC="src"
 PKG="orderlab"
@@ -19,7 +19,7 @@ mkdir -p "$ROOT/reports"
 cd "$ROOT"
 
 FINDINGS_EXIT=1   # non-zero from this tool means 'found something', not 'broke'
-"$PYBIN_DIR/semgrep" scan --config tools/semgrep/rules.yaml --config tools/semgrep/taint-rules.yaml --json -o reports/semgrep.json "$SRC" && "$PYBIN" -m bandit -r "$SRC" -f json -o reports/bandit.json
+"$PYBIN_DIR/semgrep" scan --config "Tool Triggering (Synthetic Data)/semgrep/rules.yaml" --config "Tool Triggering (Synthetic Data)/semgrep/taint-rules.yaml" --json -o reports/semgrep.json "$SRC" && "$PYBIN" -m bandit -r "$SRC" -f json -o reports/bandit.json
 rc=$?
 accept_findings "semgrep" "$rc" "reports/semgrep.json"
 exit $?

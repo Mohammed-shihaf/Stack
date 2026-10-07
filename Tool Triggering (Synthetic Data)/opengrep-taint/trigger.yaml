@@ -8,7 +8,7 @@ python_version_verified: "3.11.13"
 pin: null   # not a PyPI distribution on this branch
 declared_floor: null   # distribution declares no Requires-Python
 status: active
-entrypoint: tools/opengrep-taint/run_opengrep_taint.sh
+entrypoint: Tool Triggering (Synthetic Data)/opengrep-taint/run_opengrep_taint.sh
 outputs: reports/opengrep-taint.json
 expects: >-
   all FOUR flows in analysis/taint_fixture.py -- an engine that only knows argv/environ/request finds three and looks successful

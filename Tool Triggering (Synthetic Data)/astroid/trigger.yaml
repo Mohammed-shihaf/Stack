@@ -8,7 +8,7 @@ python_version_verified: "3.11.13"
 pin: astroid==4.0.4
 declared_floor: ">=3.10"
 status: active
-entrypoint: tools/astroid/run_astroid.py
+entrypoint: Tool Triggering (Synthetic Data)/astroid/run_astroid.py
 outputs: reports/astroid.json
 expects: >-
   inferred call targets across call_graph_sample.py's five-deep chain

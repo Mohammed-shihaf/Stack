@@ -5,7 +5,7 @@ set -uo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(cd "$HERE/../.." && pwd)"
 # shellcheck source=/dev/null
-. "$ROOT/tools/_skip.sh"
+. "$ROOT/Tool Triggering (Synthetic Data)/_skip.sh"
 
 SRC="src"
 PKG="orderlab"
@@ -19,7 +19,7 @@ mkdir -p "$ROOT/reports"
 cd "$ROOT"
 
 FINDINGS_EXIT=1   # non-zero from this tool means 'found something', not 'broke'
-opengrep scan --config tools/opengrep/rules.yaml --json -o reports/opengrep.json "$SRC"
+opengrep scan --config "Tool Triggering (Synthetic Data)/opengrep/rules.yaml" --json -o reports/opengrep.json "$SRC"
 rc=$?
 accept_findings "opengrep" "$rc" "reports/opengrep.json"
 exit $?

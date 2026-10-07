@@ -8,7 +8,7 @@ python_version_verified: "3.11.13"
 pin: pytest-testmon==2.2.0
 declared_floor: ">=3.10"
 status: active
-entrypoint: tools/testmon/run_testmon.sh
+entrypoint: Tool Triggering (Synthetic Data)/testmon/run_testmon.sh
 outputs: reports/testmon.txt
 expects: >-
   a selected subset of tests after a change to pricing_rules.py

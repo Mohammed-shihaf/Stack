@@ -8,7 +8,7 @@ python_version_verified: "3.11.13"
 pin: crosshair-tool==0.0.110
 declared_floor: ">=3.8"
 status: active
-entrypoint: tools/crosshair/run_crosshair.sh
+entrypoint: Tool Triggering (Synthetic Data)/crosshair/run_crosshair.sh
 outputs: reports/crosshair.txt
 expects: >-
   counterexamples for the combined-discount cap in PricingRules.combined (measured on this branch: crosshair completes and reports none -- the cap holds for every input it explored)

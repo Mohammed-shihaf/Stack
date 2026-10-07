@@ -8,7 +8,7 @@ python_version_verified: "3.11.13"
 pin: jscpd@5.1.1
 declared_floor: null   # distribution declares no Requires-Python
 status: active
-entrypoint: tools/jscpd/run_jscpd.sh
+entrypoint: Tool Triggering (Synthetic Data)/jscpd/run_jscpd.sh
 outputs: reports/jscpd/jscpd-report.json
 expects: >-
   the retail/wholesale processor pair as one clone (measured on this branch: 54 lines)

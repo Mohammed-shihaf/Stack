@@ -8,7 +8,7 @@ python_version_verified: "3.11.13"
 pin: semgrep==1.176.0
 declared_floor: ">=3.10"
 status: active
-entrypoint: tools/semgrep/run_semgrep.sh
+entrypoint: Tool Triggering (Synthetic Data)/semgrep/run_semgrep.sh
 outputs: reports/semgrep.json
 expects: >-
   the planted issues in analysis/sast_fixture.py, using the SAME rule file Opengrep is given -- so any difference between the primary and the alternative is a difference in engine, not in rules

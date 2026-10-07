@@ -8,7 +8,7 @@ python_version_verified: "3.11.13"
 pin: diff-cover==10.5.1
 declared_floor: ">=3.10"
 status: active
-entrypoint: tools/diff-cover/run_diff_cover.sh
+entrypoint: Tool Triggering (Synthetic Data)/diff-cover/run_diff_cover.sh
 outputs: reports/diff-cover.json
 expects: >-
   coverage delta across the last five synthetic commits

@@ -8,7 +8,7 @@ python_version_verified: "3.11.13"
 pin: pylint==4.0.8
 declared_floor: ">=3.10"
 status: active
-entrypoint: tools/symilar/run_symilar.sh
+entrypoint: Tool Triggering (Synthetic Data)/symilar/run_symilar.sh
 outputs: reports/symilar.txt
 expects: >-
   the retail/wholesale processor pair as ~60 similar lines

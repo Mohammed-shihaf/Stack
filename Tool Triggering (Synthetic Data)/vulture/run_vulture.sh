@@ -5,7 +5,7 @@ set -uo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(cd "$HERE/../.." && pwd)"
 # shellcheck source=/dev/null
-. "$ROOT/tools/_skip.sh"
+. "$ROOT/Tool Triggering (Synthetic Data)/_skip.sh"
 
 SRC="src"
 PKG="orderlab"
@@ -20,7 +20,7 @@ cd "$ROOT"
 
 FINDINGS_EXIT=1   # non-zero from this tool means 'found something', not 'broke'
 FINDINGS_RC="3"   # this tool's own findings exit code(s), which collide with the corpus's
-"$PYBIN" -m vulture "$SRC/$PKG" tools/vulture/whitelist.py --min-confidence 60 2>&1 | tee reports/vulture.txt
+"$PYBIN" -m vulture "$SRC/$PKG" "Tool Triggering (Synthetic Data)/vulture/whitelist.py" --min-confidence 60 2>&1 | tee reports/vulture.txt
 rc=$?
 accept_findings "vulture" "$rc" "reports/vulture.txt"
 exit $?

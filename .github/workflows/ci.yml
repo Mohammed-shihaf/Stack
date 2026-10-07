@@ -11,7 +11,7 @@
 # difference is itself a property of the family.
 #
 # A skipped tool exits 3, and that is expected: 13 of the 29 still cannot
-# install on this interpreter, which is the measurement. `make tools`
+# install on this interpreter, which is the measurement. `tool_integration.py --run`
 # distinguishes an expected skip from a new one.
 name: PY-121
 
@@ -55,13 +55,13 @@ jobs:
         run: .venv/bin/python -m pytest -q
 
       - name: Cross-file consistency audit
-        run: .venv/bin/python tools/full_check.py
+        run: .venv/bin/python "Tool Triggering (Synthetic Data)/full_check.py"
 
       - name: Verify tool wiring
-        run: .venv/bin/python tools/tool_integration.py --verify
+        run: .venv/bin/python "Tool Triggering (Synthetic Data)/tool_integration.py" --verify
 
       - name: Run every wired tool
-        run: PYTHON=.venv/bin/python .venv/bin/python tools/tool_integration.py --run
+        run: PYTHON=.venv/bin/python .venv/bin/python "Tool Triggering (Synthetic Data)/tool_integration.py" --run
 
       - uses: actions/upload-artifact@v4
         if: always()

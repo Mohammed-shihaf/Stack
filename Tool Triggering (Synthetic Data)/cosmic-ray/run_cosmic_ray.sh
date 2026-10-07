@@ -5,7 +5,7 @@ set -uo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(cd "$HERE/../.." && pwd)"
 # shellcheck source=/dev/null
-. "$ROOT/tools/_skip.sh"
+. "$ROOT/Tool Triggering (Synthetic Data)/_skip.sh"
 
 SRC="src"
 PKG="orderlab"
@@ -19,7 +19,7 @@ mkdir -p "$ROOT/reports"
 cd "$ROOT"
 
 FINDINGS_EXIT=1   # non-zero from this tool means 'found something', not 'broke'
-rm -f reports/cosmic-ray.sqlite && "$PYBIN_DIR/cosmic-ray" init tools/cosmic-ray/cosmic-ray.toml reports/cosmic-ray.sqlite && "$PYBIN_DIR/cosmic-ray" exec tools/cosmic-ray/cosmic-ray.toml reports/cosmic-ray.sqlite && "$PYBIN_DIR/cr-report" reports/cosmic-ray.sqlite
+rm -f reports/cosmic-ray.sqlite && "$PYBIN_DIR/cosmic-ray" init "Tool Triggering (Synthetic Data)/cosmic-ray/cosmic-ray.toml" reports/cosmic-ray.sqlite && "$PYBIN_DIR/cosmic-ray" exec "Tool Triggering (Synthetic Data)/cosmic-ray/cosmic-ray.toml" reports/cosmic-ray.sqlite && "$PYBIN_DIR/cr-report" reports/cosmic-ray.sqlite
 rc=$?
 accept_findings "cosmic-ray" "$rc" "reports/cosmic-ray.sqlite"
 exit $?

@@ -8,7 +8,7 @@ python_version_verified: "3.11.13"
 pin: pydriller==2.10
 declared_floor: ">=3.5"
 status: active
-entrypoint: tools/pydriller/run_pydriller.py
+entrypoint: Tool Triggering (Synthetic Data)/pydriller/run_pydriller.py
 outputs: reports/pydriller.json
 expects: >-
   ~42 commits, the 3x co-change of the processor pair, 3 trailer co-authors

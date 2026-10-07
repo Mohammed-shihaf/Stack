@@ -8,7 +8,7 @@ python_version_verified: "3.11.13"
 pin: null   # not a PyPI distribution on this branch
 declared_floor: null   # distribution declares no Requires-Python
 status: active
-entrypoint: tools/trivy/run_trivy.sh
+entrypoint: Tool Triggering (Synthetic Data)/trivy/run_trivy.sh
 outputs: reports/trivy.json
 expects: >-
   advisories against all five planted pins, from the manifest alone

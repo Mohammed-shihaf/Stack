@@ -7,7 +7,7 @@ The floor half is what separates this family from 3.10: exception groups and
 `except*`, tomllib, typing.Self, enum.StrEnum, asyncio.TaskGroup,
 BaseException.add_note and datetime.UTC all arrive in 3.11.
 
-tomllib is the one that matters beyond this file. tools/full_check.py tries
+tomllib is the one that matters beyond this file. Tool Triggering (Synthetic Data)/full_check.py tries
 tomllib, tomli and toml in turn and falls back to a line scanner when none is
 importable; on the four earlier families the fallback was the only path ever
 taken, and here the real parser runs for the first time.
@@ -34,7 +34,7 @@ def test_except_star_compiles():
 
 
 def test_tomllib_is_in_the_stdlib():
-    # PEP 680, new in 3.11. tools/full_check.py's pyproject rule uses this path
+    # PEP 680, new in 3.11. Tool Triggering (Synthetic Data)/full_check.py's pyproject rule uses this path
     # on this family and the hand-written line scanner on every earlier one.
     import tomllib
     assert tomllib.loads('[project]\nname = "orderlab"')["project"]["name"] == "orderlab"
@@ -122,7 +122,7 @@ def test_path_walk_is_not_available():
 
 def test_sys_monitoring_is_not_available():
     # PEP 669 sys.monitoring landed in 3.12. The settrace driver in
-    # tools/settrace/ uses sys.settrace precisely because it must work on every
+    # Tool Triggering (Synthetic Data)/settrace/ uses sys.settrace precisely because it must work on every
     # interpreter in this corpus, 3.6 included.
     import sys as _sys
     assert not hasattr(_sys, "monitoring")
