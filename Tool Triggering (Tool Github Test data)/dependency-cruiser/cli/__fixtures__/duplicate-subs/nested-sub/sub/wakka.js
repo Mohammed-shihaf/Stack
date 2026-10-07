@@ -1,1 +1,0 @@
-exports.yo = () => 'nothing, really';

@@ -1,8 +1,0 @@
-{
-  "name": "npm-hidden-lockfile-repotest",
-  "version": "1.0.0",
-  "private": true,
-  "dependencies": {
-    "is-number": "7.0.0"
-  }
-}

@@ -1,4 +1,0 @@
-[[gates]]
-fail-under-lines = 100
-fail-under-branches = 100
-fail-under-functions = 100

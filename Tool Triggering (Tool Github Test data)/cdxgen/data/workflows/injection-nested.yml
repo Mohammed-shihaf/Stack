@@ -1,7 +1,0 @@
-name: Injection Nested
-on: [pull_request, issues]
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "${{ github.event.pull_request.title || github.event.issue.title }}"

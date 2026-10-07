@@ -1,9 +1,0 @@
-{
-  "compilerOptions": {
-    "jsx": "preserve",
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "target": "esnext"
-  },
-  "include": ["../Component.tsx"]
-}

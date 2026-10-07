@@ -1,8 +1,0 @@
-Resources:
-  SomeLambdaFunction:
-    Type: "AWS::Lambda::Function"
-    Properties:
-      Runtime: "nodejs16.0"
-      Code:
-        ZipFile: if (foo()) bar(); else bar();
-  

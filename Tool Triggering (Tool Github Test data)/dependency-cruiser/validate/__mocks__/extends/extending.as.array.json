@@ -1,7 +1,0 @@
-
-{
-    "extends": [
-        "./base-for-extends.json",
-        "./base2-for-extends.json"
-    ]
-}

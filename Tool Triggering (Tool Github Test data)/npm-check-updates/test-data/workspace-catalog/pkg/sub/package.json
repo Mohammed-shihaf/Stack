@@ -1,7 +1,0 @@
-{
-  "name": "catalog-sub-package",
-  "license": "MIT",
-  "dependencies": {
-    "chalk": "catalog:"
-  }
-}

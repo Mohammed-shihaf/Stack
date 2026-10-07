@@ -1,7 +1,0 @@
-{
-  "name": "ci-tooling",
-  "version": "1.0.0",
-  "dependencies": {
-    "dot-dir-only": "2.0.0"
-  }
-}

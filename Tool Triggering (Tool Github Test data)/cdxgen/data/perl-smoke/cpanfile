@@ -1,6 +1,0 @@
-requires 'Plack', '1.0051';
-requires 'URI';
-
-on 'test' => sub {
-    requires 'Test::More', '0.98';
-};

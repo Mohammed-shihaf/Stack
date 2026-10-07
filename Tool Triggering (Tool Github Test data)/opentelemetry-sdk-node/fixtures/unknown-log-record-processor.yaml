@@ -1,4 +1,0 @@
-file_format: "1.0"
-logger_provider:
-  processors:
-    - my_custom_processor:

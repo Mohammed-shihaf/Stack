@@ -1,1 +1,0 @@
-{"linter":{"rules":{"nursery":{"noTailwindRawColors":{"level":"error","options":{"allowedColors":["white","pink-500","black"]}}}}}}

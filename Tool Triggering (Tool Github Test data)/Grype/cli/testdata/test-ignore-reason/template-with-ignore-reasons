@@ -1,4 +1,0 @@
-The following vulnerabilities are considered irrelevant:
-{{- range .IgnoredMatches}}
-  {{.Vulnerability.ID}} ({{ range $air := .AppliedIgnoreRules }}{{ $air.Reason }}{{ end }})
-{{- end}}

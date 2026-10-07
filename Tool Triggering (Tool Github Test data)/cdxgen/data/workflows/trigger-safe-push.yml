@@ -1,7 +1,0 @@
-name: Trigger Safe Push
-on: [push]
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "Safe trigger"

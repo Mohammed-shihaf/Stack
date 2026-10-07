@@ -1,8 +1,0 @@
-{
-    "compilerOptions": {
-        "allowUnreachableCode": true, // will be overridden in extends
-        "rootDirs": [  
-            "foo", "bar", "baz"      // only in the base
-        ]
-    }
-}
