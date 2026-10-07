@@ -1,1 +1,0 @@
-not-a-mapping:19:7:19:18::Non-mapping value SomeClass() is used in a mapping context:UNDEFINED

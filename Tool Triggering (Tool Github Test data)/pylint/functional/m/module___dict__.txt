@@ -1,1 +1,0 @@
-used-before-assignment:4:6:4:14::Using variable '__dict__' before assignment:HIGH

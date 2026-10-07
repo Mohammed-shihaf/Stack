@@ -1,5 +1,0 @@
-[testoptions]
-min_pyver=3.15
-
-[IMPORTS]
-deprecated-modules=json

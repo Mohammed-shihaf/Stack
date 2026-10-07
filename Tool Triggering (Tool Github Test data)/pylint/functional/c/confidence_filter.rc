@@ -1,3 +1,0 @@
-[Messages Control]
-disable=too-few-public-methods,undefined-variable
-confidence=INFERENCE,HIGH,UNDEFINED

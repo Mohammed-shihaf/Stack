@@ -1,1 +1,0 @@
-consider-using-dict-comprehension:8:11:8:45::Consider using a dictionary comprehension:UNDEFINED

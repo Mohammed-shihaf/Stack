@@ -1,3 +1,0 @@
-[tool.pylint."messages control"]
-disable = "fixme"
-enable = "all"

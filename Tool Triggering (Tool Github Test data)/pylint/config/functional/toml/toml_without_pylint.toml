@@ -1,6 +1,0 @@
-# Check that we do nothing if there is no pylint configuration
-
-[tool.othertool]
-disable = "logging-not-lazy,logging-format-interpolation"
-jobs = "10"
-reports = "yes"

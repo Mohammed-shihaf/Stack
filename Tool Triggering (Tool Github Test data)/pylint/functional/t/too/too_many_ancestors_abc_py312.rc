@@ -1,5 +1,0 @@
-[DESIGN]
-max-parents=0
-
-[testoptions]
-min_pyver=3.12

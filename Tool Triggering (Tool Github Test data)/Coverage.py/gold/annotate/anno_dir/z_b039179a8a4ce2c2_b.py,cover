@@ -1,3 +1,0 @@
-> def b(x):
->     msg = f"x is {x}"
->     print(msg)

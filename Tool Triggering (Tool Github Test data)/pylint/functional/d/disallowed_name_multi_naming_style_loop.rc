@@ -1,3 +1,0 @@
-[BASIC]
-const-rgx=([A-Z_][A-Z0-9_]*)$
-variable-rgx=(?:(?P<snake>[a-z_]+)|(?P<camel>[a-z]+(?:[A-Z][a-z]*)+))$

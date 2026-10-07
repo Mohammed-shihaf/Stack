@@ -1,5 +1,0 @@
-def dostuff():
-    pass
-
-
-dostuff()
