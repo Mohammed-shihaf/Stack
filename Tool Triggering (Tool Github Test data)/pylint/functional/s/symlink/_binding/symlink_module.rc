@@ -1,3 +1,0 @@
-[testoptions]
-# git cannot materialise the symlink on Windows without elevation or Developer Mode
-exclude_platforms=win32

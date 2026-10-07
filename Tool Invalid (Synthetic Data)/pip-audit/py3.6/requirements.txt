@@ -1,5 +1,0 @@
-requests==2.19.1
-PyYAML==5.3
-Jinja2==2.10
-cryptography==2.3
-click==8.1.7

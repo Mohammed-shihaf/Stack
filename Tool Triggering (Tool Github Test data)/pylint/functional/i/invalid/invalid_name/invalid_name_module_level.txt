@@ -1,1 +1,0 @@
-invalid-name:16:0:16:5:A:"Function name ""A"" doesn't conform to snake_case naming style":HIGH

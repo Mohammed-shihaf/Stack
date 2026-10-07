@@ -1,5 +1,0 @@
-[main]
-py-version=3.14
-
-[testoptions]
-min_pyver=3.15

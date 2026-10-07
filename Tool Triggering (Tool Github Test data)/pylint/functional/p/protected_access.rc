@@ -1,2 +1,0 @@
-[CLASSES]
-exclude-protected=_meta,_manager,os._exit,BaseTomato._sauce

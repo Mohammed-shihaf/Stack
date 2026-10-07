@@ -1,6 +1,0 @@
-[MESSAGES CONTROL]
-enable=invalid-name
-
-[BASIC]
-attr-rgx=^x$
-class-attribute-rgx=^y$

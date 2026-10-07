@@ -1,1 +1,0 @@
-"""Shift roster scheduling toolkit."""

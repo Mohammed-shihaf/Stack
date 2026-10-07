@@ -1,3 +1,0 @@
-[MAIN]
-load-plugins=pylint.extensions.code_style
-enable=consider-using-augmented-assign

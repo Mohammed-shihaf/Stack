@@ -1,1 +1,0 @@
-consider-using-set-comprehension:3:7:3:32::Consider using a set comprehension:UNDEFINED

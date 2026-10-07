@@ -1,3 +1,0 @@
-[variables]
-allow-global-unused-variables=no
-dummy-variables-rgx=_+$

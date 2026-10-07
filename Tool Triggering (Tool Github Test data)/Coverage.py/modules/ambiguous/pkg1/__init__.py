@@ -1,1 +1,0 @@
-print("Ambiguous pkg1")

@@ -1,5 +1,0 @@
-[STRING]
-check-quote-consistency=yes
-
-[testoptions]
-max_pyver=3.12

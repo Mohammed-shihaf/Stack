@@ -1,1 +1,0 @@
-bare-except:5:0:6:8::No exception type(s) specified:HIGH

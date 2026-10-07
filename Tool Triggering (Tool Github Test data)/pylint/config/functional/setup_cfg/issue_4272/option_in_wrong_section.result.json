@@ -1,5 +1,0 @@
-{
-  "load_plugins": ["pylint.extensions.bad_builtin"],
-  "persistent": false,
-  "bad_functions": ["print", "map"]
-}

@@ -1,8 +1,0 @@
-[STRING]
-check-quote-consistency=yes
-
-[main]
-py-version=3.12
-
-[testoptions]
-min_pyver=3.12
