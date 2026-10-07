@@ -1,9 +1,0 @@
-{
-  "compilerOptions": {
-    "outDir": "./lib",
-    "lib": ["ESNext"],
-    "module": "esnext",
-    "moduleResolution": "classic"
-  },
-  "include": ["file.ts"]
-}

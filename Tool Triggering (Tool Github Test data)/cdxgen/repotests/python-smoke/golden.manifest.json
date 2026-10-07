@@ -1,9 +1,0 @@
-{
-  "scenarios": [
-    {
-      "name": "default",
-      "projectType": ["python"],
-      "options": {}
-    }
-  ]
-}

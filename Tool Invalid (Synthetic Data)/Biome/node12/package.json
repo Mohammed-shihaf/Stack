@@ -1,9 +1,0 @@
-{
-  "name": "ferry-schedule",
-  "private": true,
-  "version": "1.0.0",
-  "devDependencies": {
-    "typescript": "5.0.4",
-    "@types/node": "^12"
-  }
-}

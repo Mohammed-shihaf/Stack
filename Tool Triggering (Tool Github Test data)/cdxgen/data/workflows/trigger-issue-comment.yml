@@ -1,7 +1,0 @@
-name: Trigger Issue Comment
-on: [issue_comment]
-jobs:
-  respond:
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "Comment received"

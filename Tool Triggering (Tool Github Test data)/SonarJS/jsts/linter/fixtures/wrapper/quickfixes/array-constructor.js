@@ -1,1 +1,0 @@
-let x = new Array(0, 1, 2);

@@ -1,8 +1,0 @@
-name: Mutable reusable workflow
-on: push
-jobs:
-  call-build:
-    uses: octo-org/shared-ci/.github/workflows/build.yml@v2
-    with:
-      run-tests: true
-

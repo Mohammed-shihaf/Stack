@@ -1,7 +1,0 @@
-name: Trigger Workflow Run
-on: [workflow_run]
-jobs:
-  downstream:
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "Triggered by another workflow"

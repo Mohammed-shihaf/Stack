@@ -1,7 +1,0 @@
-{
-  "name": "excluded",
-  "workspaces": ["child"],
-  "dependencies": {
-    "react": "catalog:"
-  }
-}

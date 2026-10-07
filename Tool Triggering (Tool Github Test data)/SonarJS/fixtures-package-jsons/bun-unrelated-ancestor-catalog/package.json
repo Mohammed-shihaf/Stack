@@ -1,7 +1,0 @@
-{
-  "name": "unrelated-workspace",
-  "workspaces": ["other"],
-  "catalog": {
-    "react": "1.0.0-STRAY"
-  }
-}

@@ -1,5 +1,0 @@
-.{
-    .name = .zig_clap,
-    .version = "0.10.0",
-    .dependencies = .{},
-}
