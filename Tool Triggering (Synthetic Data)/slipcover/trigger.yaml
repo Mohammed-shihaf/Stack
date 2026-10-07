@@ -8,7 +8,7 @@ python_version_verified: "3.11.13"
 pin: slipcover==1.1.0
 declared_floor: ">=3.9"
 status: active
-entrypoint: tools/slipcover/run_slipcover.sh
+entrypoint: Tool Triggering (Synthetic Data)/slipcover/run_slipcover.sh
 outputs: reports/slipcover.xml
 expects: >-
   a coverage figure (measured on this branch: line-rate 0.5271). Its primary, Coverage.py, needs >=3.10 and is dark, so this number has no cross-check yet

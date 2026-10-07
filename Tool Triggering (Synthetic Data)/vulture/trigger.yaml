@@ -8,7 +8,7 @@ python_version_verified: "3.11.13"
 pin: vulture==2.16
 declared_floor: ">=3.9"
 status: active
-entrypoint: tools/vulture/run_vulture.sh
+entrypoint: Tool Triggering (Synthetic Data)/vulture/run_vulture.sh
 outputs: reports/vulture.txt
 expects: >-
   the unused definitions in analysis/dead_code.py (measured on this branch: 6 findings in that file). NOTE: vulture exits 3 on findings, which collides with this corpus's SKIPPED code -- see FINDINGS_RC in the runner

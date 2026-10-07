@@ -5,7 +5,7 @@ set -uo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(cd "$HERE/../.." && pwd)"
 # shellcheck source=/dev/null
-. "$ROOT/tools/_skip.sh"
+. "$ROOT/Tool Triggering (Synthetic Data)/_skip.sh"
 
 SRC="packages/domain/src"
 PKG="orderlab"
@@ -20,7 +20,7 @@ cd "$ROOT"
 
 FINDINGS_EXIT=1   # non-zero from this tool means 'found something', not 'broke'
 FINDINGS_RC_MAX=31   # this tool's exit code is a bitmask, not a status
-"$PYBIN" -m pylint --rcfile=tools/pylint/pylintrc "$SRC/$PKG" --output-format=json:reports/pylint.json,colorized
+"$PYBIN" -m pylint --rcfile="Tool Triggering (Synthetic Data)/pylint/pylintrc" "$SRC/$PKG" --output-format=json:reports/pylint.json,colorized
 rc=$?
 accept_findings "pylint" "$rc" "reports/pylint.json"
 exit $?

@@ -8,7 +8,7 @@ python_version_verified: "3.11.13"
 pin: pymcdc==0.2.6
 declared_floor: ">=3.10"
 status: active
-entrypoint: tools/pymcdc/run_pymcdc.sh
+entrypoint: Tool Triggering (Synthetic Data)/pymcdc/run_pymcdc.sh
 outputs: reports/pymcdc.txt
 expects: >-
   MC/DC obligations for the compound conditions in classify_shipment

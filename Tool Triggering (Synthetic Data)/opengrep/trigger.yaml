@@ -8,7 +8,7 @@ python_version_verified: "3.11.13"
 pin: null   # not a PyPI distribution on this branch
 declared_floor: null   # distribution declares no Requires-Python
 status: active
-entrypoint: tools/opengrep/run_opengrep.sh
+entrypoint: Tool Triggering (Synthetic Data)/opengrep/run_opengrep.sh
 outputs: reports/opengrep.json
 expects: >-
   the planted issues in analysis/sast_fixture.py

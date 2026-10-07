@@ -1,13 +1,13 @@
 """Settings layers, merged lowest precedence first."""
 
-from collections.abc import Mapping, Sequence
-from typing import Dict
+from typing import Dict, Sequence
 
 
 class Layer:
     """A named settings layer and its values."""
 
     def __init__(self, name, values):
+        """Store the layer name and its values."""
         self.name = name
         self.values = values
 

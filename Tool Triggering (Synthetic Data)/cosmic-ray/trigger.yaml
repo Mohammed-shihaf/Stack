@@ -8,7 +8,7 @@ python_version_verified: "3.11.13"
 pin: cosmic-ray==8.7.0
 declared_floor: ">=3.9"
 status: active
-entrypoint: tools/cosmic-ray/run_cosmic_ray.sh
+entrypoint: Tool Triggering (Synthetic Data)/cosmic-ray/run_cosmic_ray.sh
 outputs: reports/cosmic-ray.sqlite
 expects: >-
   a mutation score over $SRC/$PKG/services (measured on this branch: 336 mutants, 336 killed, 0 surviving -- the parametrised boundary tests at 25/100/500 kill the NumberReplacer mutants that would otherwise survive)

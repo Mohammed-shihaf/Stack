@@ -8,7 +8,7 @@ python_version_verified: "3.11.13"
 pin: mutmut==3.7.0
 declared_floor: ">=3.10"
 status: active
-entrypoint: tools/mutmut/run_mutmut.sh
+entrypoint: Tool Triggering (Synthetic Data)/mutmut/run_mutmut.sh
 outputs: reports/mutmut.txt
 expects: >-
   surviving mutants at the same boundaries cosmic-ray finds

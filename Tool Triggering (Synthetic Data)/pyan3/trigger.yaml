@@ -8,7 +8,7 @@ python_version_verified: "3.11.13"
 pin: pyan3==2.8.1
 declared_floor: ">=3.10"
 status: active
-entrypoint: tools/pyan3/run_pyan3.sh
+entrypoint: Tool Triggering (Synthetic Data)/pyan3/run_pyan3.sh
 outputs: reports/pyan3.dot
 expects: >-
   the five-deep chain and the ping/pong recursive cycle

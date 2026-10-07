@@ -8,7 +8,7 @@ python_version_verified: "3.11.13"
 pin: lizard==1.24.0
 declared_floor: null   # distribution declares no Requires-Python
 status: active
-entrypoint: tools/lizard/run_lizard.sh
+entrypoint: Tool Triggering (Synthetic Data)/lizard/run_lizard.sh
 outputs: reports/lizard.csv
 expects: >-
   a per-function CCN table agreeing with radon on classify_shipment (measured on this branch: CCN 21, identical to radon CC 21 -- the first primary/alternative agreement available in this corpus, since lizard is dark on the 3.6 family)

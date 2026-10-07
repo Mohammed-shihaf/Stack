@@ -1,9 +1,7 @@
 """Settings layers, merged lowest precedence first."""
 
-
-from typing import Dict
-from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
+from typing import Dict, Mapping, Sequence
 
 
 @dataclass(frozen=True)

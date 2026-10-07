@@ -8,7 +8,7 @@ python_version_verified: "3.11.13"
 pin: pip-audit==2.10.1
 declared_floor: ">=3.10"
 status: active
-entrypoint: tools/pip-audit/run_pip_audit.sh
+entrypoint: Tool Triggering (Synthetic Data)/pip-audit/run_pip_audit.sh
 outputs: reports/pip-audit.json
 expects: >-
   advisories against all five planted pins and nothing else (measured on this branch: 162 packages audited, 26 known vulnerabilities in exactly 5 packages -- cryptography 11, urllib3 6, jinja2 4, requests 3, paramiko 2)

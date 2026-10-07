@@ -8,7 +8,7 @@ python_version_verified: "3.11.13"
 pin: dulwich==1.2.14
 declared_floor: ">=3.10"
 status: active
-entrypoint: tools/dulwich/run_dulwich.py
+entrypoint: Tool Triggering (Synthetic Data)/dulwich/run_dulwich.py
 outputs: reports/dulwich.json
 expects: >-
   the same commit count and co-author split PyDriller reports

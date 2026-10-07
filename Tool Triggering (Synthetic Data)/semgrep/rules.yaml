@@ -1,6 +1,6 @@
 # Shipped IN the branch rather than fetched from semgrep.dev, which is
-# 403 at this corpus's build host. Byte-identical to
-# tools/opengrep/rules.yaml: semgrep and Opengrep share a rule syntax,
+# 403 at this corpus's build host. Same rules as
+# Tool Triggering (Synthetic Data)/opengrep/rules.yaml: semgrep and Opengrep share a rule syntax,
 # so the SAST primary and its alternative are run against exactly the
 # same rules and any difference in output is a difference in ENGINE.
 rules:

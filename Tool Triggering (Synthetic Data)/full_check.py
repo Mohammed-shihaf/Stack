@@ -12,7 +12,7 @@ in this corpus or its TypeScript sibling. Two in particular:
 
   * Expected values are read from the repository, never from a list baked into
     this script. The planted pins come from requirements-runtime.txt, the tool
-    set comes from the tools/ tree, and the package name comes from the source
+    set comes from the Tool Triggering (Synthetic Data)/ tree, and the package name comes from the source
     layout.
 
 This family DOES have tomllib (PEP 680, stdlib from 3.11), so the pyproject
@@ -86,11 +86,11 @@ def rule_interpreter_agreement():
         if want not in pyproject:
             fail("pyproject.toml [project] is missing %s" % want)
 
-    ruff = read("tools/ruff/ruff.toml")
+    ruff = read("Tool Triggering (Synthetic Data)/ruff/ruff.toml")
     if 'target-version = "py%s"' % PY_NODOT not in ruff:
         fail("ruff.toml target-version does not match py%s" % PY_NODOT)
 
-    pylintrc = read("tools/pylint/pylintrc")
+    pylintrc = read("Tool Triggering (Synthetic Data)/pylint/pylintrc")
     if "py-version = %s" % PY not in pylintrc:
         fail("pylintrc py-version does not match %s" % PY)
 
@@ -135,16 +135,16 @@ def rule_pyproject_parses():
 
 def rule_triggers():
     check("trigger manifests")
-    tools_dir = os.path.join(ROOT, "tools")
+    tools_dir = os.path.join(ROOT, "Tool Triggering (Synthetic Data)")
     dirs = sorted(n for n in os.listdir(tools_dir)
                   if os.path.isdir(os.path.join(tools_dir, n)) and not n.startswith("_"))
     if not dirs:
-        fail("tools/ has no tool directories at all")
+        fail("Tool Triggering (Synthetic Data)/ has no tool directories at all")
     if DATA["toolsWired"] != len(dirs):
-        fail("dataset.json toolsWired=%d but tools/ has %d directories"
+        fail("dataset.json toolsWired=%d but Tool Triggering (Synthetic Data)/ has %d directories"
              % (DATA["toolsWired"], len(dirs)))
     for name in dirs:
-        rel = "tools/%s/trigger.yaml" % name
+        rel = "Tool Triggering (Synthetic Data)/%s/trigger.yaml" % name
         if not exists(rel):
             fail("missing %s" % rel)
             continue
@@ -155,7 +155,7 @@ def rule_triggers():
         elif m.group(1) != PY:
             fail("%s python_version %r disagrees with .python-version %r"
                  % (rel, m.group(1), PY))
-        m = re.search(r'^entrypoint:\s*(\S+)', body, re.M)
+        m = re.search(r'^entrypoint:\s*"?([^"\n]+?)"?\s*$', body, re.M)
         if not m:
             fail("%s has no entrypoint" % rel)
         elif not exists(m.group(1)):
@@ -178,9 +178,9 @@ def rule_status_matches_dataset():
     for name, bucket in (("active", active), ("inactive", dark),
                          ("inactive-silent", silent)):
         for d in sorted(bucket):
-            rel = "tools/%s/trigger.yaml" % d
+            rel = "Tool Triggering (Synthetic Data)/%s/trigger.yaml" % d
             if not exists(rel):
-                fail("dataset.json lists %s in %s but tools/%s/ does not exist"
+                fail("dataset.json lists %s in %s but Tool Triggering (Synthetic Data)/%s/ does not exist"
                      % (d, name, d))
                 continue
             m = re.search(r'^status:\s*(\S+)', read(rel), re.M)
@@ -466,7 +466,7 @@ def rule_branch_identity():
 
 def rule_shell_and_yaml():
     check("shell and yaml parse")
-    for dirpath, dirnames, filenames in os.walk(os.path.join(ROOT, "tools")):
+    for dirpath, dirnames, filenames in os.walk(os.path.join(ROOT, "Tool Triggering (Synthetic Data)")):
         dirnames[:] = [d for d in dirnames if d != "__pycache__"]
         for name in sorted(filenames):
             full = os.path.join(dirpath, name)

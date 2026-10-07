@@ -8,7 +8,7 @@ python_version_verified: "3.11.13"
 pin: radon==6.0.1
 declared_floor: null   # distribution declares no Requires-Python
 status: active
-entrypoint: tools/radon/run_radon.sh
+entrypoint: Tool Triggering (Synthetic Data)/radon/run_radon.sh
 outputs: reports/radon-cc.json
 expects: >-
   classify_shipment above the McCabe limit of 10 (measured on this branch: CC 21, rank D)

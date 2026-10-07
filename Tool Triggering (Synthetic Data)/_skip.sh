@@ -1,4 +1,4 @@
-# Shared runner preamble. Sourced by every tools/*/run_*.sh.
+# Shared runner preamble. Sourced by every Tool Triggering (Synthetic Data)/*/run_*.sh.
 #
 # Exit codes:
 #   0  tool ran and wrote its report
@@ -136,7 +136,7 @@ require_binary() {
   echo "STATUS: NOT INSTALLED"
   echo "  tool   : $dir"
   echo "  reason : '$exe' is not on PATH. It is a standalone binary, not a pin,"
-  echo "           so no package manager can supply it -- see tools/$dir/INSTALL.md."
+  echo "           so no package manager can supply it -- see Tool Triggering (Synthetic Data)/$dir/INSTALL.md."
   echo "  note   : this is a host setup gap, not a Python 3.6 finding. This tool"
   echo "           IS able to run on this interpreter."
   _status "$dir" "NOT_INSTALLED" "$exe not on PATH"

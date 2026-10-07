@@ -5,7 +5,7 @@ set -uo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(cd "$HERE/../.." && pwd)"
 # shellcheck source=/dev/null
-. "$ROOT/tools/_skip.sh"
+. "$ROOT/Tool Triggering (Synthetic Data)/_skip.sh"
 
 SRC="packages/domain/src"
 PKG="orderlab"
@@ -19,7 +19,7 @@ mkdir -p "$ROOT/reports"
 cd "$ROOT"
 
 FINDINGS_EXIT=1   # non-zero from this tool means 'found something', not 'broke'
-"$PYBIN" -m ruff check --config tools/ruff/ruff.toml --output-format json --output-file reports/ruff.json . ; "$PYBIN" -m ruff check --config tools/ruff/ruff.toml .
+"$PYBIN" -m ruff check --config "Tool Triggering (Synthetic Data)/ruff/ruff.toml" --output-format json --output-file reports/ruff.json . ; "$PYBIN" -m ruff check --config "Tool Triggering (Synthetic Data)/ruff/ruff.toml" .
 rc=$?
 accept_findings "ruff" "$rc" "reports/ruff.json"
 exit $?

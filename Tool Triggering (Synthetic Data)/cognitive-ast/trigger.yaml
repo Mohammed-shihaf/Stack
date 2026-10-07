@@ -8,7 +8,7 @@ python_version_verified: "3.11.13"
 pin: null   # not a PyPI distribution on this branch
 declared_floor: null   # distribution declares no Requires-Python
 status: active
-entrypoint: tools/cognitive-ast/run_cognitive_ast.py
+entrypoint: Tool Triggering (Synthetic Data)/cognitive-ast/run_cognitive_ast.py
 outputs: reports/cognitive-ast.json
 expects: >-
   classify_shipment above the cognitive threshold of 15 (measured on this branch: score 50, the only function over it)

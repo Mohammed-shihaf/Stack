@@ -9,7 +9,7 @@ pin: beniget==0.5.0
 extra_pins: [gast==0.7.0]
 declared_floor: ">=3.6"
 status: active
-entrypoint: tools/beniget/run_beniget.py
+entrypoint: Tool Triggering (Synthetic Data)/beniget/run_beniget.py
 outputs: reports/beniget.json
 expects: >-
   def-use chains over pricing_rules.py and the four taint_fixture flows

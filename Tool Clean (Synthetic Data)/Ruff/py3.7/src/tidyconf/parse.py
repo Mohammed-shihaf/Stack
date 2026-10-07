@@ -1,8 +1,6 @@
 """Parsing of ``key=value`` settings lines."""
 
-
-from typing import Dict
-from collections.abc import Iterable
+from typing import Dict, Iterable
 
 COMMENT_PREFIX = "#"
 SEPARATOR = "="

@@ -5,10 +5,6 @@
 # pip 26.2.1 and running `pip freeze`. Every version here is what pip
 # ACTUALLY chose on that interpreter.
 #
-# GitPython==3.1.18 is transitive drift, not a choice: pydriller 2.10
-# declares `gitpython` with no upper bound, so pip resolved backwards
-# to the last release admitting 3.6, silently and with exit 0.
-#
 # lizard and pydriller are both in this file. Both install. Neither
 # imports. A lockfile is not evidence that a tool works.
 CacheControl==0.14.4

@@ -8,7 +8,7 @@ python_version_verified: "3.11.13"
 pin: coverage==7.16.0
 declared_floor: ">=3.10"
 status: active
-entrypoint: tools/coverage/run_coverage.sh
+entrypoint: Tool Triggering (Synthetic Data)/coverage/run_coverage.sh
 outputs: reports/coverage.xml
 expects: >-
   statement and branch coverage over $SRC/$PKG, with analysis/dead_code.py uncovered

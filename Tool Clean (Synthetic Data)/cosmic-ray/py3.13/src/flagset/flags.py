@@ -16,4 +16,4 @@ def toggle(word: int, position: int) -> int:
 
 def clear(word: int, position: int) -> int:
     """Unset the bit at `position`."""
-    return word - ~(1 << position) & ALL_FLAGS
+    return word & ~(1 << position) & ALL_FLAGS
