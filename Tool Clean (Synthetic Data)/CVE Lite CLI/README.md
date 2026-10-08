@@ -10,7 +10,7 @@ Domain: granary dependency inventory (GranaryInventory)
 
 ## What a passing result looks like
 
-cve-lite would parse package-lock.json, batch-query the OSV database for every resolved package, and report zero known vulnerabilities.
+cve-lite falls back to the exact-pinned direct dependencies of `package.json` (typescript 5.9.3, @types/node 26.6.3, cve-lite-cli 1.37.0), queries OSV for them, and reports zero known vulnerabilities.
 
 ## Command
 
@@ -20,4 +20,4 @@ cve-lite . --no-open
 
 ## Notes
 
-cve-lite-cli itself installs and runs fine (real npm package, matches its GitHub description exactly), but its only vulnerability source is `api.osv.dev`, which returns 403 at this sandbox's egress proxy (measured directly, not assumed). Its `--offline` mode only reads a local advisory database that itself must be populated by `cve-lite advisories sync` against that same blocked endpoint -- running `--offline` against the empty database `advisories init` creates does report "no known vulnerabilities", but that is vacuously true (zero advisories to match against), not a real measurement, so it is not counted as a clean result here.
+cve-lite-cli reads the lockfile when there is one. These folders have **no lockfile** (a `package-lock.json` in a sub-folder makes Testable treat the folder as its own project and run all tools on it), and cve-lite-cli has a documented fallback for that case: with no lockfile it scans the **direct dependencies in `package.json` that are pinned to an exact version** (`loadPackages()` in `src/parsers/index.ts`, `mode: "manifest-fallback"`; present in 1.37.0 and 1.38.0). Its only vulnerability source is `api.osv.dev`, which returned 403 in the generating session, so no scan result is quoted.

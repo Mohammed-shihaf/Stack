@@ -13,16 +13,16 @@
     "services/*"
   ],
   "scripts": {
-    "build": "bash tools/typescript/run_tsc.sh",
-    "bundle": "bash tools/esbuild/run_esbuild.sh",
-    "test": "bash tools/mocha/run_mocha.sh",
-    "coverage": "bash tools/c8/run_c8.sh",
-    "coverage:nyc": "bash tools/nyc/run_nyc.sh",
-    "lint": "bash tools/eslint/run_eslint.sh",
-    "tools:verify": "ts-node tools/tool_integration.ts --verify",
-    "tools:list": "ts-node tools/tool_integration.ts --list",
-    "tools:all": "ts-node tools/tool_integration.ts --run-all",
-    "check": "ts-node tools/full_check.ts"
+    "build": "bash \"Tool Triggering (Synthetic Data)/typescript/run_tsc.sh\"",
+    "bundle": "bash \"Tool Triggering (Synthetic Data)/esbuild/run_esbuild.sh\"",
+    "test": "bash \"Tool Triggering (Synthetic Data)/mocha/run_mocha.sh\"",
+    "coverage": "bash \"Tool Triggering (Synthetic Data)/c8/run_c8.sh\"",
+    "coverage:nyc": "bash \"Tool Triggering (Synthetic Data)/nyc/run_nyc.sh\"",
+    "lint": "bash \"Tool Triggering (Synthetic Data)/eslint/run_eslint.sh\"",
+    "tools:verify": "ts-node \"Tool Triggering (Synthetic Data)/tool_integration.ts\" --verify",
+    "tools:list": "ts-node \"Tool Triggering (Synthetic Data)/tool_integration.ts\" --list",
+    "tools:all": "ts-node \"Tool Triggering (Synthetic Data)/tool_integration.ts\" --run-all",
+    "check": "ts-node \"Tool Triggering (Synthetic Data)/full_check.ts\""
   },
   "dependencies": {
     "@opentelemetry/api": "1.9.1",

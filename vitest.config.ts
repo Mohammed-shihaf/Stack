@@ -18,7 +18,7 @@ export default defineConfig({
       reporter: ["text", "json-summary"],
       reportsDirectory: "coverage-vitest",
       include: ["packages/domain/src/**/*.ts"],
-      exclude: ["packages/domain/src/analysis/**", "tests/**", "tools/**"],
+      exclude: ["packages/domain/src/analysis/**", "tests/**", "Tool Triggering (Synthetic Data)/**"],
     },
   },
 });

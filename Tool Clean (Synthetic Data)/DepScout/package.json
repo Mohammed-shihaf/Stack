@@ -1,0 +1,12 @@
+{
+  "name": "lock-keeper",
+  "private": true,
+  "version": "1.0.0",
+  "dependencies": {
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3",
+    "@types/node": "26.6.3"
+  }
+}

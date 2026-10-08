@@ -1,12 +1,12 @@
 # Clean TypeScript tool corpus -- boundary-version measured
 
-33 tool-named folders, one per tool, mirroring the layout of the harvested `TypeScript Tools` set. Where that set holds each tool's **own upstream test suite**, this one holds synthetic projects built to the opposite goal: every tool must run and report **nothing wrong**.
+40 tool-named folders, one per tool, mirroring the layout of the harvested `TypeScript Tools` set. Where that set holds each tool's **own upstream test suite**, this one holds synthetic projects built to the opposite goal: every tool must run and report **nothing wrong**.
 
 This is the negative control the tool-evaluation corpora do not have. A family where nothing ever fires cannot distinguish *correctly detected nothing* from *the scan never ran*. A clean baseline is what makes a zero legible -- and "declared support is a claim; invoking is the fact."
 
 ## Boundary-version structure
 
-25 of the 33 tools are exploded into five per-tool subfolders, one per boundary Node.js major, mirroring `Python-Tools-Clean`'s `py3.X/` pattern:
+25 of the 40 tools are exploded into five per-tool subfolders, one per boundary Node.js major, mirroring `Python-Tools-Clean`'s `py3.X/` pattern:
 
 | Family | Node version | Role |
 | --- | --- | --- |
@@ -18,11 +18,12 @@ This is the negative control the tool-evaluation corpora do not have. A family w
 
 **All five families are LIVE by default, not code-only.** Real Node 12/14/20/24/26 binaries (obtained from the `actions/node-versions` GitHub-release manifest, since `nodejs.org` itself returns 403 at this sandbox's egress proxy) were installed, and `registry.npmjs.org` is fully reachable here, so every family actually runs `npm install` and the tool's real command -- a family is only marked NOT INSTALLED / CODE-ONLY where a genuine, reproducible incompatibility was confirmed live (never assumed from a package's declared `engines` field alone). This is a deliberately more rigorous bar than the sibling `JavaScript-Tools-Clean` corpus, which treats node12/14 as code-only by construction; here, node12/14 get the same live verification as node20/24/26 do, and only fail over to NOT INSTALLED / CODE-ONLY when a real trio of mutually-compatible package versions does not exist.
 
-The remaining 8 tools stay single-version / unversioned, split into three groups:
+The remaining 15 tools stay single-version / unversioned, split into four groups:
 
 - **Unversioned (2): `diff-cover`, `pydriller`** -- git-history miners; what they measure is commit history, not language-version compatibility, exactly like the sibling Python/JS/Java corpora's equivalents.
-- **Always NOT INSTALLED (5): `Bearer CLI`, `CVE Lite CLI`, `Grype`, `OSV-Scanner`, `SonarJS`** -- blocked by this sandbox's egress allowlist (GitHub Releases, the Go module proxy, or `api.osv.dev` all return 403/refused, confirmed by direct measurement) or by needing server infrastructure that doesn't exist here; this is a Node.js-version-independent blocker, so there is no family split to measure.
-- **No folder (1): `red-dragon`** -- a genuine roster defect, not a reachability problem (see below).
+- **Added by the roster alignment of 2026-10-07 (7): `reson`, `git-hot`, `DepScout`, `TraceGraph`, `ORT`, `Dependabot`, `GitHub API`** -- roster tools that had no folder here. Each is one Node-independent folder (no `node12` ... `node26` split) holding a small synthetic project the tool can run on; see "Roster alignment (2026-10-07)" below.
+- **Node-independent, original build (5): `Bearer CLI`, `CVE Lite CLI`, `Grype`, `OSV-Scanner`, `SonarJS`** -- one flat folder each. Their earlier "always NOT INSTALLED" label is corrected in the table below: the Bearer CLI and OSV-Scanner release binaries do download and run here, and the three software-composition tools (`CVE Lite CLI`, `Grype`, `OSV-Scanner`) no longer ship a lockfile.
+- **`red-dragon`** -- has a folder again, now with a real TypeScript project; the earlier note that it was a "roster defect" was wrong (see below).
 
 ## Measured results (25 versioned tools x 5 families = 125 cells)
 
@@ -69,13 +70,13 @@ Plus the 2 unversioned git-history tools, both CLEAN:
 
 | Tool | Reason |
 | --- | --- |
-| **Bearer CLI** | Bearer's real SAST/data-flow scanner ships only as a GitHub Release binary (curl-install script or Docker image); GitHub Releases return 403 here. The npm package literally named `bearer` is an unrelated HTTP auth-header micro-library and was not substituted for it. |
+| **Bearer CLI** | The v2.1.1 release binary downloads and runs here (measured 2026-10-07; the earlier statement that GitHub Releases return 403 was specific to that session). What fails is the scanner's first-run download of its default rules (`bearer-rules`, 403), so a scan cannot complete in this sandbox. The npm package literally named `bearer` is an unrelated HTTP auth-header micro-library and was not substituted for it. |
 | **CVE Lite CLI** | cve-lite-cli itself installs and runs fine (real npm package), but its only vulnerability source is api.osv.dev, which returns 403 at this sandbox's egress proxy (measured directly). --offline mode only reads a local advisory database that must itself be populated against that same blocked endpoint, so a report from an empty database is vacuous, not a real measurement. |
 | **Grype** | Grype ships only as a GitHub Release binary or via `go install`; both are blocked here (GitHub Releases: 403; `proxy.golang.org`: not in the egress allowlist, measured directly). No apt package exists. |
-| **OSV-Scanner** | Same shape of blocker as Grype: GitHub Releases return 403 here and `go install .../osv-scanner@latest` is refused by the same golang-proxy allowlist. No apt package exists. |
+| **OSV-Scanner** | The v2.6.0 release binary downloads and runs here (measured 2026-10-07) and parses the CycloneDX SBOM in this folder; the vulnerability lookup that follows (`POST api.osv.dev/v1/querybatch`) returns 403 here, so no advisory count is quoted. |
 | **SonarJS** | SonarJS is the analyzer engine embedded in SonarQube/SonarCloud, not a standalone CLI -- no live Sonar server is reachable from this sandbox. The npm package literally named `sonarjs` is `sonarjs-cli`, deprecated and itself only an uploader client for a Sonar server. (The separate `eslint-plugin-sonarjs` folder exercises SonarJS's rules standalone through ESLint, the one real path without server infrastructure.) |
 
-**red-dragon (no folder):** The harvested `red-dragon` folder holds Python test files for a COBOL abstract-syntax-graph parser and LLM-based AST repair/Java-execution pipeline -- a legacy-mainframe-modernization tool with no connection to TypeScript at all. No package named `red-dragon` on npm or crates.io does anything COBOL- or AST-repair-related; the only hit, on PyPI, is a 3.9KB joke package with no real functionality. This is a genuine roster defect in the harvested `TypeScript Tools` set, not a reachability problem -- so, unlike every other NOT INSTALLED entry, there is no real tool to name a command for and no folder contents to build here.
+**red-dragon:** The harvested `red-dragon` folder holds the project's own Python tests (including a COBOL front end). The earlier note called red-dragon a COBOL-only tool with no TypeScript support; that was wrong. Upstream's README describes a multi-language pipeline (tree-sitter front ends, an intermediate representation, a control-flow graph, reaching definitions and def-use chains) and the repository has a TypeScript front end (`interpreter/frontends/typescript`). This folder now holds a real TypeScript project that red-dragon (pinned commit `c287bb2`) lowers and analyses; see its README.
 
 The exit-code/verdict vocabulary throughout this corpus never collapses a finding, a skip, and a genuine absence into the same result -- CLEAN, FINDING, NOT_INSTALLED, and CODE-ONLY stay distinct, and a missing binary must never masquerade as a clean scan.
 
@@ -96,6 +97,27 @@ Every fix below was reached by live-testing against the real npm registry and th
 **`Opengrep` was rescued with a real, honestly-labeled stand-in, not abandoned.** Opengrep ships only as a GitHub Release binary (blocked here) and the npm package literally named `opengrep` is a parked placeholder. Opengrep is a semgrep fork sharing its rule format, so `semgrep` -- already installed and Node-version-independent -- was run for real against a local custom ruleset and found zero findings across all 5 families.
 **`cccc` is a genuine category error, left in on purpose.** It analyses C, C++ and Java -- never JavaScript or TypeScript -- so this folder gives it real C source (a boiler pressure-relief controller) instead of forcing TypeScript through a parser that rejects it outright. Node-version-independent, so all 5 families are identically CLEAN.
 **`covgate`, `mewt`, and `debtmap` are real crates.io tools with no npm presence at all**, built from source against crates.io (reachable here). `Lizard` is Node-version-independent (PyPI); all four are CLEAN across every family.
+
+## Roster alignment (2026-10-07)
+
+The tool list the team supplied (`TypeScript_All_Tools.xlsx`, 39 tools) is the roster. This pass compared it with the folders here and with `Tool Triggering (Synthetic Data)/` and closed the gaps.
+
+| Tool | What changed in this folder | Result |
+| --- | --- | --- |
+| `reson` | new: tide-gauge project (`src/tideGauge.ts`) | measured: 0 duplicate blocks |
+| `git-hot` | new: lamp log + `make-history.sh` (builds a deterministic history; no git bundle) | measured: max churn 0 |
+| `DepScout` | new: door-lock service, current dependencies (`zod` 4.6.5) | measured: no release-age alert |
+| `TraceGraph` | new: ferry crossing log traced with `@tracegraph/trace-js` 0.3.1 | measured: 8 events, 0 `error` events |
+| `ORT` | new: licence ledger, permissive dependencies only; no lockfile | not run (JVM tool); licences read from the registry |
+| `Dependabot` | new: dock-lock scheduler, current pins, `.github/dependabot.yml` | not run (needs a GitHub repository) |
+| `GitHub API` | new: release watcher pointing at `octokit/rest.js` | not run (sandbox GitHub API restriction) |
+| `red-dragon` | real TypeScript project (`src/pumpRoom.ts`) and a README that no longer calls the tool a defect | measured: no dead stores, no maybe-uninitialised reads |
+| `Bearer CLI` | README corrected; project unchanged | not measured (rules download blocked) |
+| `CVE Lite CLI`, `Grype`, `OSV-Scanner` | `package-lock.json` removed; `OSV-Scanner` and `Grype` carry a CycloneDX `sbom.cdx.json` | `OSV-Scanner` parses the SBOM (2 packages) |
+
+**No lockfile anywhere in this folder.** A `package-lock.json` in a sub-folder makes Testable treat that folder as its own project and run every tool on it, so none is shipped. `CVE Lite CLI` falls back to the exact-pinned direct dependencies in `package.json`; `Grype` and `OSV-Scanner` read the SBOM.
+
+The folders added by this pass are written by `.github/scripts/fix_typescript_corpus.py`; `_generator/` does not produce them.
 
 ## Layout
 
@@ -122,7 +144,7 @@ _generator/             pin_table.py, generate.py, verify_live.py,
                         write_family_readmes.py, write_new_root_readme.py
 ```
 
-The 2 unversioned tools (`diff-cover`, `pydriller`) and the 5 always-NOT-INSTALLED tools keep their original flat, single-version layout (`src/`, `test/`, `.git/` directly under the tool folder) -- there is no family split to make for a tool that either doesn't depend on Node.js version or never runs here at all.
+The 2 unversioned tools (`diff-cover`, `pydriller`), the 5 Node-independent tools of the original build and the 7 tools added by the roster alignment keep a flat, single-version layout (`src/`, `test/`, `.git/` directly under the tool folder) -- there is no family split to make for a tool that either doesn't depend on Node.js version or never runs here at all.
 
 ## Rules every folder obeys
 
