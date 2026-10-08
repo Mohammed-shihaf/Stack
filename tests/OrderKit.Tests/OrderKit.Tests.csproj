@@ -10,7 +10,10 @@
 
   <ItemGroup>
     <PackageReference Include="NUnit" Version="3.13.3" />
-    <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+    <!-- Test project only: the test host needs Newtonsoft.Json 13. The planted 9.0.1 pin stays in the src projects. -->
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="System.Net.Http" Version="4.3.0" />
     <PackageReference Include="Microsoft.AspNet.Mvc" Version="5.2.3" />
     <PackageReference Include="System.Text.RegularExpressions" Version="4.3.0" />
@@ -18,11 +21,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\OrderKit.Domain\OrderKit.Domain.csproj" />
-    <ProjectReference Include="..\..\OrderKit.Contracts\OrderKit.Contracts.csproj" />
-    <ProjectReference Include="..\..\OrderKit.Pricing\OrderKit.Pricing.csproj" />
-    <ProjectReference Include="..\..\OrderKit.Risk\OrderKit.Risk.csproj" />
-    <ProjectReference Include="..\..\OrderKit.Reporting\OrderKit.Reporting.csproj" />
+    <ProjectReference Include="..\..\src\OrderKit.Domain\OrderKit.Domain.csproj" />
+    <ProjectReference Include="..\..\src\OrderKit.Contracts\OrderKit.Contracts.csproj" />
+    <ProjectReference Include="..\..\src\Services\OrderKit.Pricing\OrderKit.Pricing.csproj" />
+    <ProjectReference Include="..\..\src\Services\OrderKit.Risk\OrderKit.Risk.csproj" />
+    <ProjectReference Include="..\..\src\Services\OrderKit.Reporting\OrderKit.Reporting.csproj" />
   </ItemGroup>
 
 </Project>
