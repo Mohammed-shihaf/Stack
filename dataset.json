@@ -1,12 +1,12 @@
 {
   "branchId": "TS-097",
-  "repository": "typescript-n12-001-005",
+  "repository": "typescript-n20-097-101",
   "language": "TypeScript",
   "typescriptVersion": "5.9.3",
   "nodeVersion": "20",
   "nodeVersionVerified": "20.20.2",
   "bundler": "esbuild",
-  "bundlerVersion": "0.21.5",
+  "bundlerVersion": "0.28.2",
   "packageManager": "npm",
   "packageManagerVersion": "11.19.1",
   "architecture": "Monolith",
@@ -17,7 +17,7 @@
     "typescript-n20-ts-097"
   ],
   "workspaces": [],
-  "toolsWired": 29,
+  "toolsWired": 49,
   "bundlerNote": "esbuild 0.28.2 standalone (current major). Transform and linker are both esbuild.",
   "coveragePrimary": "c8",
   "coverageCrossCheck": "nyc + ts-node",
@@ -40,9 +40,6 @@
     ]
   },
   "toolsSkipped": {
-    "OSV-Scanner": "api.osv.dev unreachable -- 403 at the egress proxy",
-    "npm downloads API": "api.npmjs.org unreachable -- 403 at the egress proxy",
-    "npm-check-updates@19.6.6": "requires Node >=18; pinned to 16.14.20 instead",
     "_note": "knip, vitest and biome were skipped on the Node 12 and Node 14 corpora because no release supported those runtimes. All three are wired here -- Node 16 is the first version where knip runs."
   }
 }

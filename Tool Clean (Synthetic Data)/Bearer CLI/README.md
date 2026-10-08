@@ -2,7 +2,7 @@
 
 Synthetic, clean-by-design TypeScript project for **Bearer CLI**.
 
-Package: bearer/bearer (Go binary / GitHub release)
+Package: bearer/bearer 2.1.1 (Go binary / GitHub release)
 
 Domain: patient intake form handling (IntakeForm)
 
@@ -20,4 +20,4 @@ bearer scan .
 
 ## Notes
 
-Bearer's real SAST/data-flow scanner ships only as a GitHub Release binary (curl-install script or Docker image); GitHub Releases return 403 here. The npm package literally named `bearer` is an unrelated HTTP auth-header micro-library (`bearer` @ 0.0.20, "Bearer authentication module using token and Authorization HTTP header") and was not substituted for it.
+Bearer's SAST / data-flow scanner ships as a GitHub release binary (v2.1.1: `bearer_2.1.1_linux_amd64.tar.gz`); the npm package literally named `bearer` is an unrelated HTTP auth-header micro-library. Correction to the earlier note: the release download itself works (HTTP 200 on 2026-10-07); what failed in the generating session is Bearer's first-run download of its default rules (`0 rules found for supported language, default rules could not be downloaded` -- bearer-rules returned 403), so the scan could not complete there. The Clean folder is therefore **expected** clean and not measured.

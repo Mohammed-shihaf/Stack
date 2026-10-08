@@ -2,22 +2,23 @@
 
 Synthetic, clean-by-design TypeScript project for **red-dragon**.
 
-Package: (no real package under this name touches TypeScript)
+Package: red-dragon (Python, github.com/avishek-sen-gupta/red-dragon, commit c287bb2)
 
-Domain: n/a -- genuine roster/category defect, documented rather than fabricated
+Domain: pump-room pressure trends (PumpRoom)
 
-**Not installed here**: see Notes for why, and what was checked instead.
+**Measured**: installed (or built from real source) and actually invoked in the build environment; the result below is real, not asserted.
 
 ## What a passing result looks like
 
-n/a
+The driver reports dead stores: none, maybe-uninitialised reads: none -- every named variable in the three functions is read after it is written, and each is written before any read.
 
 ## Command
 
 ```bash
-n/a
+# red-dragon is not on PyPI: clone it, check out the pinned commit, `uv sync` (Python >= 3.13)
+uv run --project <red-dragon checkout> python "../../Tool Triggering (Synthetic Data)/red-dragon/dataflow.py" <red-dragon checkout> reports/red-dragon.json src/pumpRoom.ts
 ```
 
 ## Notes
 
-The harvested `red-dragon` folder holds Python test files for a COBOL abstract-syntax-graph parser and LLM-based AST repair/Java-execution pipeline -- a legacy-mainframe-modernization tool with no connection to TypeScript at all. No package named `red-dragon` on npm or crates.io does anything COBOL- or AST-repair-related; the only hit, on PyPI, is a 3.9KB joke package ("A Python package that awakens the red dragon") with no real functionality. This is a genuine roster defect in the harvested `TypeScript Tools` set, not a tool this sandbox merely can't reach -- so, unlike every other NOT_INSTALLED entry above, there is no real tool to name a command for and no folder contents to build here.
+The earlier version of this folder called `red-dragon` a roster defect (a COBOL-only tool with no TypeScript support). That was wrong: upstream's README describes a multi-language pipeline (tree-sitter frontends, an intermediate representation, a CFG, reaching-definitions and def-use analysis), and it has a TypeScript frontend (`interpreter/frontends/typescript`). Checked by running commit c287bb2 on TypeScript source on 2026-10-07: it lowers `src/pumpRoom.ts` to IR, builds the CFG and reports definitions and def-use chains. One limit was found on the way: this commit cannot lower a compound assignment such as `i += 1` (`ValueError: Unknown binary operator: '+='`), so the fixtures here use `i = i + 1`. Needs Python >= 3.13 and `uv`; Node-version-independent, one folder. The driver is `Tool Triggering (Synthetic Data)/red-dragon/dataflow.py`; it counts a named variable that is assigned but never read as a dead store, and a read that an initialiser-less `let x;` can reach as a maybe-uninitialised read.

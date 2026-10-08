@@ -2,7 +2,7 @@
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "entry": ["src/index.ts", "tests/**/*.spec.ts"],
   "project": ["src/**/*.ts"],
-  "ignore": ["tools/**", "dist/**", "build/**"],
+  "ignore": ["Tool Triggering (Synthetic Data)/**", "dist/**", "build/**"],
   "ignoreBinaries": ["biome", "depcruise", "grype", "lizard"],
   "ignoreExportsUsedInFile": true,
   "ignoreDependencies": [
