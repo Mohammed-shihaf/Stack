@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+  <!-- Generated demo entry points are not part of the measured surface. -->
+  <Match><Class name="~.*\.app\.Main"/><Bug pattern="DM_DEFAULT_ENCODING"/></Match>
+</FindBugsFilter>
