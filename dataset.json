@@ -1,0 +1,50 @@
+{
+  "branchId": "TS-098",
+  "repository": "typescript-n20-097-101",
+  "language": "TypeScript",
+  "typescriptVersion": "5.9.3",
+  "nodeVersion": "20",
+  "nodeVersionVerified": "20.20.2",
+  "bundler": "esbuild",
+  "bundlerVersion": "0.28.2",
+  "packageManager": "npm",
+  "packageManagerVersion": "11.19.1",
+  "architecture": "Microservices",
+  "scenario": "2 - Microservices",
+  "module": "workspace",
+  "sourceRoot": "packages/domain/src",
+  "deployableUnits": [
+    "gateway-service",
+    "order-service",
+    "pricing-service"
+  ],
+  "workspaces": [
+    "packages/*",
+    "services/*"
+  ],
+  "toolsWired": 49,
+  "bundlerNote": "esbuild 0.28.2 standalone (current major). Transform and linker are both esbuild.",
+  "coveragePrimary": "c8",
+  "coverageCrossCheck": "nyc + ts-node",
+  "plantedFixtures": {
+    "duplication": [
+      "packages/domain/src/services/retail-order-processor.ts",
+      "packages/domain/src/services/wholesale-order-processor.ts"
+    ],
+    "complexity": "packages/domain/src/analysis/complexity-sample.ts",
+    "sast": "packages/domain/src/analysis/sast-fixture.ts",
+    "taint": "packages/domain/src/analysis/taint-fixture.ts",
+    "deadCode": "packages/domain/src/analysis/dead-code.ts",
+    "callGraph": "packages/domain/src/analysis/call-graph-sample.ts",
+    "vulnerablePins": [
+      "lodash@4.17.15",
+      "minimist@1.2.5",
+      "axios@0.21.0",
+      "node-fetch@2.6.0",
+      "tar@6.1.0"
+    ]
+  },
+  "toolsSkipped": {
+    "_note": "knip, vitest and biome were skipped on the Node 12 and Node 14 corpora because no release supported those runtimes. All three are wired here -- Node 16 is the first version where knip runs."
+  }
+}

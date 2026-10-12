@@ -1,0 +1,10 @@
+{
+  "name": "cannery-line",
+  "private": true,
+  "version": "1.0.0",
+  "devDependencies": {
+    "@cyclonedx/cdxgen": "8.6.3",
+    "typescript": "5.0.4",
+    "@types/node": "^12"
+  }
+}

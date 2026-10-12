@@ -1,0 +1,33 @@
+rules:
+  - id: hardcoded-secret
+    languages: [typescript, javascript]
+    severity: ERROR
+    message: Hardcoded credential-like literal assigned directly.
+    patterns:
+      - pattern-either:
+          - pattern: $VAR = "..."
+      - metavariable-regex:
+          metavariable: $VAR
+          regex: (?i)(passphrase|password|secret|token|apikey)
+      - pattern-not: $VAR = ""
+  - id: weak-hash-algorithm
+    languages: [typescript, javascript]
+    severity: ERROR
+    message: Use of a cryptographically weak hash algorithm.
+    pattern-either:
+      - pattern: createHash("md5")
+      - pattern: createHash("sha1")
+  - id: insecure-random
+    languages: [typescript, javascript]
+    severity: ERROR
+    message: Math.random() is not suitable for security-sensitive tokens.
+    pattern: Math.random(...)
+  - id: non-constant-time-compare
+    languages: [typescript, javascript]
+    severity: ERROR
+    message: Comparing secrets with === is not constant-time.
+    patterns:
+      - pattern: $A === $B
+      - metavariable-regex:
+          metavariable: $A
+          regex: (?i)(hash|token|passphrase|secret)

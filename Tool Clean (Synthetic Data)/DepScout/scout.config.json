@@ -1,0 +1,22 @@
+{
+  "indicators": [
+    "was-released-recently",
+    "is-released-frequently",
+    "is-downloaded-frequently",
+    "is-long-living-project",
+    "is-starred-repo",
+    "has-open-issues",
+    "has-forks",
+    "repo-owner-type",
+    "is-healthy-repo"
+  ],
+  "thresholds": {
+    "is-released-frequently": {
+      "warningThreshold": 30,
+      "alertThreshold": 90
+    }
+  },
+  "conditions": {
+    "maxAlerts": 2
+  }
+}

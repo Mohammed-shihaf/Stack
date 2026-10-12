@@ -1,0 +1,15 @@
+db = "mewt.sqlite"
+
+[log]
+level = "info"
+
+[targets]
+include = ["src/**/*.ts"]
+ignore = ["node_modules", "build", "test"]
+
+[run]
+comprehensive = true
+
+[test]
+cmd = "npx vitest run"
+timeout = 60

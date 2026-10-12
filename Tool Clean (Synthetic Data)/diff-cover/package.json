@@ -1,0 +1,12 @@
+{
+  "name": "cooperage-yield",
+  "private": true,
+  "version": "1.0.0",
+  "devDependencies": {
+    "vitest": "4.1.11",
+    "@vitest/coverage-v8": "4.1.11",
+    "typescript": "5.9.3",
+    "@types/node": "26.6.3"
+  },
+  "type": "module"
+}

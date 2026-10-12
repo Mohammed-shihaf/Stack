@@ -1,0 +1,9 @@
+{
+  "name": "windmill-gears",
+  "private": true,
+  "version": "1.0.0",
+  "devDependencies": {
+    "typescript": "5.9.3",
+    "@types/node": "^26"
+  }
+}

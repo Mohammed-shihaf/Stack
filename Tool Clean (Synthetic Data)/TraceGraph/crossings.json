@@ -1,0 +1,17 @@
+[
+  {
+    "ferry": "Gannet",
+    "passengers": 42,
+    "minutes": 35
+  },
+  {
+    "ferry": "Skua",
+    "passengers": 18,
+    "minutes": 28
+  },
+  {
+    "ferry": "Puffin",
+    "passengers": 63,
+    "minutes": 41
+  }
+]

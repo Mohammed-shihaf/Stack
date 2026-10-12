@@ -1,0 +1,745 @@
+{
+  "Lizard": {
+    "node12": {
+      "run_rc": 0,
+      "run_tail": ""
+    },
+    "node14": {
+      "run_rc": 0,
+      "run_tail": ""
+    },
+    "node20": {
+      "run_rc": 0,
+      "run_tail": ""
+    },
+    "node24": {
+      "run_rc": 0,
+      "run_tail": ""
+    },
+    "node26": {
+      "run_rc": 0,
+      "run_tail": ""
+    }
+  },
+  "Opengrep": {
+    "node12": {
+      "run_rc": 0,
+      "run_tail": "               \n               \n\u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510\n\u2502 Scan Status \u2502\n\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\n  Scanning 1 file tracked by git with 4 Code rules:\n  Scanning 1 file with 4 ts rules.\n                \n                \n\u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510\n\u2502 Scan Summary \u2502\n\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\n\u2705 Scan completed successfully.\n \u2022 Findings: 0 (0 blocking)\n \u2022 Rules run: 4\n \u2022 Targets scanned: 1\n \u2022 Parsed lines: ~100.0%\n \u2022 No ignore information available\nRan 4 rules on 1 file: 0 findings.\n"
+    },
+    "node14": {
+      "run_rc": 0,
+      "run_tail": "               \n               \n\u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510\n\u2502 Scan Status \u2502\n\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\n  Scanning 1 file tracked by git with 4 Code rules:\n  Scanning 1 file with 4 ts rules.\n                \n                \n\u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510\n\u2502 Scan Summary \u2502\n\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\n\u2705 Scan completed successfully.\n \u2022 Findings: 0 (0 blocking)\n \u2022 Rules run: 4\n \u2022 Targets scanned: 1\n \u2022 Parsed lines: ~100.0%\n \u2022 No ignore information available\nRan 4 rules on 1 file: 0 findings.\n"
+    },
+    "node20": {
+      "run_rc": 0,
+      "run_tail": "               \n               \n\u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510\n\u2502 Scan Status \u2502\n\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\n  Scanning 1 file tracked by git with 4 Code rules:\n  Scanning 1 file with 4 ts rules.\n                \n                \n\u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510\n\u2502 Scan Summary \u2502\n\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\n\u2705 Scan completed successfully.\n \u2022 Findings: 0 (0 blocking)\n \u2022 Rules run: 4\n \u2022 Targets scanned: 1\n \u2022 Parsed lines: ~100.0%\n \u2022 No ignore information available\nRan 4 rules on 1 file: 0 findings.\n"
+    },
+    "node24": {
+      "run_rc": 0,
+      "run_tail": "               \n               \n\u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510\n\u2502 Scan Status \u2502\n\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\n  Scanning 1 file tracked by git with 4 Code rules:\n  Scanning 1 file with 4 ts rules.\n                \n                \n\u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510\n\u2502 Scan Summary \u2502\n\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\n\u2705 Scan completed successfully.\n \u2022 Findings: 0 (0 blocking)\n \u2022 Rules run: 4\n \u2022 Targets scanned: 1\n \u2022 Parsed lines: ~100.0%\n \u2022 No ignore information available\nRan 4 rules on 1 file: 0 findings.\n"
+    },
+    "node26": {
+      "run_rc": 0,
+      "run_tail": "               \n               \n\u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510\n\u2502 Scan Status \u2502\n\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\n  Scanning 1 file tracked by git with 4 Code rules:\n  Scanning 1 file with 4 ts rules.\n                \n                \n\u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510\n\u2502 Scan Summary \u2502\n\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\n\u2705 Scan completed successfully.\n \u2022 Findings: 0 (0 blocking)\n \u2022 Rules run: 4\n \u2022 Targets scanned: 1\n \u2022 Parsed lines: ~100.0%\n \u2022 No ignore information available\nRan 4 rules on 1 file: 0 findings.\n"
+    }
+  },
+  "cccc": {
+    "node12": {
+      "run_rc": 0,
+      "run_tail": "src/boiler_room.c\nCLEAN: 0 rejected lines, every module's CCN <= 10\nCCCC - a code counter for C and C++\n===================================\n\nA program to analyse C and C++ source code and report on\nsome simple software metrics\nVersion 3.1.6\nCopyright Tim Littlefair, 1995, 1996, 1997, 1998, 1999, 2000\nwith contributions from Bill McLean, Herman Hueni, Lynn Wilson \nPeter Bell, Thomas Hieber and Kenneth H. Cox.\n\nThe development of this program was heavily dependent on\nthe Purdue Compiler Construction Tool Set (PCCTS) \nby Terence Parr, Will Cohen, Hank Dietz, Russel Quoung,\nTom Moog and others.\n\nCCCC comes with ABSOLUTELY NO WARRANTY.\nThis is free software, and you are welcome to redistribute it\nunder certain conditions.  See the file COPYING in the source\ncode distribution for details.\nParsing\nProcessing src/boiler_room.c as C/C++ (c.ansi)\n\nGenerating HTML reports\n\nGenerating XML reports\n\nPrimary HTML output is in .cccc/cccc.html\nDetailed HTML reports on modules and source are in .cccc\nPrimary XML output is in .cccc/cccc.xml\nDetailed XML reports on modules are in .cccc\nDatabase dump is in .cccc/cccc.db\n\n"
+    },
+    "node14": {
+      "run_rc": 0,
+      "run_tail": "src/boiler_room.c\nCLEAN: 0 rejected lines, every module's CCN <= 10\nCCCC - a code counter for C and C++\n===================================\n\nA program to analyse C and C++ source code and report on\nsome simple software metrics\nVersion 3.1.6\nCopyright Tim Littlefair, 1995, 1996, 1997, 1998, 1999, 2000\nwith contributions from Bill McLean, Herman Hueni, Lynn Wilson \nPeter Bell, Thomas Hieber and Kenneth H. Cox.\n\nThe development of this program was heavily dependent on\nthe Purdue Compiler Construction Tool Set (PCCTS) \nby Terence Parr, Will Cohen, Hank Dietz, Russel Quoung,\nTom Moog and others.\n\nCCCC comes with ABSOLUTELY NO WARRANTY.\nThis is free software, and you are welcome to redistribute it\nunder certain conditions.  See the file COPYING in the source\ncode distribution for details.\nParsing\nProcessing src/boiler_room.c as C/C++ (c.ansi)\n\nGenerating HTML reports\n\nGenerating XML reports\n\nPrimary HTML output is in .cccc/cccc.html\nDetailed HTML reports on modules and source are in .cccc\nPrimary XML output is in .cccc/cccc.xml\nDetailed XML reports on modules are in .cccc\nDatabase dump is in .cccc/cccc.db\n\n"
+    },
+    "node20": {
+      "run_rc": 0,
+      "run_tail": "src/boiler_room.c\nCLEAN: 0 rejected lines, every module's CCN <= 10\nCCCC - a code counter for C and C++\n===================================\n\nA program to analyse C and C++ source code and report on\nsome simple software metrics\nVersion 3.1.6\nCopyright Tim Littlefair, 1995, 1996, 1997, 1998, 1999, 2000\nwith contributions from Bill McLean, Herman Hueni, Lynn Wilson \nPeter Bell, Thomas Hieber and Kenneth H. Cox.\n\nThe development of this program was heavily dependent on\nthe Purdue Compiler Construction Tool Set (PCCTS) \nby Terence Parr, Will Cohen, Hank Dietz, Russel Quoung,\nTom Moog and others.\n\nCCCC comes with ABSOLUTELY NO WARRANTY.\nThis is free software, and you are welcome to redistribute it\nunder certain conditions.  See the file COPYING in the source\ncode distribution for details.\nParsing\nProcessing src/boiler_room.c as C/C++ (c.ansi)\n\nGenerating HTML reports\n\nGenerating XML reports\n\nPrimary HTML output is in .cccc/cccc.html\nDetailed HTML reports on modules and source are in .cccc\nPrimary XML output is in .cccc/cccc.xml\nDetailed XML reports on modules are in .cccc\nDatabase dump is in .cccc/cccc.db\n\n"
+    },
+    "node24": {
+      "run_rc": 0,
+      "run_tail": "src/boiler_room.c\nCLEAN: 0 rejected lines, every module's CCN <= 10\nCCCC - a code counter for C and C++\n===================================\n\nA program to analyse C and C++ source code and report on\nsome simple software metrics\nVersion 3.1.6\nCopyright Tim Littlefair, 1995, 1996, 1997, 1998, 1999, 2000\nwith contributions from Bill McLean, Herman Hueni, Lynn Wilson \nPeter Bell, Thomas Hieber and Kenneth H. Cox.\n\nThe development of this program was heavily dependent on\nthe Purdue Compiler Construction Tool Set (PCCTS) \nby Terence Parr, Will Cohen, Hank Dietz, Russel Quoung,\nTom Moog and others.\n\nCCCC comes with ABSOLUTELY NO WARRANTY.\nThis is free software, and you are welcome to redistribute it\nunder certain conditions.  See the file COPYING in the source\ncode distribution for details.\nParsing\nProcessing src/boiler_room.c as C/C++ (c.ansi)\n\nGenerating HTML reports\n\nGenerating XML reports\n\nPrimary HTML output is in .cccc/cccc.html\nDetailed HTML reports on modules and source are in .cccc\nPrimary XML output is in .cccc/cccc.xml\nDetailed XML reports on modules are in .cccc\nDatabase dump is in .cccc/cccc.db\n\n"
+    },
+    "node26": {
+      "run_rc": 0,
+      "run_tail": "src/boiler_room.c\nCLEAN: 0 rejected lines, every module's CCN <= 10\nCCCC - a code counter for C and C++\n===================================\n\nA program to analyse C and C++ source code and report on\nsome simple software metrics\nVersion 3.1.6\nCopyright Tim Littlefair, 1995, 1996, 1997, 1998, 1999, 2000\nwith contributions from Bill McLean, Herman Hueni, Lynn Wilson \nPeter Bell, Thomas Hieber and Kenneth H. Cox.\n\nThe development of this program was heavily dependent on\nthe Purdue Compiler Construction Tool Set (PCCTS) \nby Terence Parr, Will Cohen, Hank Dietz, Russel Quoung,\nTom Moog and others.\n\nCCCC comes with ABSOLUTELY NO WARRANTY.\nThis is free software, and you are welcome to redistribute it\nunder certain conditions.  See the file COPYING in the source\ncode distribution for details.\nParsing\nProcessing src/boiler_room.c as C/C++ (c.ansi)\n\nGenerating HTML reports\n\nGenerating XML reports\n\nPrimary HTML output is in .cccc/cccc.html\nDetailed HTML reports on modules and source are in .cccc\nPrimary XML output is in .cccc/cccc.xml\nDetailed XML reports on modules are in .cccc\nDatabase dump is in .cccc/cccc.db\n\n"
+    }
+  },
+  "debtmap": {
+    "node12": {
+      "run_rc": 0,
+      "run_tail": "============================================\n    Debtmap v0.24.1\n============================================\n\nTOP 0 FINDINGS\n\nTOTAL DEBT SCORE: 0\nDEBT DENSITY: 0.0 per 1K LOC (15 total LOC)\n\n\u2192 1/2 files parse...\n\u2713 1/2 files parse - 0s\n\u2192 2/2 Building call graph...\n\u2713 2/2 Building call graph - 0s\nNo technical debt items found matching current thresholds.\nTry adjusting filters:\n  - Use --min-score <value> to lower the score threshold\n  - Current min_score threshold: 3.0 (default)\n  - Use DEBTMAP_MIN_SCORE_THRESHOLD=0 to see all items\n\nAnalysis complete in 0.8s\n"
+    },
+    "node14": {
+      "run_rc": 0,
+      "run_tail": "============================================\n    Debtmap v0.24.1\n============================================\n\nTOP 0 FINDINGS\n\nTOTAL DEBT SCORE: 0\nDEBT DENSITY: 0.0 per 1K LOC (15 total LOC)\n\n\u2192 1/2 files parse...\n\u2713 1/2 files parse - 0s\n\u2192 2/2 Building call graph...\n\u2713 2/2 Building call graph - 0s\nNo technical debt items found matching current thresholds.\nTry adjusting filters:\n  - Use --min-score <value> to lower the score threshold\n  - Current min_score threshold: 3.0 (default)\n  - Use DEBTMAP_MIN_SCORE_THRESHOLD=0 to see all items\n\nAnalysis complete in 0.8s\n"
+    },
+    "node20": {
+      "run_rc": 0,
+      "run_tail": "============================================\n    Debtmap v0.24.1\n============================================\n\nTOP 0 FINDINGS\n\nTOTAL DEBT SCORE: 0\nDEBT DENSITY: 0.0 per 1K LOC (15 total LOC)\n\n\u2192 1/2 files parse...\n\u2713 1/2 files parse - 0s\n\u2192 2/2 Building call graph...\n\u2713 2/2 Building call graph - 0s\nNo technical debt items found matching current thresholds.\nTry adjusting filters:\n  - Use --min-score <value> to lower the score threshold\n  - Current min_score threshold: 3.0 (default)\n  - Use DEBTMAP_MIN_SCORE_THRESHOLD=0 to see all items\n\nAnalysis complete in 0.8s\n"
+    },
+    "node24": {
+      "run_rc": 0,
+      "run_tail": "============================================\n    Debtmap v0.24.1\n============================================\n\nTOP 0 FINDINGS\n\nTOTAL DEBT SCORE: 0\nDEBT DENSITY: 0.0 per 1K LOC (15 total LOC)\n\n\u2192 1/2 files parse...\n\u2713 1/2 files parse - 0s\n\u2192 2/2 Building call graph...\n\u2713 2/2 Building call graph - 0s\nNo technical debt items found matching current thresholds.\nTry adjusting filters:\n  - Use --min-score <value> to lower the score threshold\n  - Current min_score threshold: 3.0 (default)\n  - Use DEBTMAP_MIN_SCORE_THRESHOLD=0 to see all items\n\nAnalysis complete in 0.8s\n"
+    },
+    "node26": {
+      "run_rc": 0,
+      "run_tail": "============================================\n    Debtmap v0.24.1\n============================================\n\nTOP 0 FINDINGS\n\nTOTAL DEBT SCORE: 0\nDEBT DENSITY: 0.0 per 1K LOC (15 total LOC)\n\n\u2192 1/2 files parse...\n\u2713 1/2 files parse - 0s\n\u2192 2/2 Building call graph...\n\u2713 2/2 Building call graph - 0s\nNo technical debt items found matching current thresholds.\nTry adjusting filters:\n  - Use --min-score <value> to lower the score threshold\n  - Current min_score threshold: 3.0 (default)\n  - Use DEBTMAP_MIN_SCORE_THRESHOLD=0 to see all items\n\nAnalysis complete in 0.8s\n"
+    }
+  },
+  "Biome": {
+    "node12": {
+      "skipped": "generate.py dropped a required package for this family",
+      "unavailable": "@biomejs/biome"
+    },
+    "node14": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": "Checked 1 file in 6ms. No fixes applied.\n"
+    },
+    "node20": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": "Checked 1 file in 3ms. No fixes applied.\n"
+    },
+    "node24": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": "Checked 1 file in 4ms. No fixes applied.\n"
+    },
+    "node26": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": "Checked 1 file in 4ms. No fixes applied.\n"
+    }
+  },
+  "ESLint": {
+    "node12": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": ""
+    },
+    "node14": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": ""
+    },
+    "node20": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": ""
+    },
+    "node24": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": ""
+    },
+    "node26": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": ""
+    }
+  },
+  "StrykerJS": {
+    "node12": {
+      "skipped": "generate.py dropped a required package for this family",
+      "unavailable": "vitest\n@vitest/coverage-v8\n@stryker-mutator/core\n@stryker-mutator/vitest-runner\n@stryker-mutator/typescript-checker"
+    },
+    "node14": {
+      "skipped": "generate.py dropped a required package for this family",
+      "unavailable": "vitest\n@vitest/coverage-v8\n@stryker-mutator/core\n@stryker-mutator/vitest-runner\n@stryker-mutator/typescript-checker"
+    },
+    "node20": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": ":24:08 (22524) INFO DryRunExecutor\u001b[39m Initial test run succeeded. Ran 12 tests in 0 seconds (net 6.3433720000005 ms, overhead 269.6566279999995 ms).\nMutation testing 61% (elapsed: <1m, remaining: <1m) 10/26 tested (0 survived, 0 timed out)\nMutation testing 92% (elapsed: <1m, remaining: <1m) 21/26 tested (0 survived, 0 timed out)\n\nAll tests/clocktowerChime.test.ts\n  \u2713 chimeCount chimes 12 at midnight (killed 6)\n  \u2713 chimeCount chimes 12 at noon (killed 1)\n  \u2713 chimeCount chimes the 12-hour equivalent for afternoon hours (killed 1)\n  ~ chimeCount chimes the hour itself before noon (covered 14)\n  \u2713 chimeCount chimes correctly at the last valid hour, 23 (killed 1)\n  \u2713 chimeCount rejects an hour outside 0-23 with a specific message (killed 6)\n  \u2713 isQuietHour is quiet late at night (killed 4)\n  \u2713 isQuietHour is quiet early morning (killed 2)\n  \u2713 isQuietHour is not quiet mid-morning (killed 1)\n  \u2713 isQuietHour is not quiet right at 7 (killed 1)\n  ~ isQuietHour is not quiet right before 22 (covered 10)\n  \u2713 isQuietHour is quiet exactly at 22 (killed 1)\n\nRan 2.31 tests per mutant on average.\n--------------------|------------------|----------|-----------|------------|----------|----------|\n                    | % Mutation score |          |           |            |          |          |\nFile                |  total | covered | # killed | # timeout | # survived | # no cov | # errors |\n--------------------|--------|---------|----------|-----------|------------|----------|----------|\nAll files           | 100.00 |  100.00 |       24 |         0 |          0 |        0 |        2 |\n clocktowerChime.ts | 100.00 |  100.00 |       24 |         0 |          0 |        0 |        2 |\n--------------------|--------|---------|----------|-----------|------------|----------|----------|\n\u001b[32m22:24:32 (22524) INFO MutationTestReportHelper\u001b[39m Final mutation score of 100.00 is greater than or equal to break threshold 100\n\u001b[32m22:24:32 (22524) INFO MutationTestExecutor\u001b[39m Done in 29 seconds.\n"
+    },
+    "node24": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": ":42 (22637) INFO DryRunExecutor\u001b[39m Initial test run succeeded. Ran 12 tests in 0 seconds (net 5.895369000000073 ms, overhead 230.10463099999993 ms).\nMutation testing 64% (elapsed: <1m, remaining: <1m) 11/26 tested (0 survived, 0 timed out)\nMutation testing 96% (elapsed: <1m, remaining: n/a) 23/26 tested (0 survived, 0 timed out)\n\nAll tests/clocktowerChime.test.ts\n  \u2713 chimeCount chimes 12 at midnight (killed 6)\n  \u2713 chimeCount chimes 12 at noon (killed 1)\n  \u2713 chimeCount chimes the 12-hour equivalent for afternoon hours (killed 1)\n  ~ chimeCount chimes the hour itself before noon (covered 14)\n  \u2713 chimeCount chimes correctly at the last valid hour, 23 (killed 1)\n  \u2713 chimeCount rejects an hour outside 0-23 with a specific message (killed 6)\n  \u2713 isQuietHour is quiet late at night (killed 4)\n  \u2713 isQuietHour is quiet early morning (killed 2)\n  \u2713 isQuietHour is not quiet mid-morning (killed 1)\n  \u2713 isQuietHour is not quiet right at 7 (killed 1)\n  ~ isQuietHour is not quiet right before 22 (covered 10)\n  \u2713 isQuietHour is quiet exactly at 22 (killed 1)\n\nRan 2.31 tests per mutant on average.\n--------------------|------------------|----------|-----------|------------|----------|----------|\n                    | % Mutation score |          |           |            |          |          |\nFile                |  total | covered | # killed | # timeout | # survived | # no cov | # errors |\n--------------------|--------|---------|----------|-----------|------------|----------|----------|\nAll files           | 100.00 |  100.00 |       24 |         0 |          0 |        0 |        2 |\n clocktowerChime.ts | 100.00 |  100.00 |       24 |         0 |          0 |        0 |        2 |\n--------------------|--------|---------|----------|-----------|------------|----------|----------|\n\u001b[32m22:25:05 (22637) INFO MutationTestReportHelper\u001b[39m Final mutation score of 100.00 is greater than or equal to break threshold 100\n\u001b[32m22:25:05 (22637) INFO MutationTestExecutor\u001b[39m Done in 26 seconds.\n"
+    },
+    "node26": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": ":14 (22759) INFO DryRunExecutor\u001b[39m Initial test run succeeded. Ran 12 tests in 0 seconds (net 6.121075000000019 ms, overhead 174.87892499999998 ms).\nMutation testing 62% (elapsed: <1m, remaining: <1m) 10/26 tested (0 survived, 0 timed out)\nMutation testing 96% (elapsed: <1m, remaining: n/a) 23/26 tested (0 survived, 0 timed out)\n\nAll tests/clocktowerChime.test.ts\n  \u2713 chimeCount chimes 12 at midnight (killed 6)\n  \u2713 chimeCount chimes 12 at noon (killed 1)\n  \u2713 chimeCount chimes the 12-hour equivalent for afternoon hours (killed 1)\n  ~ chimeCount chimes the hour itself before noon (covered 14)\n  \u2713 chimeCount chimes correctly at the last valid hour, 23 (killed 1)\n  \u2713 chimeCount rejects an hour outside 0-23 with a specific message (killed 6)\n  \u2713 isQuietHour is quiet late at night (killed 4)\n  \u2713 isQuietHour is quiet early morning (killed 2)\n  \u2713 isQuietHour is not quiet mid-morning (killed 1)\n  \u2713 isQuietHour is not quiet right at 7 (killed 1)\n  ~ isQuietHour is not quiet right before 22 (covered 10)\n  \u2713 isQuietHour is quiet exactly at 22 (killed 1)\n\nRan 2.31 tests per mutant on average.\n--------------------|------------------|----------|-----------|------------|----------|----------|\n                    | % Mutation score |          |           |            |          |          |\nFile                |  total | covered | # killed | # timeout | # survived | # no cov | # errors |\n--------------------|--------|---------|----------|-----------|------------|----------|----------|\nAll files           | 100.00 |  100.00 |       24 |         0 |          0 |        0 |        2 |\n clocktowerChime.ts | 100.00 |  100.00 |       24 |         0 |          0 |        0 |        2 |\n--------------------|--------|---------|----------|-----------|------------|----------|----------|\n\u001b[32m22:25:37 (22759) INFO MutationTestReportHelper\u001b[39m Final mutation score of 100.00 is greater than or equal to break threshold 100\n\u001b[32m22:25:37 (22759) INFO MutationTestExecutor\u001b[39m Done in 26 seconds.\n"
+    }
+  },
+  "cdxgen": {
+    "node12": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": ""
+    },
+    "node14": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": ""
+    },
+    "node20": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": "uring SBOM ge |\n|                        |            | N                        | neration may read inherited environment variables. |\n|                        |            | CLAUDE_CODE_MESSAGING_TO | Mitigation: Unset unneeded secrets when scanning u |\n|                        |            | KEN                      | ntrusted repositories. Prefer ephemeral, scoped CI |\n|                        |            | CLAUDE_CODE_USER_EMAIL   |  credentials injected only for the step that needs |\n|                        |            | CLOUDSDK_AUTH_ACCESS_TOK |  them.                                             |\n|                        |            | EN                       |                                                    |\n|                        |            | GH_TOKEN                 |                                                    |\n|                        |            | GITHUB_TOKEN             |                                                    |\n+------------------------+------------+--------------------------+----------------------------------------------------+\n| Network Interception   | LOW        | HTTPS_PROXY              | An outbound proxy is configured via HTTPS_PROXY. R |\n|                        |            |                          | egistry lookups, dependency downloads, and SBOM up |\n|                        |            |                          | loads will be routed through this proxy.           |\n|                        |            |                          | Mitigation: Verify the proxy is trusted and uses T |\n|                        |            |                          | LS. Remove the variable if not required for this s |\n|                        |            |                          | can.                                               |\n+------------------------+------------+--------------------------+----------------------------------------------------+\n\u001b[1;35mSECURE MODE: DO NOT run cdxgen with root privileges.\u001b[0m\n"
+    },
+    "node24": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": "uring SBOM ge |\n|                        |            | N                        | neration may read inherited environment variables. |\n|                        |            | CLAUDE_CODE_MESSAGING_TO | Mitigation: Unset unneeded secrets when scanning u |\n|                        |            | KEN                      | ntrusted repositories. Prefer ephemeral, scoped CI |\n|                        |            | CLAUDE_CODE_USER_EMAIL   |  credentials injected only for the step that needs |\n|                        |            | CLOUDSDK_AUTH_ACCESS_TOK |  them.                                             |\n|                        |            | EN                       |                                                    |\n|                        |            | GH_TOKEN                 |                                                    |\n|                        |            | GITHUB_TOKEN             |                                                    |\n+------------------------+------------+--------------------------+----------------------------------------------------+\n| Network Interception   | LOW        | HTTPS_PROXY              | An outbound proxy is configured via HTTPS_PROXY. R |\n|                        |            |                          | egistry lookups, dependency downloads, and SBOM up |\n|                        |            |                          | loads will be routed through this proxy.           |\n|                        |            |                          | Mitigation: Verify the proxy is trusted and uses T |\n|                        |            |                          | LS. Remove the variable if not required for this s |\n|                        |            |                          | can.                                               |\n+------------------------+------------+--------------------------+----------------------------------------------------+\n\u001b[1;35mSECURE MODE: DO NOT run cdxgen with root privileges.\u001b[0m\n"
+    },
+    "node26": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": "uring SBOM ge |\n|                        |            | N                        | neration may read inherited environment variables. |\n|                        |            | CLAUDE_CODE_MESSAGING_TO | Mitigation: Unset unneeded secrets when scanning u |\n|                        |            | KEN                      | ntrusted repositories. Prefer ephemeral, scoped CI |\n|                        |            | CLAUDE_CODE_USER_EMAIL   |  credentials injected only for the step that needs |\n|                        |            | CLOUDSDK_AUTH_ACCESS_TOK |  them.                                             |\n|                        |            | EN                       |                                                    |\n|                        |            | GH_TOKEN                 |                                                    |\n|                        |            | GITHUB_TOKEN             |                                                    |\n+------------------------+------------+--------------------------+----------------------------------------------------+\n| Network Interception   | LOW        | HTTPS_PROXY              | An outbound proxy is configured via HTTPS_PROXY. R |\n|                        |            |                          | egistry lookups, dependency downloads, and SBOM up |\n|                        |            |                          | loads will be routed through this proxy.           |\n|                        |            |                          | Mitigation: Verify the proxy is trusted and uses T |\n|                        |            |                          | LS. Remove the variable if not required for this s |\n|                        |            |                          | can.                                               |\n+------------------------+------------+--------------------------+----------------------------------------------------+\n\u001b[1;35mSECURE MODE: DO NOT run cdxgen with root privileges.\u001b[0m\n"
+    }
+  },
+  "covgate": {
+    "node12": {
+      "skipped": "generate.py dropped a required package for this family",
+      "unavailable": "vitest\n@vitest/coverage-v8"
+    },
+    "node14": {
+      "skipped": "generate.py dropped a required package for this family",
+      "unavailable": "vitest\n@vitest/coverage-v8"
+    },
+    "node20": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": "\n RUN  v4.1.11 /root/ts_work_src/covgate/node20\n      Coverage enabled with v8\n\n\n Test Files  1 passed (1)\n      Tests  4 passed (4)\n   Start at  22:26:18\n   Duration  345ms (transform 32ms, setup 0ms, import 53ms, tests 7ms, environment 0ms)\n\nPASS Lines: 100.00% (3/3) \u2265 100.00%\nPASS Branches: 100.00% (2/2) \u2265 100.00%\nPASS Functions: 100.00% (2/2) \u2265 100.00%\n"
+    },
+    "node24": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": "\n RUN  v4.1.11 /root/ts_work_src/covgate/node24\n      Coverage enabled with v8\n\n\n Test Files  1 passed (1)\n      Tests  4 passed (4)\n   Start at  22:26:21\n   Duration  234ms (transform 25ms, setup 0ms, import 41ms, tests 5ms, environment 0ms)\n\nPASS Lines: 100.00% (3/3) \u2265 100.00%\nPASS Branches: 100.00% (2/2) \u2265 100.00%\nPASS Functions: 100.00% (2/2) \u2265 100.00%\n"
+    },
+    "node26": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": "\n RUN  v4.1.11 /root/ts_work_src/covgate/node26\n      Coverage enabled with v8\n\n\n Test Files  1 passed (1)\n      Tests  4 passed (4)\n   Start at  22:26:23\n   Duration  258ms (transform 27ms, setup 0ms, import 45ms, tests 5ms, environment 0ms)\n\nPASS Lines: 100.00% (3/3) \u2265 100.00%\nPASS Branches: 100.00% (2/2) \u2265 100.00%\nPASS Functions: 100.00% (2/2) \u2265 100.00%\n"
+    }
+  },
+  "dependency-cruiser": {
+    "node12": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": "\n\u2714 no dependency violations found (0 modules, 0 dependencies cruised)\n\n\n"
+    },
+    "node14": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": "\n\u2714 no dependency violations found (3 modules, 2 dependencies cruised)\n\n\nDeprecationWarning: 'originalKeywordKind' has been deprecated since v5.0.0 and will no longer be usable after v5.2.0. Use 'identifierToKeywordKind(identifier)' instead.\n"
+    },
+    "node20": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": "\n\u2714 no dependency violations found (3 modules, 2 dependencies cruised)\n\n"
+    },
+    "node24": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": "\n\u2714 no dependency violations found (3 modules, 2 dependencies cruised)\n\n"
+    },
+    "node26": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": "\n\u2714 no dependency violations found (3 modules, 2 dependencies cruised)\n\n"
+    }
+  },
+  "eslint-plugin-security": {
+    "node12": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": ""
+    },
+    "node14": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": ""
+    },
+    "node20": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": ""
+    },
+    "node24": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": ""
+    },
+    "node26": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": ""
+    }
+  },
+  "eslint-plugin-sonarjs": {
+    "node12": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": ""
+    },
+    "node14": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": ""
+    },
+    "node20": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": ""
+    },
+    "node24": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": ""
+    },
+    "node26": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": ""
+    }
+  },
+  "fast-check": {
+    "node12": {
+      "skipped": "generate.py dropped a required package for this family",
+      "unavailable": "vitest"
+    },
+    "node14": {
+      "install_rc": 0,
+      "install_strategy": "ignore-scripts",
+      "run_rc": 0,
+      "run_tail": "(node:23732) UnhandledPromiseRejectionWarning: SyntaxError: Unexpected token '||='\n    at Loader.moduleStrategy (internal/modules/esm/translators.js:149:18)\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:23732) UnhandledPromiseRejectionWarning: Unhandled promise rejection. This error originated either by throwing inside of an async function without a catch block, or by rejecting a promise which was not handled with .catch(). To terminate the node process on unhandled promise rejection, use the CLI flag `--unhandled-rejections=strict` (see https://nodejs.org/api/cli.html#cli_unhandled_rejections_mode). (rejection id: 1)\n(node:23732) [DEP0018] DeprecationWarning: Unhandled promise rejections are deprecated. In the future, promise rejections that are not handled will terminate the Node.js process with a non-zero exit code.\n"
+    },
+    "node20": {
+      "install_rc": 0,
+      "install_strategy": "legacy-peer-deps",
+      "run_rc": 0,
+      "run_tail": "\n RUN  v5.0.3 /root/ts_work_src/fast-check/node20\n\n\n Test Files  1 passed (1)\n      Tests  2 passed (2)\n   Start at  22:27:47\n   Duration  326ms (transform 53%, import 26%, tests 17%, worker 4%)\n\n"
+    },
+    "node24": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": "\n RUN  v5.0.3 /root/ts_work_src/fast-check/node24\n\n\n Test Files  1 passed (1)\n      Tests  2 passed (2)\n   Start at  22:27:52\n   Duration  216ms (transform 51%, import 28%, tests 16%, worker 5%)\n\n"
+    },
+    "node26": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": "\n RUN  v5.0.3 /root/ts_work_src/fast-check/node26\n\n\n Test Files  1 passed (1)\n      Tests  2 passed (2)\n   Start at  22:27:56\n   Duration  229ms (transform 48%, import 27%, tests 20%, worker 4%)\n\n"
+    }
+  },
+  "jscpd": {
+    "node12": {
+      "install_rc": 0,
+      "install_strategy": "ignore-scripts",
+      "run_rc": 0,
+      "run_tail": "\u001b[90m\u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u001b[39m\u001b[90m\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u001b[39m\u001b[90m\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u001b[39m\u001b[90m\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u001b[39m\u001b[90m\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u001b[39m\u001b[90m\u252c\u2500\u2500\u2500\u2500\u2510\u001b[39m\n\u001b[90m\u2502\u001b[39m\u001b[31m Format     \u001b[39m\u001b[90m\u2502\u001b[39m\u001b[31m Files analyzed \u001b[39m\u001b[90m\u2502\u001b[39m\u001b[31m Total lines \u001b[39m\u001b[90m\u2502\u001b[39m\u001b[31m Clones found \u001b[39m\u001b[90m\u2502\u001b[39m\u001b[31m Duplicated lines \u001b[39m\u001b[90m\u2502\u001b[39m\u001b[31m %  \u001b[39m\u001b[90m\u2502\u001b[39m\n\u001b[90m\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u001b[39m\u001b[90m\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u001b[39m\u001b[90m\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u001b[39m\u001b[90m\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u001b[39m\u001b[90m\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u001b[39m\u001b[90m\u253c\u2500\u2500\u2500\u2500\u2524\u001b[39m\n\u001b[90m\u2502\u001b[39m typescript \u001b[90m\u2502\u001b[39m 1              \u001b[90m\u2502\u001b[39m 32          \u001b[90m\u2502\u001b[39m 0            \u001b[90m\u2502\u001b[39m 0                \u001b[90m\u2502\u001b[39m 0% \u001b[90m\u2502\u001b[39m\n\u001b[90m\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u001b[39m\u001b[90m\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u001b[39m\u001b[90m\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u001b[39m\u001b[90m\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u001b[39m\u001b[90m\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u001b[39m\u001b[90m\u253c\u2500\u2500\u2500\u2500\u2524\u001b[39m\n\u001b[90m\u2502\u001b[39m \u001b[1mTotal:\u001b[22m     \u001b[90m\u2502\u001b[39m 1              \u001b[90m\u2502\u001b[39m 32          \u001b[90m\u2502\u001b[39m 0            \u001b[90m\u2502\u001b[39m 0                \u001b[90m\u2502\u001b[39m 0% \u001b[90m\u2502\u001b[39m\n\u001b[90m\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u001b[39m\u001b[90m\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u001b[39m\u001b[90m\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u001b[39m\u001b[90m\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u001b[39m\u001b[90m\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u001b[39m\u001b[90m\u2534\u2500\u2500\u2500\u2500\u2518\u001b[39m\nExecution Time: 55.054ms\n"
+    },
+    "node14": {
+      "install_rc": 0,
+      "install_strategy": "ignore-scripts",
+      "run_rc": 0,
+      "run_tail": "\u001b[90m\u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u001b[39m\u001b[90m\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u001b[39m\u001b[90m\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u001b[39m\u001b[90m\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u001b[39m\u001b[90m\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u001b[39m\u001b[90m\u252c\u2500\u2500\u2500\u2500\u2510\u001b[39m\n\u001b[90m\u2502\u001b[39m\u001b[31m Format     \u001b[39m\u001b[90m\u2502\u001b[39m\u001b[31m Files analyzed \u001b[39m\u001b[90m\u2502\u001b[39m\u001b[31m Total lines \u001b[39m\u001b[90m\u2502\u001b[39m\u001b[31m Clones found \u001b[39m\u001b[90m\u2502\u001b[39m\u001b[31m Duplicated lines \u001b[39m\u001b[90m\u2502\u001b[39m\u001b[31m %  \u001b[39m\u001b[90m\u2502\u001b[39m\n\u001b[90m\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u001b[39m\u001b[90m\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u001b[39m\u001b[90m\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u001b[39m\u001b[90m\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u001b[39m\u001b[90m\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u001b[39m\u001b[90m\u253c\u2500\u2500\u2500\u2500\u2524\u001b[39m\n\u001b[90m\u2502\u001b[39m typescript \u001b[90m\u2502\u001b[39m 1              \u001b[90m\u2502\u001b[39m 32          \u001b[90m\u2502\u001b[39m 0            \u001b[90m\u2502\u001b[39m 0                \u001b[90m\u2502\u001b[39m 0% \u001b[90m\u2502\u001b[39m\n\u001b[90m\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u001b[39m\u001b[90m\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u001b[39m\u001b[90m\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u001b[39m\u001b[90m\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u001b[39m\u001b[90m\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u001b[39m\u001b[90m\u253c\u2500\u2500\u2500\u2500\u2524\u001b[39m\n\u001b[90m\u2502\u001b[39m \u001b[1mTotal:\u001b[22m     \u001b[90m\u2502\u001b[39m 1              \u001b[90m\u2502\u001b[39m 32          \u001b[90m\u2502\u001b[39m 0            \u001b[90m\u2502\u001b[39m 0                \u001b[90m\u2502\u001b[39m 0% \u001b[90m\u2502\u001b[39m\n\u001b[90m\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u001b[39m\u001b[90m\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u001b[39m\u001b[90m\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u001b[39m\u001b[90m\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u001b[39m\u001b[90m\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u001b[39m\u001b[90m\u2534\u2500\u2500\u2500\u2500\u2518\u001b[39m\nExecution Time: 61.712ms\n"
+    },
+    "node20": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": "\u001b[90mNo duplicates found.\u001b[39m\n\u001b[90m\u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510\u001b[39m\n\u001b[90m\u2502\u001b[39m\u001b[31m Format     \u001b[39m\u001b[90m\u2502\u001b[39m\u001b[31m Files analyzed \u001b[39m\u001b[90m\u2502\u001b[39m\u001b[31m Total lines \u001b[39m\u001b[90m\u2502\u001b[39m\u001b[31m Total tokens \u001b[39m\u001b[90m\u2502\u001b[39m\u001b[31m Clones found \u001b[39m\u001b[90m\u2502\u001b[39m\u001b[31m Duplicated lines \u001b[39m\u001b[90m\u2502\u001b[39m\u001b[31m Duplicated tokens \u001b[39m\u001b[90m\u2502\u001b[39m\n\u001b[90m\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524\u001b[39m\n\u001b[90m\u2502\u001b[39m typescript \u001b[90m\u2502\u001b[39m 1              \u001b[90m\u2502\u001b[39m 32          \u001b[90m\u2502\u001b[39m 167          \u001b[90m\u2502\u001b[39m 0            \u001b[90m\u2502\u001b[39m 0 (0.00%)        \u001b[90m\u2502\u001b[39m 0 (0.00%)         \u001b[90m\u2502\u001b[39m\n\u001b[90m\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524\u001b[39m\n\u001b[90m\u2502\u001b[39m \u001b[1mTotal:\u001b[22m     \u001b[90m\u2502\u001b[39m 1              \u001b[90m\u2502\u001b[39m 32          \u001b[90m\u2502\u001b[39m 167          \u001b[90m\u2502\u001b[39m 0            \u001b[90m\u2502\u001b[39m 0 (0.00%)        \u001b[90m\u2502\u001b[39m 0 (0.00%)         \u001b[90m\u2502\u001b[39m\n\u001b[90m\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\u001b[39m\n\u001b[90mFound 0 clones.\u001b[39m\n\u001b[90mtime: 2.945ms\u001b[39m\n"
+    },
+    "node24": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": "\u001b[90mNo duplicates found.\u001b[39m\n\u001b[90m\u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510\u001b[39m\n\u001b[90m\u2502\u001b[39m\u001b[31m Format     \u001b[39m\u001b[90m\u2502\u001b[39m\u001b[31m Files analyzed \u001b[39m\u001b[90m\u2502\u001b[39m\u001b[31m Total lines \u001b[39m\u001b[90m\u2502\u001b[39m\u001b[31m Total tokens \u001b[39m\u001b[90m\u2502\u001b[39m\u001b[31m Clones found \u001b[39m\u001b[90m\u2502\u001b[39m\u001b[31m Duplicated lines \u001b[39m\u001b[90m\u2502\u001b[39m\u001b[31m Duplicated tokens \u001b[39m\u001b[90m\u2502\u001b[39m\n\u001b[90m\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524\u001b[39m\n\u001b[90m\u2502\u001b[39m typescript \u001b[90m\u2502\u001b[39m 1              \u001b[90m\u2502\u001b[39m 32          \u001b[90m\u2502\u001b[39m 167          \u001b[90m\u2502\u001b[39m 0            \u001b[90m\u2502\u001b[39m 0 (0.00%)        \u001b[90m\u2502\u001b[39m 0 (0.00%)         \u001b[90m\u2502\u001b[39m\n\u001b[90m\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524\u001b[39m\n\u001b[90m\u2502\u001b[39m \u001b[1mTotal:\u001b[22m     \u001b[90m\u2502\u001b[39m 1              \u001b[90m\u2502\u001b[39m 32          \u001b[90m\u2502\u001b[39m 167          \u001b[90m\u2502\u001b[39m 0            \u001b[90m\u2502\u001b[39m 0 (0.00%)        \u001b[90m\u2502\u001b[39m 0 (0.00%)         \u001b[90m\u2502\u001b[39m\n\u001b[90m\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\u001b[39m\n\u001b[90mFound 0 clones.\u001b[39m\n\u001b[90mtime: 2.744ms\u001b[39m\n"
+    },
+    "node26": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": "\u001b[90mNo duplicates found.\u001b[39m\n\u001b[90m\u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510\u001b[39m\n\u001b[90m\u2502\u001b[39m\u001b[31m Format     \u001b[39m\u001b[90m\u2502\u001b[39m\u001b[31m Files analyzed \u001b[39m\u001b[90m\u2502\u001b[39m\u001b[31m Total lines \u001b[39m\u001b[90m\u2502\u001b[39m\u001b[31m Total tokens \u001b[39m\u001b[90m\u2502\u001b[39m\u001b[31m Clones found \u001b[39m\u001b[90m\u2502\u001b[39m\u001b[31m Duplicated lines \u001b[39m\u001b[90m\u2502\u001b[39m\u001b[31m Duplicated tokens \u001b[39m\u001b[90m\u2502\u001b[39m\n\u001b[90m\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524\u001b[39m\n\u001b[90m\u2502\u001b[39m typescript \u001b[90m\u2502\u001b[39m 1              \u001b[90m\u2502\u001b[39m 32          \u001b[90m\u2502\u001b[39m 167          \u001b[90m\u2502\u001b[39m 0            \u001b[90m\u2502\u001b[39m 0 (0.00%)        \u001b[90m\u2502\u001b[39m 0 (0.00%)         \u001b[90m\u2502\u001b[39m\n\u001b[90m\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524\u001b[39m\n\u001b[90m\u2502\u001b[39m \u001b[1mTotal:\u001b[22m     \u001b[90m\u2502\u001b[39m 1              \u001b[90m\u2502\u001b[39m 32          \u001b[90m\u2502\u001b[39m 167          \u001b[90m\u2502\u001b[39m 0            \u001b[90m\u2502\u001b[39m 0 (0.00%)        \u001b[90m\u2502\u001b[39m 0 (0.00%)         \u001b[90m\u2502\u001b[39m\n\u001b[90m\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\u001b[39m\n\u001b[90mFound 0 clones.\u001b[39m\n\u001b[90mtime: 2.820ms\u001b[39m\n"
+    }
+  },
+  "knip": {
+    "node12": {
+      "skipped": "generate.py dropped a required package for this family",
+      "unavailable": "knip"
+    },
+    "node14": {
+      "skipped": "generate.py dropped a required package for this family",
+      "unavailable": "knip"
+    },
+    "node20": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": ""
+    },
+    "node24": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": ""
+    },
+    "node26": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": ""
+    }
+  },
+  "license-checker-rseidelsohn": {
+    "node12": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": "\n"
+    },
+    "node14": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": "\n"
+    },
+    "node20": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": "\n"
+    },
+    "node24": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": "\n"
+    },
+    "node26": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": "\n"
+    }
+  },
+  "mewt": {
+    "node12": {
+      "skipped": "generate.py dropped a required package for this family",
+      "unavailable": "vitest"
+    },
+    "node14": {
+      "skipped": "generate.py dropped a required package for this family",
+      "unavailable": "vitest"
+    },
+    "node20": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": "[IF 13] Line 4: 'if (rockwellC >= 55) {' -> 'if (false) {'\n   Saved new mutant: [IF 14] Line 7: 'if (rockwellC >= 35) {' -> 'if (false) {'\n   Saved new mutant: [IT 15] Line 4: 'if (rockwellC >= 55) {' -> 'if (true) {'\n   Saved new mutant: [IT 16] Line 7: 'if (rockwellC >= 35) {' -> 'if (true) {'\n   Saved new mutant: [COS 17] Line 4: 'if (rockwellC >= 55) {' -> 'if (rockwellC == 55) {'\n   Saved new mutant: [COS 18] Line 4: 'if (rockwellC >= 55) {' -> 'if (rockwellC != 55) {'\n   Saved new mutant: [COS 19] Line 4: 'if (rockwellC >= 55) {' -> 'if (rockwellC === 55) {'\n   Saved new mutant: [COS 20] Line 4: 'if (rockwellC >= 55) {' -> 'if (rockwellC !== 55) {'\n   Saved new mutant: [COS 21] Line 4: 'if (rockwellC >= 55) {' -> 'if (rockwellC < 55) {'\n   Saved new mutant: [COS 22] Line 4: 'if (rockwellC >= 55) {' -> 'if (rockwellC <= 55) {'\n   Saved new mutant: [COS 23] Line 4: 'if (rockwellC >= 55) {' -> 'if (rockwellC > 55) {'\n   Saved new mutant: [COS 24] Line 7: 'if (rockwellC >= 35) {' -> 'if (rockwellC == 35) {'\n   Saved new mutant: [COS 25] Line 7: 'if (rockwellC >= 35) {' -> 'if (rockwellC != 35) {'\n   Saved new mutant: [COS 26] Line 7: 'if (rockwellC >= 35) {' -> 'if (rockwellC === 35) {'\n   Saved new mutant: [COS 27] Line 7: 'if (rockwellC >= 35) {' -> 'if (rockwellC !== 35) {'\n   Saved new mutant: [COS 28] Line 7: 'if (rockwellC >= 35) {' -> 'if (rockwellC < 35) {'\n   Saved new mutant: [COS 29] Line 7: 'if (rockwellC >= 35) {' -> 'if (rockwellC <= 35) {'\n   Saved new mutant: [COS 30] Line 7: 'if (rockwellC >= 35) {' -> 'if (rockwellC > 35) {'\n Running baseline test to ensure tests pass before applying mutations...\n Baseline test passed successfully!\n Starting mutation campaign with 1 targets (30 untested mutants)\n Estimated maximum completion time: 30 minutes\n Mutation campaign completed in 38 seconds\n \n Campaign Summary:\n   Tested:   30 mutants\n   Caught:   30 mutants\n   Uncaught: 0 mutants\n   Skipped:  0 mutants\n Mutation testing campaign completed successfully\n"
+    },
+    "node24": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": "[IF 13] Line 4: 'if (rockwellC >= 55) {' -> 'if (false) {'\n   Saved new mutant: [IF 14] Line 7: 'if (rockwellC >= 35) {' -> 'if (false) {'\n   Saved new mutant: [IT 15] Line 4: 'if (rockwellC >= 55) {' -> 'if (true) {'\n   Saved new mutant: [IT 16] Line 7: 'if (rockwellC >= 35) {' -> 'if (true) {'\n   Saved new mutant: [COS 17] Line 4: 'if (rockwellC >= 55) {' -> 'if (rockwellC == 55) {'\n   Saved new mutant: [COS 18] Line 4: 'if (rockwellC >= 55) {' -> 'if (rockwellC != 55) {'\n   Saved new mutant: [COS 19] Line 4: 'if (rockwellC >= 55) {' -> 'if (rockwellC === 55) {'\n   Saved new mutant: [COS 20] Line 4: 'if (rockwellC >= 55) {' -> 'if (rockwellC !== 55) {'\n   Saved new mutant: [COS 21] Line 4: 'if (rockwellC >= 55) {' -> 'if (rockwellC < 55) {'\n   Saved new mutant: [COS 22] Line 4: 'if (rockwellC >= 55) {' -> 'if (rockwellC <= 55) {'\n   Saved new mutant: [COS 23] Line 4: 'if (rockwellC >= 55) {' -> 'if (rockwellC > 55) {'\n   Saved new mutant: [COS 24] Line 7: 'if (rockwellC >= 35) {' -> 'if (rockwellC == 35) {'\n   Saved new mutant: [COS 25] Line 7: 'if (rockwellC >= 35) {' -> 'if (rockwellC != 35) {'\n   Saved new mutant: [COS 26] Line 7: 'if (rockwellC >= 35) {' -> 'if (rockwellC === 35) {'\n   Saved new mutant: [COS 27] Line 7: 'if (rockwellC >= 35) {' -> 'if (rockwellC !== 35) {'\n   Saved new mutant: [COS 28] Line 7: 'if (rockwellC >= 35) {' -> 'if (rockwellC < 35) {'\n   Saved new mutant: [COS 29] Line 7: 'if (rockwellC >= 35) {' -> 'if (rockwellC <= 35) {'\n   Saved new mutant: [COS 30] Line 7: 'if (rockwellC >= 35) {' -> 'if (rockwellC > 35) {'\n Running baseline test to ensure tests pass before applying mutations...\n Baseline test passed successfully!\n Starting mutation campaign with 1 targets (30 untested mutants)\n Estimated maximum completion time: 30 minutes\n Mutation campaign completed in 28 seconds\n \n Campaign Summary:\n   Tested:   30 mutants\n   Caught:   30 mutants\n   Uncaught: 0 mutants\n   Skipped:  0 mutants\n Mutation testing campaign completed successfully\n"
+    },
+    "node26": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": "[IF 13] Line 4: 'if (rockwellC >= 55) {' -> 'if (false) {'\n   Saved new mutant: [IF 14] Line 7: 'if (rockwellC >= 35) {' -> 'if (false) {'\n   Saved new mutant: [IT 15] Line 4: 'if (rockwellC >= 55) {' -> 'if (true) {'\n   Saved new mutant: [IT 16] Line 7: 'if (rockwellC >= 35) {' -> 'if (true) {'\n   Saved new mutant: [COS 17] Line 4: 'if (rockwellC >= 55) {' -> 'if (rockwellC == 55) {'\n   Saved new mutant: [COS 18] Line 4: 'if (rockwellC >= 55) {' -> 'if (rockwellC != 55) {'\n   Saved new mutant: [COS 19] Line 4: 'if (rockwellC >= 55) {' -> 'if (rockwellC === 55) {'\n   Saved new mutant: [COS 20] Line 4: 'if (rockwellC >= 55) {' -> 'if (rockwellC !== 55) {'\n   Saved new mutant: [COS 21] Line 4: 'if (rockwellC >= 55) {' -> 'if (rockwellC < 55) {'\n   Saved new mutant: [COS 22] Line 4: 'if (rockwellC >= 55) {' -> 'if (rockwellC <= 55) {'\n   Saved new mutant: [COS 23] Line 4: 'if (rockwellC >= 55) {' -> 'if (rockwellC > 55) {'\n   Saved new mutant: [COS 24] Line 7: 'if (rockwellC >= 35) {' -> 'if (rockwellC == 35) {'\n   Saved new mutant: [COS 25] Line 7: 'if (rockwellC >= 35) {' -> 'if (rockwellC != 35) {'\n   Saved new mutant: [COS 26] Line 7: 'if (rockwellC >= 35) {' -> 'if (rockwellC === 35) {'\n   Saved new mutant: [COS 27] Line 7: 'if (rockwellC >= 35) {' -> 'if (rockwellC !== 35) {'\n   Saved new mutant: [COS 28] Line 7: 'if (rockwellC >= 35) {' -> 'if (rockwellC < 35) {'\n   Saved new mutant: [COS 29] Line 7: 'if (rockwellC >= 35) {' -> 'if (rockwellC <= 35) {'\n   Saved new mutant: [COS 30] Line 7: 'if (rockwellC >= 35) {' -> 'if (rockwellC > 35) {'\n Running baseline test to ensure tests pass before applying mutations...\n Baseline test passed successfully!\n Starting mutation campaign with 1 targets (30 untested mutants)\n Estimated maximum completion time: 30 minutes\n Mutation campaign completed in 27 seconds\n \n Campaign Summary:\n   Tested:   30 mutants\n   Caught:   30 mutants\n   Uncaught: 0 mutants\n   Skipped:  0 mutants\n Mutation testing campaign completed successfully\n"
+    }
+  },
+  "monocart-coverage-reports": {
+    "node12": {
+      "skipped": "generate.py dropped a required package for this family",
+      "unavailable": "monocart-coverage-reports"
+    },
+    "node14": {
+      "skipped": "generate.py dropped a required package for this family",
+      "unavailable": "monocart-coverage-reports"
+    },
+    "node20": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "build_rc": 0,
+      "run_rc": 0,
+      "run_tail": "[MCR] Execute: node build/tools/driver.js\nALL_ASSERTIONS_PASSED\n"
+    },
+    "node24": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "build_rc": 0,
+      "run_rc": 0,
+      "run_tail": "[MCR] Execute: node build/tools/driver.js\nALL_ASSERTIONS_PASSED\n"
+    },
+    "node26": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "build_rc": 0,
+      "run_rc": 0,
+      "run_tail": "[MCR] Execute: node build/tools/driver.js\nALL_ASSERTIONS_PASSED\n(node:28282) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.\n(Use `node --trace-deprecation ...` to show where the warning was created)\n(node:28282) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.\n(Use `node --trace-deprecation ...` to show where the warning was created)\n(node:28283) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.\n(Use `node --trace-deprecation ...` to show where the warning was created)\n(node:28283) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.\n(Use `node --trace-deprecation ...` to show where the warning was created)\n"
+    }
+  },
+  "npm-check-updates": {
+    "node12": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": "Checking /root/ts_work_src/npm-check-updates/node12/package.json\n\n @types/node            ^12  \u2192     ^26     \n npm-check-updates  12.5.12  \u2192  23.1.0     \n typescript           5.0.4  \u2192   7.0.2     \n\nRun ncu -u to upgrade package.json\n\n"
+    },
+    "node14": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": "Checking /root/ts_work_src/npm-check-updates/node14/package.json\n\n @types/node             ^14  \u2192     ^26\n npm-check-updates  16.14.20  \u2192  23.1.0\n typescript            6.0.3  \u2192   7.0.2\n\nRun ncu -u to upgrade package.json\n\n"
+    },
+    "node20": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": "Checking /root/ts_work_src/npm-check-updates/node20/package.json\n\n @types/node           ^20  \u2192     ^26\n npm-check-updates  22.2.9  \u2192  23.1.0\n\nRun npx npm-check-updates -u to upgrade package.json\n\n"
+    },
+    "node24": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": "Checking /root/ts_work_src/npm-check-updates/node24/package.json\n\nMajor   Potentially breaking API changes\n @types/node  ^24  \u2192  ^26\n\nRun npx npm-check-updates -u to upgrade package.json\n\n"
+    },
+    "node26": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": "Checking /root/ts_work_src/npm-check-updates/node26/package.json\nAll dependencies match the latest package versions :)\n\n"
+    }
+  },
+  "opentelemetry-sdk-node": {
+    "node12": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "build_rc": 0,
+      "run_rc": 0,
+      "run_tail": "SPANS_EMITTED=1 ATTRS_OK=true\n"
+    },
+    "node14": {
+      "install_rc": 0,
+      "install_strategy": "ignore-scripts",
+      "build_rc": 0,
+      "run_rc": 0,
+      "run_tail": "SPANS_EMITTED=1 ATTRS_OK=true\n"
+    },
+    "node20": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "build_rc": 0,
+      "run_rc": 0,
+      "run_tail": "SPANS_EMITTED=1 ATTRS_OK=true\n"
+    },
+    "node24": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "build_rc": 0,
+      "run_rc": 0,
+      "run_tail": "SPANS_EMITTED=1 ATTRS_OK=true\n"
+    },
+    "node26": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "build_rc": 0,
+      "run_rc": 0,
+      "run_tail": "SPANS_EMITTED=1 ATTRS_OK=true\n"
+    }
+  },
+  "oxc-coverage-instrument": {
+    "node12": {
+      "skipped": "generate.py dropped a required package for this family",
+      "unavailable": "vitest\n@vitest/coverage-istanbul"
+    },
+    "node14": {
+      "skipped": "generate.py dropped a required package for this family",
+      "unavailable": "vitest\n@vitest/coverage-istanbul"
+    },
+    "node20": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": "\n RUN  v4.1.11 /root/ts_work_src/oxc-coverage-instrument/node20\n      Coverage enabled with istanbul\n\n\n Test Files  1 passed (1)\n      Tests  4 passed (4)\n   Start at  22:31:24\n   Duration  320ms (transform 54ms, setup 0ms, import 67ms, tests 5ms, environment 0ms)\n\n % Coverage report from istanbul\n-----------------|---------|----------|---------|---------|-------------------\nFile             | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s \n-----------------|---------|----------|---------|---------|-------------------\n-----------------|---------|----------|---------|---------|-------------------\n\n=============================== Coverage summary ===============================\nStatements   : 100% ( 8/8 )\nBranches     : 100% ( 2/2 )\nFunctions    : 100% ( 3/3 )\nLines        : 100% ( 8/8 )\n================================================================================\n"
+    },
+    "node24": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": "\n RUN  v4.1.11 /root/ts_work_src/oxc-coverage-instrument/node24\n      Coverage enabled with istanbul\n\n\n Test Files  1 passed (1)\n      Tests  4 passed (4)\n   Start at  22:31:27\n   Duration  208ms (transform 35ms, setup 0ms, import 53ms, tests 4ms, environment 0ms)\n\n % Coverage report from istanbul\n-----------------|---------|----------|---------|---------|-------------------\nFile             | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s \n-----------------|---------|----------|---------|---------|-------------------\n-----------------|---------|----------|---------|---------|-------------------\n\n=============================== Coverage summary ===============================\nStatements   : 100% ( 8/8 )\nBranches     : 100% ( 2/2 )\nFunctions    : 100% ( 3/3 )\nLines        : 100% ( 8/8 )\n================================================================================\n"
+    },
+    "node26": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": "\n RUN  v4.1.11 /root/ts_work_src/oxc-coverage-instrument/node26\n      Coverage enabled with istanbul\n\n\n Test Files  1 passed (1)\n      Tests  4 passed (4)\n   Start at  22:31:30\n   Duration  199ms (transform 35ms, setup 0ms, import 52ms, tests 4ms, environment 0ms)\n\n % Coverage report from istanbul\n-----------------|---------|----------|---------|---------|-------------------\nFile             | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s \n-----------------|---------|----------|---------|---------|-------------------\n-----------------|---------|----------|---------|---------|-------------------\n\n=============================== Coverage summary ===============================\nStatements   : 100% ( 8/8 )\nBranches     : 100% ( 2/2 )\nFunctions    : 100% ( 3/3 )\nLines        : 100% ( 8/8 )\n================================================================================\n"
+    }
+  },
+  "oxlint": {
+    "node12": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": "Found 0 warnings and 0 errors.\nFinished in 4ms on 1 file with 88 rules using 2 threads.\n"
+    },
+    "node14": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": "Found 0 warnings and 0 errors.\nFinished in 3ms on 1 file with 88 rules using 2 threads.\n"
+    },
+    "node20": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": ""
+    },
+    "node24": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": ""
+    },
+    "node26": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": ""
+    }
+  },
+  "ts-morph": {
+    "node12": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "build_rc": 0,
+      "run_rc": 0,
+      "run_tail": "DIAGNOSTICS=0 UNRESOLVED_IDENTIFIERS=0\n"
+    },
+    "node14": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "build_rc": 0,
+      "run_rc": 0,
+      "run_tail": "DIAGNOSTICS=0 UNRESOLVED_IDENTIFIERS=0\n"
+    },
+    "node20": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "build_rc": 0,
+      "run_rc": 0,
+      "run_tail": "DIAGNOSTICS=0 UNRESOLVED_IDENTIFIERS=0\n"
+    },
+    "node24": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "build_rc": 0,
+      "run_rc": 0,
+      "run_tail": "DIAGNOSTICS=0 UNRESOLVED_IDENTIFIERS=0\n"
+    },
+    "node26": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "build_rc": 0,
+      "run_rc": 0,
+      "run_tail": "DIAGNOSTICS=0 UNRESOLVED_IDENTIFIERS=0\n"
+    }
+  },
+  "ts-unused-exports": {
+    "node12": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": "0 modules with unused exports\n"
+    },
+    "node14": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": "0 modules with unused exports\n"
+    },
+    "node20": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": "0 modules with unused exports\n"
+    },
+    "node24": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": "0 modules with unused exports\n"
+    },
+    "node26": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": "0 modules with unused exports\n"
+    }
+  },
+  "vitest": {
+    "node12": {
+      "skipped": "generate.py dropped a required package for this family",
+      "unavailable": "vitest"
+    },
+    "node14": {
+      "install_rc": 0,
+      "install_strategy": "ignore-scripts",
+      "run_rc": 0,
+      "run_tail": "(node:29394) UnhandledPromiseRejectionWarning: SyntaxError: Unexpected token '||='\n    at Loader.moduleStrategy (internal/modules/esm/translators.js:149:18)\n(Use `node --trace-warnings ...` to show where the warning was created)\n(node:29394) UnhandledPromiseRejectionWarning: Unhandled promise rejection. This error originated either by throwing inside of an async function without a catch block, or by rejecting a promise which was not handled with .catch(). To terminate the node process on unhandled promise rejection, use the CLI flag `--unhandled-rejections=strict` (see https://nodejs.org/api/cli.html#cli_unhandled_rejections_mode). (rejection id: 1)\n(node:29394) [DEP0018] DeprecationWarning: Unhandled promise rejections are deprecated. In the future, promise rejections that are not handled will terminate the Node.js process with a non-zero exit code.\n"
+    },
+    "node20": {
+      "install_rc": 0,
+      "install_strategy": "legacy-peer-deps",
+      "run_rc": 0,
+      "run_tail": "\n RUN  v5.0.3 /root/ts_work_src/vitest/node20\n\n\n Test Files  1 passed (1)\n      Tests  3 passed (3)\n   Start at  22:32:26\n   Duration  261ms (transform 67%, import 19%, tests 8%, worker 6%)\n\n"
+    },
+    "node24": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": "\n RUN  v5.0.3 /root/ts_work_src/vitest/node24\n\n\n Test Files  1 passed (1)\n      Tests  3 passed (3)\n   Start at  22:32:30\n   Duration  213ms (transform 62%, import 21%, tests 10%, worker 7%)\n\n"
+    },
+    "node26": {
+      "install_rc": 0,
+      "install_strategy": "plain",
+      "run_rc": 0,
+      "run_tail": "\n RUN  v5.0.3 /root/ts_work_src/vitest/node26\n\n\n Test Files  1 passed (1)\n      Tests  3 passed (3)\n   Start at  22:32:34\n   Duration  191ms (transform 66%, import 19%, tests 8%, worker 7%)\n\n"
+    }
+  }
+}

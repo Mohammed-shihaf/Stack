@@ -1,0 +1,10 @@
+{
+  "name": "tannery-ledger",
+  "private": true,
+  "version": "1.0.0",
+  "devDependencies": {
+    "license-checker-rseidelsohn": "1.2.2",
+    "typescript": "5.0.4",
+    "@types/node": "^12"
+  }
+}
